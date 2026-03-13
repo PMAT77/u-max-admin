@@ -10,11 +10,11 @@ export class TopLayoutStrategy extends BaseLayoutStrategy {
   mode = 'top' as const
 
   get sidebarClass(): string {
-    return 'u-max-layout--top'
+    return 'u-max-sider--top'
   }
 
   get headerClass(): string {
-    return 'u-max-layout__header--fixed'
+    return 'u-max-header--fixed'
   }
 
   getLogoComponent(): Component | null {

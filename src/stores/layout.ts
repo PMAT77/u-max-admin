@@ -59,6 +59,7 @@ export const useLayoutStore = defineStore('layout', {
     },
 
     getSidebarWidth(): number {
+      if(!this.sidebar.show) return 0
       return this.strategy?.sidebarWidth ?? 240
     },
 
@@ -122,7 +123,7 @@ export const useLayoutStore = defineStore('layout', {
      */
     toggleSidebar(): void {
       this.sidebar.show = !this.sidebar.show
-      this.sidebar.isCollapse = !this.sidebar.show
+      // this.sidebar.isCollapse = !this.sidebar.show
     },
 
     /**
@@ -130,7 +131,7 @@ export const useLayoutStore = defineStore('layout', {
      */
     setSidebarShow(show: boolean): void {
       this.sidebar.show = show
-      this.sidebar.isCollapse = !show
+      // this.sidebar.isCollapse = !show
     },
 
     /**

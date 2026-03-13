@@ -10,11 +10,11 @@ export class VerticalLayoutStrategy extends BaseLayoutStrategy {
   mode = 'vertical' as const
 
   get sidebarClass(): string {
-    return 'u-max-layout--vertical'
+    return 'u-max-sider--vertical'
   }
 
   get headerClass(): string {
-    return 'u-max-layout__header--fixed'
+    return 'u-max-header--fixed'
   }
 
   getLogoComponent(): Component | null {

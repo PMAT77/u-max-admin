@@ -14,11 +14,11 @@ export class SidebarLayoutStrategy extends BaseLayoutStrategy {
   }
 
   get sidebarClass(): string {
-    return 'u-max-layout--sidebar'
+    return 'u-max-sider--sidebar'
   }
 
   get headerClass(): string {
-    return 'u-max-layout__header--fixed'
+    return 'u-max-header--fixed'
   }
 
   getLogoComponent(): Component | null {
