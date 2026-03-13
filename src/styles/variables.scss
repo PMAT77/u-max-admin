@@ -1,0 +1,32 @@
+// 颜色变量
+$primary-color: #667eea;
+$secondary-color: #764ba2;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$error-color: #f56c6c;
+$info-color: #409eff;
+
+// 字体变量
+$font-family: Arial, sans-serif;
+$font-size-base: 14px;
+$font-size-lg: 16px;
+$font-size-sm: 12px;
+
+// 间距变量
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// 边框变量
+$border-radius: 8px;
+$border-color: #e9ecef;
+
+// 阴影变量
+$box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+.rounded-lg {
+  border-radius: $border-radius;
+}
