@@ -7,10 +7,10 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/common',
-    component: () => import('../../layouts/default/index.vue'),
+    component: () => import('@/layouts/default/index.vue'),
     meta: {
-      title: '通用',
-      icon: 'ellipsis'
+      title: '通用', 
+      show: false,
     },
     children: [
       {
@@ -18,15 +18,14 @@ const routes: RouteRecordRaw[] = [
         name: 'About',
         component: () => import('@/views/common/About.vue'),
         meta: {
-          title: '关于',
-          icon: 'info-circle'
+          title: '关于', 
         }
       }
     ]
   },
   {
     path: '/:pathMatch(.*)*',
-    component: () => import('../../layouts/blank/index.vue'),
+    component: () => import('@/layouts/blank/index.vue'),
     children: [
       {
         path: '',

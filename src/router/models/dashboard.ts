@@ -7,19 +7,20 @@ import type { RouteRecordRaw } from 'vue-router'
 const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
-    component: () => import('../../layouts/default/index.vue'),
+    name: 'Dashboard',
+    component: () => import('@/layouts/default/index.vue'),
     meta: {
       title: '控制台',
-      icon: 'home'
+      icon: 'Dashboard'
     },
     children: [
       {
-        path: 'console',
-        name: 'Dashboard',
+        path: 'workbench',
+        name: 'Workbench',
         component: () => import('@/views/dashboard/Dashboard.vue'),
         meta: {
-          title: '控制台首页',
-          icon: 'home'
+          title: '工作台', 
+          icon: 'Workbench'
         }
       }
     ]

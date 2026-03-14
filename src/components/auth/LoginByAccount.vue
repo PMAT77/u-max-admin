@@ -3,7 +3,7 @@
  * 用于账号密码登录
  */
 <template>
-  <n-form :model="form" :show-label="false" ref="formRef" label-placement="top">
+  <n-form :model="form" :rules="rules" :show-label="false" ref="formRef" label-placement="top">
     <!-- 账号输入框 -->
     <n-form-item label="账号" path="username">
       <n-input v-model:value="form.username" placeholder="请输入账号" size="large">
@@ -39,11 +39,18 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { User, Locked, CodeSigningService } from '@vicons/carbon' 
+import type { FormInst, FormRules } from 'naive-ui'
+import type { LoginByAccountEmits } from '@/types/components'
 
 /**
  * 组件事件
  */
-const emit = defineEmits(['login'])
+const emit = defineEmits<LoginByAccountEmits>()
+
+/**
+ * 表单引用
+ */
+const formRef = ref<FormInst | null>(null)
 
 /**
  * 表单数据
@@ -55,13 +62,62 @@ const form = ref({
 })
 
 /**
+ * 表单验证规则
+ */
+const rules = ref<FormRules>({
+  username: [
+    {
+      required: true,
+      message: '请输入账号',
+      trigger: ['input', 'blur']
+    },
+    {
+      min: 3,
+      max: 20,
+      message: '账号长度应在3-20个字符之间',
+      trigger: ['input', 'blur']
+    }
+  ],
+  password: [
+    {
+      required: true,
+      message: '请输入密码',
+      trigger: ['input', 'blur']
+    },
+    {
+      min: 6,
+      max: 20,
+      message: '密码长度应在6-20个字符之间',
+      trigger: ['input', 'blur']
+    }
+  ],
+  captcha: [
+    {
+      required: true,
+      message: '请输入验证码',
+      trigger: ['input', 'blur']
+    },
+    {
+      len: 6,
+      message: '验证码长度为6个字符',
+      trigger: ['input', 'blur']
+    }
+  ]
+})
+
+/**
  * 处理登录
  */
-function handleLogin() {
-  emit('login', {
-    type: 'account', // 登录类型
-    data: form.value // 登录数据
-  })
+async function handleLogin() {
+  if (formRef.value) {
+    const valid = await formRef.value.validate()
+    if (valid) {
+      emit('login', {
+        type: 'account', // 登录类型
+        data: form.value // 登录数据
+      })
+    }
+  }
 }
 </script>
 

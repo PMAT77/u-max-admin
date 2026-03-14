@@ -12,7 +12,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useThemeStore } from './stores/theme'
+import { useThemeStore } from './stores'
 
 // 获取主题状态管理实例
 const themeStore = useThemeStore()

@@ -25,10 +25,12 @@
 
 <script setup lang="ts"> 
 import { ref, computed } from 'vue'
-import { useLoadingBar } from 'naive-ui'
+import { useLoadingBar, useNotification, useMessage } from 'naive-ui'
 import { userApi } from '@/api/user'
 import { useRouter } from 'vue-router'
-import { useLayoutStore } from '@/stores/layout'
+import { useLayoutStore } from '@/stores'
+import { setToken } from '@/utils/tokenStorage'
+import { handleApiError } from '@/utils/errorHandler'
 
 import LoginPanel from '@/components/auth/LoginPanel.vue' 
 
@@ -67,49 +69,46 @@ async function handleLogin(loginData: { type: string; data: any }) {
   // 开始加载
   const loading = message.loading('登录中...')
   loadingBar.start()
-  const timer = setTimeout(async () => {
-    try {
-      
-      let response
-      switch (type) {
-        case 'account':
-          // 账号密码登录
-          response = await userApi.login({
-            username: data.username,
-            password: data.password
-          })
-          break
-        case 'phone':
-          // 手机号登录逻辑
-          console.log('手机号登录', data)
-          break
-        default:
-          break
-      }
-      
-      // 登录成功处理
-      if (response && response.code === 200 && response.data) {
-        // 保存token
-        localStorage.setItem('token', response.data.token)
-        // 跳转到控制台
-        router.push('/dashboard/console')
-
-        notification.success({
-          title: '登录成功',
-          content: 'Oi！欢迎您，superman',
-          duration: 2500,
-          keepAliveOnHover: true
+  
+  try { 
+    let response
+    switch (type) {
+      case 'account':
+        // 账号密码登录
+        response = await userApi.login({
+          username: data.username,
+          password: data.password
         })
-      }
-    } catch (error) {
-      console.error('登录失败', error)
-    } finally {
-      // 结束加载
-      loadingBar.finish()
-      loading.destroy()
-      clearTimeout(timer)
+        break
+      case 'phone':
+        // 手机号登录逻辑
+        console.log('手机号登录', data)
+        break
+      default:
+        break
     }
-  }, 3000)
+    
+    // 登录成功处理
+    if (response && response.code === 200 && response.data) {
+      // 保存token
+      setToken(response.data.token)
+      // 跳转到控制台
+      router.push('/dashboard/workbench')
+
+      notification.success({
+        title: '登录成功',
+        content: 'Oi！欢迎您，superman',
+        duration: 2500,
+        keepAliveOnHover: true
+      })
+    }
+  } catch (error) {
+    handleApiError(error)
+  } finally {
+    // 结束加载
+    loadingBar.finish()
+    loading.destroy()
+  }
 }
 </script>
  

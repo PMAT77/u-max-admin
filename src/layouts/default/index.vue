@@ -16,16 +16,9 @@
       :class="layoutStore.getSidebarClass"
     >
       <div class="flex flex-col h-full">
-        <SystemLogo v-if="layoutStore.getShowLogo" />
+        <Logo v-if="layoutStore.getShowLogo" />
 
-        <div class="u-max-sider__menu">
-          <n-menu
-            mode="vertical"
-            :options="menuOptions"
-            :value="activeMenu"
-            @update:value="handleMenuUpdate"
-          /> 
-        </div>
+        <Menu />
 
         <div class="u-max-sider__footer">
           <div class="flex justify-end py-2 w-full">
@@ -45,10 +38,9 @@
     <n-scrollbar class="u-max-scrollbar" content-style="overflow: hidden;">
       <n-layout-header 
         bordered
-        class="u-max-header" 
-        :class="layoutStore.getHeaderClass"
+        class="u-max-header u-max-header--fixed"  
       > 
-        <LayoutNavbar />
+        <Navbar />
       </n-layout-header>
       
       <!-- 内容区域 -->
@@ -61,46 +53,21 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useLayoutStore } from '@/stores/layout'
+import { onMounted } from 'vue' 
+import { useLayoutStore } from '@/stores' 
+import { useRouteStore } from '@/stores'
 import { TextIndentLess, TextIndentMore } from '@vicons/carbon'
+import Logo from './components/Logo/index.vue'
+import Navbar from './components/Navbar/index.vue' 
+import Menu from './components/Menu/index.vue'
 import PreferenceButton from '@/components/common/PreferenceButton.vue'
-import SystemLogo from '@/components/common/SystemLogo.vue'
-import LayoutNavbar from './components/LayoutNavbar.vue'
-
-// 路由和状态管理
-const router = useRouter()
-const route = useRoute()
+  
 const layoutStore = useLayoutStore()
+const routeStore = useRouteStore()  
 
-// 当前激活的菜单
-const activeMenu = computed(() => route.path)
-
-const menuOptions = computed(() => [])
-
-/**
- * 处理菜单更新
- * @param {string} key - 菜单key
- */
-function handleMenuUpdate(key: string) {
-  router.push(key)
-}
-
-/**
- * 处理个人资料
- */
-function handleProfile() {
-  console.log('个人资料')
-}
-
-/**
- * 处理退出登录
- */
-function handleLogout() {
-  localStorage.removeItem('token')
-  router.push('/auth/login')
-}
+onMounted(() => {
+  routeStore.initMenu()
+}) 
 </script>
 
 <style scoped lang="scss">
@@ -108,24 +75,21 @@ function handleLogout() {
   --u-max-radius: 0.5rem;
   --u-max-z-index: 1000;
   --u-max-header-height: 56px;
-  --u-max-sidebar-height: calc(100vh - var(--u-max-sider-margin-top));
 }
 
 .u-max-sider {
-  margin-top: var(--u-max-sider-margin-top);
   transition: all 0.3s var(--n-bezier);
 
   &--vertical {
-    --u-max-sider-margin-top: 0px;
+    height: 100vh;
   }
 
   &--sidebar {
-    --u-max-sider-margin-top: var(--u-max-header-height);
     position: absolute;
     left: 0;
-    top: 0;
-    z-index: var(--u-max-z-index);
-    height: var(--u-max-sidebar-height);
+    top: var(--u-max-header-height);
+    z-index: calc(var(--u-max-z-index) - 1);
+    height: calc(100vh - var(--u-max-header-height)); 
   }
 }
 
@@ -140,7 +104,7 @@ function handleLogout() {
   align-items: center;
   justify-content: flex-end;
   width: 100%;
-}
+} 
 
 .u-max-header {
   position: absolute;

@@ -74,11 +74,12 @@ import LoginByPhone from './LoginByPhone.vue' // 手机号登录组件
 import LoginByQrcode from './LoginByQrcode.vue' // 扫码登录组件
 
 import type { Component } from 'vue'
+import type { LoginPanelEmits } from '@/types/components'
 
 /**
  * 组件事件
  */
-const emit = defineEmits(['login']) 
+const emit = defineEmits<LoginPanelEmits>() 
  
 // 组件引用
 const loginByAccountRef = ref(null)

@@ -23,7 +23,7 @@ const router = useRouter()
  * 返回首页
  */
 function goHome() {
-  router.push('/dashboard/console')
+  router.push('/dashboard/workbench')
 }
 </script>
 

@@ -27,8 +27,8 @@
 <script setup>
 import { computed } from 'vue'
 import { NConfigProvider, NGlobalStyle, darkTheme } from 'naive-ui'
-import { useThemeStore } from '@/stores/theme'
-import { useLayoutStore } from '@/stores/layout'
+import { useThemeStore } from '@/stores'
+import { useLayoutStore } from '@/stores'
 
 /**
  * 组件属性

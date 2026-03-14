@@ -43,10 +43,10 @@ export default defineConfig({
     }),
     viteMockServe({
       mockPath: 'src/mock',
-      localEnabled: process.env.VITE_USE_MOCK === 'true',
-      prodEnabled: process.env.VITE_USE_MOCK === 'true',
+      localEnabled: true,
+      prodEnabled: true,
       watchFiles: true
-    })
+    } as any)
   ],
   resolve: {
     alias: {

@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import router from './router'
+import i18n from './i18n'
 import ThemeProvider from './components/common/ThemeProvider.vue'
 import axios from 'axios'
 
@@ -28,6 +29,8 @@ app.component('ThemeProvider', ThemeProvider)
 app.use(pinia)
 // 集成路由
 app.use(router)
+// 集成国际化
+app.use(i18n)
 // 全局注入axios
 app.config.globalProperties.$axios = axios
 // 挂载应用到DOM

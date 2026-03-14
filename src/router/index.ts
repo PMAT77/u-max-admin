@@ -3,6 +3,7 @@
  * 负责创建路由实例和配置路由守卫
  */
 import { createRouter, createWebHistory } from 'vue-router'
+import { hasToken } from '@/utils/tokenStorage'
 import routes from './routes'
 
 /**
@@ -18,8 +19,8 @@ const router = createRouter({
  * 用于控制页面访问权限和登录状态管理
  */
 router.beforeEach((to, from, next) => {
-  // 检查是否已登录（通过localStorage中的token判断）
-  const isLoggedIn = localStorage.getItem('token') !== null
+  // 检查是否已登录（通过sessionStorage中的token判断）
+  const isLoggedIn = hasToken()
 
   console.log('当前路由:', to.path, '是否已登录:', isLoggedIn)
   
@@ -30,7 +31,7 @@ router.beforeEach((to, from, next) => {
   if (isLoggedIn) {
     // 如果已登录且访问的是登录页面，重定向到仪表盘
     if (to.path === '/auth/login') {
-      next('/dashboard/console')
+      next('/dashboard/workbench')
     } else {
       // 已登录，放行
       next()
