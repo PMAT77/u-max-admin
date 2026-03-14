@@ -4,12 +4,13 @@
  */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { setupSvgIcon } from './icons'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 import router from './router'
+import axios from 'axios'
 import i18n from './i18n'
 import ThemeProvider from './components/common/ThemeProvider.vue'
-import axios from 'axios'
 
 // 导入全局样式
 import 'uno.css'
@@ -25,6 +26,8 @@ pinia.use(piniaPluginPersistedstate)
 
 // 注册全局组件
 app.component('ThemeProvider', ThemeProvider)
+// 注册SvgIcon组件
+setupSvgIcon(app)
 // 集成Pinia状态管理
 app.use(pinia)
 // 集成路由

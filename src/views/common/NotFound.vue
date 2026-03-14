@@ -1,7 +1,4 @@
-/**
- * 404页面组件
- * 当用户访问不存在的页面时显示
- */
+/** * 404页面组件 * 当用户访问不存在的页面时显示 */
 <template>
   <div class="not-found">
     <div class="not-found-content">
@@ -14,16 +11,16 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
 
 // 路由实例
-const router = useRouter()
+const router = useRouter();
 
 /**
  * 返回首页
  */
 function goHome() {
-  router.push('/dashboard/workbench')
+  router.push('/dashboard/workbench');
 }
 </script>
 
@@ -73,11 +70,11 @@ function goHome() {
     padding: 30px;
     margin: 0 20px;
   }
-  
+
   .not-found-code {
     font-size: 60px;
   }
-  
+
   .not-found-title {
     font-size: 20px;
   }

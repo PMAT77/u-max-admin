@@ -43,6 +43,5 @@ export const layouts: Record<LayoutMode, LayoutConfig> = {
   },
 }
 
-export const defaultMode: LayoutMode = 'sidebar'
-
+export const defaultMode: LayoutMode = 'vertical'
 export const defaultLayoutConfig: LayoutConfig = layouts[defaultMode]

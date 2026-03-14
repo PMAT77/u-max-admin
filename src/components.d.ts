@@ -28,6 +28,7 @@ declare module 'vue' {
     NGradientText: typeof import('naive-ui')['NGradientText']
     NH2: typeof import('naive-ui')['NH2']
     NIcon: typeof import('naive-ui')['NIcon']
+    NImage: typeof import('naive-ui')['NImage']
     NInput: typeof import('naive-ui')['NInput']
     NInputOtp: typeof import('naive-ui')['NInputOtp']
     NLayout: typeof import('naive-ui')['NLayout']
@@ -46,6 +47,7 @@ declare module 'vue' {
     PreferenceButton: typeof import('./components/common/PreferenceButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SvgIcon: typeof import('./components/common/SvgIcon.vue')['default']
     ThemeProvider: typeof import('./components/common/ThemeProvider.vue')['default']
     ThemeSwitcher: typeof import('./components/common/ThemeSwitcher.vue')['default']
   }
@@ -69,6 +71,7 @@ declare global {
   const NGradientText: typeof import('naive-ui')['NGradientText']
   const NH2: typeof import('naive-ui')['NH2']
   const NIcon: typeof import('naive-ui')['NIcon']
+  const NImage: typeof import('naive-ui')['NImage']
   const NInput: typeof import('naive-ui')['NInput']
   const NInputOtp: typeof import('naive-ui')['NInputOtp']
   const NLayout: typeof import('naive-ui')['NLayout']
@@ -87,6 +90,7 @@ declare global {
   const PreferenceButton: typeof import('./components/common/PreferenceButton.vue')['default']
   const RouterLink: typeof import('vue-router')['RouterLink']
   const RouterView: typeof import('vue-router')['RouterView']
+  const SvgIcon: typeof import('./components/common/SvgIcon.vue')['default']
   const ThemeProvider: typeof import('./components/common/ThemeProvider.vue')['default']
   const ThemeSwitcher: typeof import('./components/common/ThemeSwitcher.vue')['default']
 }

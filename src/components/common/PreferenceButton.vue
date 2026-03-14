@@ -1,7 +1,4 @@
-/**
- * 偏好设置按钮组件
- * 显示一个浮动按钮，点击后可打开偏好设置面板
- */
+/** * 偏好设置按钮组件 * 显示一个浮动按钮，点击后可打开偏好设置面板 */
 <template>
   <n-tooltip trigger="hover" placement="left">
     <template #trigger>
@@ -14,7 +11,7 @@
 </template>
 
 <script setup>
-import { Template } from '@vicons/carbon'
+import { Template } from '@vicons/carbon';
 </script>
 
 <style scoped>

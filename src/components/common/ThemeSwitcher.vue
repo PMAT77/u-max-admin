@@ -1,7 +1,4 @@
-/**
- * 主题切换器组件
- * 用于配置主题模式和主题颜色
- */
+/** * 主题切换器组件 * 用于配置主题模式和主题颜色 */
 <template>
   <div class="theme-switcher">
     <n-space vertical>
@@ -26,7 +23,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 /**
  * 组件属性
@@ -40,15 +37,15 @@ const props = defineProps({
     type: Object,
     default: () => ({
       theme: 'dark',
-      primaryColor: '#667eea'
-    })
-  }
-})
+      primaryColor: '#667eea',
+    }),
+  },
+});
 
 /**
  * 组件事件
  */
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
 /**
  * 主题模式计算属性
@@ -56,15 +53,15 @@ const emit = defineEmits(['update:modelValue'])
  */
 const theme = computed({
   get() {
-    return props.modelValue.theme
+    return props.modelValue.theme;
   },
   set(value) {
     emit('update:modelValue', {
       ...props.modelValue,
-      theme: value
-    })
-  }
-})
+      theme: value,
+    });
+  },
+});
 
 /**
  * 主题颜色计算属性
@@ -72,15 +69,15 @@ const theme = computed({
  */
 const primaryColor = computed({
   get() {
-    return props.modelValue.primaryColor
+    return props.modelValue.primaryColor;
   },
   set(value) {
     emit('update:modelValue', {
       ...props.modelValue,
-      primaryColor: value
-    })
-  }
-})
+      primaryColor: value,
+    });
+  },
+});
 </script>
 
 <style scoped>

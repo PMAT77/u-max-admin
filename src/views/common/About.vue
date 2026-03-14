@@ -1,7 +1,4 @@
-/**
- * 关于页面组件
- * 显示项目的基本信息
- */
+/** * 关于页面组件 * 显示项目的基本信息 */
 <template>
   <div class="about">
     <n-card title="关于页面">
@@ -10,9 +7,7 @@
   </div>
 </template>
 
-<script setup>
-
-</script>
+<script setup></script>
 
 <style lang="scss" scoped>
 @use '../../styles/variables.scss' as *;

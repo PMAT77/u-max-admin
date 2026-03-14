@@ -22,7 +22,8 @@
 - 🎨 **UnoCSS** - 原子化 CSS 引擎
 - 📱 **响应式** - 完美支持移动端
 - 🌙 **主题切换** - 支持亮色/暗色主题
-- 🔌 **策略模式** - 灵活的布局架构
+- 🌐 **国际化** - 多语言支持
+- ⚙️ **配置驱动** - 灵活的布局配置系统
 
 ## 技术栈
 
@@ -36,6 +37,7 @@
 | UnoCSS | ^66.6.6 | CSS 引擎 |
 | Axios | ^1.13.6 | HTTP 请求 |
 | Vue Router | ^4.6.4 | 路由管理 |
+| Vue I18n | ^12.0.0 | 国际化 |
 
 ## 目录结构
 
@@ -43,7 +45,8 @@
 src/
 ├── api/                    # API 接口
 │   ├── index.ts           # Axios 实例配置
-│   └── user.ts            # 用户相关 API
+│   ├── user.ts            # 用户相关 API
+│   └── route.ts           # 路由/菜单 API
 ├── assets/                 # 静态资源
 ├── components/            # 公共组件
 │   ├── auth/             # 认证相关组件
@@ -53,21 +56,25 @@ src/
 │   │   └── LoginPanel.vue
 │   └── common/           # 通用组件
 │       ├── PreferenceButton.vue
-│       ├── SystemLogo.vue
 │       ├── ThemeProvider.vue
 │       └── ThemeSwitcher.vue
+├── config/                # 配置文件
+│   └── layouts/          # 布局配置
+│       ├── index.ts      # 布局配置入口
+│       └── type.ts       # 布局类型定义
+├── i18n/                  # 国际化
+│   ├── index.ts          # i18n 配置
+│   └── locales/          # 语言包
+│       ├── zh-CN.ts      # 中文
+│       └── en-US.ts      # 英文
 ├── layouts/              # 布局组件
 │   ├── blank/           # 空白布局
-│   ├── default/         # 默认布局
-│   │   └── components/
-│   │       └── LayoutNavbar.vue
-│   └── strategy/        # 布局策略（核心架构）
-│       ├── BaseLayoutStrategy.ts
-│       ├── SidebarLayoutStrategy.ts
-│       ├── TopLayoutStrategy.ts
-│       ├── VerticalLayoutStrategy.ts
-│       ├── LayoutStrategyFactory.ts
-│       └── types.ts
+│   └── default/         # 默认布局
+│       └── components/
+│           ├── Breadcrumb/  # 面包屑
+│           ├── Logo/        # Logo
+│           ├── Menu/        # 菜单
+│           └── Navbar/      # 导航栏
 ├── mock/                 # Mock 数据
 ├── router/              # 路由配置
 │   ├── index.ts        # 路由入口
@@ -77,14 +84,22 @@ src/
 │       ├── common.ts
 │       └── dashboard.ts
 ├── stores/              # Pinia 状态管理
-│   ├── layout.ts       # 布局状态
-│   ├── router.ts       # 路由状态
-│   └── theme.ts        # 主题状态
+│   ├── index.ts        # Store 统一导出
+│   └── modules/        # 模块化 Store
+│       ├── layout.ts   # 布局状态
+│       ├── route.ts    # 路由/菜单状态
+│       └── theme.ts    # 主题状态
 ├── styles/             # 全局样式
+├── types/              # 类型定义
+│   ├── api.ts          # API 类型
+│   └── components.ts   # 组件类型
+├── utils/              # 工具函数
+│   ├── errorHandler.ts # 错误处理
+│   └── tokenStorage.ts # Token 存储
 ├── views/              # 页面视图
 │   ├── auth/          # 认证页面
 │   ├── common/        # 通用页面
-│   └── dashboard/    # 仪表盘
+│   └── dashboard/     # 仪表盘
 ├── App.vue
 └── main.ts
 ```
@@ -123,11 +138,11 @@ npm run preview
 |------|------|------|
 | 项目初始化 | Vue 3 + Vite + TypeScript 基础项目搭建 | ✅ |
 | UI 框架集成 | Naive UI 组件库集成 | ✅ |
-| 状态管理 | Pinia 状态管理 + 持久化 | ✅ |
+| 状态管理 | Pinia 模块化状态管理 + 持久化 | ✅ |
 | 路由管理 | Vue Router 路由配置 + 守卫 | ✅ |
 | 主题系统 | 亮色/暗色主题切换 | ✅ |
 | 登录页 | 三种登录方式（账号/手机/二维码） | ✅ |
-| 布局架构 | 策略模式布局系统 | ✅ |
+| 布局架构 | 配置驱动布局系统 | ✅ |
 | 多布局模式 | 支持 vertical/sidebar/top 三种布局 | ✅ |
 | API 封装 | Axios 请求封装 + 错误处理 | ✅ |
 | Mock 数据 | 开发环境 Mock 数据支持 | ✅ |
@@ -137,6 +152,8 @@ npm run preview
 | CSS 预处理器 | SCSS 支持 | ✅ |
 | CSS 工具 | UnoCSS 原子化 CSS | ✅ |
 | 路由菜单 | 从路由自动生成菜单 | ✅ |
+| 面包屑导航 | 动态面包屑导航 | ✅ |
+| 国际化 | 多语言支持 (中/英) | ✅ |
 | 404 页面 | 404 未找到页面 | ✅ |
 | 登录守卫 | 路由守卫权限控制 | ✅ |
 
@@ -156,9 +173,7 @@ npm run preview
 | 表格组件 | 通用表格封装 | 📋 |
 | 表单组件 | 通用表单封装 | 📋 |
 | 权限指令 | v-permission 指令 | 📋 |
-| 面包屑 | 路由面包屑导航 | 📋 |
 | 标签栏 | 多页签缓存功能 | 📋 |
-| 国际化 | 多语言支持 | 📋 |
 | 主题自定义 | 主题色/圆角自定义 | 📋 |
 | 导出功能 | Excel/PDF 导出 | 📋 |
 | 富文本编辑器 | 文本编辑功能 | 📋 |
@@ -166,43 +181,81 @@ npm run preview
 
 ## 布局架构
 
-本项目采用**策略模式**实现布局架构，方便扩展和维护。
+本项目采用**配置驱动**的方式实现布局系统，简洁高效。
 
 ### 核心概念
 
 ```typescript
-// 1. 定义布局策略接口
-interface LayoutStrategy {
+// 1. 定义布局配置
+interface LayoutConfig {
   mode: LayoutMode
   sidebarWidth: number
+  collapsedWidth: number
+  bigLogo: boolean
   showLogo: boolean
-  sidebarClass: string
+  showSidebar: boolean
+  showTopbar: boolean
+  headerFixed: boolean
+  siderClass: string
   headerClass: string
 }
 
-// 2. 实现具体策略
-class VerticalLayoutStrategy extends BaseLayoutStrategy { }
-class SidebarLayoutStrategy extends BaseLayoutStrategy { }
-class TopLayoutStrategy extends BaseLayoutStrategy { }
+// 2. 配置不同布局模式
+const layouts = {
+  vertical: { ... },
+  sidebar: { ... },
+  top: { ... }
+}
 
-// 3. 使用工厂创建
-const strategy = LayoutStrategyFactory.create('sidebar')
+// 3. 切换布局
+layoutStore.setLayoutMode('sidebar')
 ```
+
+### 布局模式
+
+| 模式 | 说明 |
+|------|------|
+| vertical | 垂直布局，侧边栏全屏高度 |
+| sidebar | 侧边栏布局，侧边栏在头部下方 |
+| top | 顶部导航布局，无侧边栏 |
 
 ### 扩展新布局
 
 ```typescript
-// 1. 创建新策略类
-class MixinLayoutStrategy extends BaseLayoutStrategy {
-  mode = 'mixin' as const
-  // 实现具体逻辑...
+// 1. 在 config/layouts/index.ts 添加新配置
+const layouts = {
+  // ...
+  mixin: {
+    mode: 'mixin',
+    sidebarWidth: 200,
+    // ...其他配置
+  }
 }
 
-// 2. 注册到工厂
-LayoutStrategyFactory.register('mixin', MixinLayoutStrategy)
+// 2. 在 type.ts 添加类型
+export type LayoutMode = 'vertical' | 'sidebar' | 'top' | 'mixin'
 
 // 3. 切换布局
 layoutStore.setLayoutMode('mixin')
+```
+
+## 状态管理
+
+采用 Pinia 模块化架构，状态清晰分离：
+
+| Store | 说明 |
+|-------|------|
+| layout | 布局配置、侧边栏状态 |
+| route | 菜单数据、面包屑、激活状态 |
+| theme | 主题配置、语言设置 |
+
+```typescript
+// 使用示例
+import { useLayoutStore, useRouteStore, useThemeStore } from '@/stores'
+
+const layoutStore = useLayoutStore()
+const routeStore = useRouteStore()
+const themeStore = useThemeStore()
 ```
 
 ## 环境变量
