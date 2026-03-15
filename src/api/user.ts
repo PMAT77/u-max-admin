@@ -18,9 +18,12 @@ export interface ApiResponse<T = any> {
  * 用户信息接口
  */
 export interface UserInfo {
-  id: number // 用户ID
+  id: number | string // 用户ID
   username: string // 用户名
-  name: string // 姓名
+  nickname?: string // 昵称
+  avatar?: string // 头像
+  email?: string // 邮箱
+  phone?: string // 手机号
   roles?: string[] // 角色列表
   permissions?: string[] // 权限列表
 }
@@ -30,7 +33,7 @@ export interface UserInfo {
  */
 export interface LoginResponse {
   token: string // 登录令牌
-  user: UserInfo // 用户信息
+  userInfo: UserInfo // 用户信息
 }
 
 /**

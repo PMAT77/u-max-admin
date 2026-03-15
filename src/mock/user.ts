@@ -20,13 +20,15 @@ export default [
           message: '登录成功', // 成功消息
           data: {
             token: 'mock-token-' + Date.now(), // 模拟token
-            user: {
+            userInfo: {
               id: 1,
               username: 'superman',
-              name: '超级管理员',
+              nickname: '超级管理员',
               avatar: 'https://neeko-copilot.bytedance.net/api/text2image?prompt=professional%20avatar%20of%20a%20system%20administrator&size=256x256',
               email: 'superman@example.com',
-              phone: '13800138000'
+              phone: '13800138000',
+              roles: ['super_admin'],
+              permissions: ['*']
             }
           }
         }

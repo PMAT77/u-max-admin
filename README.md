@@ -41,7 +41,7 @@
 
 ## 目录结构
 
-```
+```cmd
 src/
 ├── api/                    # API 接口
 │   ├── index.ts           # Axios 实例配置
@@ -135,7 +135,7 @@ npm run preview
 ### ✅ 已完成
 
 | 功能 | 说明 | 状态 |
-|------|------|------|
+|------|------|------|compact
 | 项目初始化 | Vue 3 + Vite + TypeScript 基础项目搭建 | ✅ |
 | UI 框架集成 | Naive UI 组件库集成 | ✅ |
 | 状态管理 | Pinia 模块化状态管理 + 持久化 | ✅ |
@@ -160,7 +160,7 @@ npm run preview
 ### 🚧 开发中
 
 | 功能 | 说明 | 状态 |
-|------|------|------|
+|------|------|------|compact
 | 用户管理 | 用户列表/增删改查 | 🚧 |
 | 角色管理 | 角色权限配置 | 🚧 |
 | 菜单管理 | 动态菜单配置 | 🚧 |
@@ -169,7 +169,7 @@ npm run preview
 ### 📋 待实现
 
 | 功能 | 说明 | 状态 |
-|------|------|------|
+|------|------|------|compact
 | 表格组件 | 通用表格封装 | 📋 |
 | 表单组件 | 通用表单封装 | 📋 |
 | 权限指令 | v-permission 指令 | 📋 |
@@ -214,7 +214,7 @@ layoutStore.setLayoutMode('sidebar')
 ### 布局模式
 
 | 模式 | 说明 |
-|------|------|
+|------|------|compact
 | vertical | 垂直布局，侧边栏全屏高度 |
 | sidebar | 侧边栏布局，侧边栏在头部下方 |
 | top | 顶部导航布局，无侧边栏 |
@@ -244,7 +244,7 @@ layoutStore.setLayoutMode('mixin')
 采用 Pinia 模块化架构，状态清晰分离：
 
 | Store | 说明 |
-|-------|------|
+|-------|------|compact
 | layout | 布局配置、侧边栏状态 |
 | route | 菜单数据、面包屑、激活状态 |
 | theme | 主题配置、语言设置 |
@@ -261,7 +261,7 @@ const themeStore = useThemeStore()
 ## 环境变量
 
 | 变量名 | 说明 | 默认值 |
-|--------|------|--------|
+|--------|------|--------|compact
 | VITE_API_BASE_URL | API 基础路径 | /api |
 | VITE_MOCK_ENABLE | 是否启用 Mock | true |
 
@@ -282,4 +282,4 @@ const themeStore = useThemeStore()
 
 ## License
 
-MIT License © 2024 UMax Admin
+MIT License © 2026 UMax Admin

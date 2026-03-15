@@ -65,6 +65,7 @@ import { ref, h } from 'vue';
 import { NIcon } from 'naive-ui';
 import { User, Mobile, QrCode, LogoGithub, OverflowMenuVertical, LogoWechat } from '@vicons/carbon';
 import { QqOutlined } from '@vicons/antd';
+import { renderIcon } from '@/utils/renderer';
 
 import LoginByAccount from './LoginByAccount.vue'; // 账号登录组件
 import LoginByPhone from './LoginByPhone.vue'; // 手机号登录组件
@@ -94,23 +95,6 @@ const dropdownOptions = [
     icon: renderIcon(LogoWechat),
   },
 ];
-
-/**
- * 渲染图标
- * @param {Component} icon - 图标组件
- * @returns {Function} 图标渲染函数
- */
-function renderIcon(icon: Component) {
-  return () => {
-    return h(
-      NIcon,
-      { size: 18 },
-      {
-        default: () => h(icon),
-      },
-    );
-  };
-}
 
 /**
  * 处理登录事件

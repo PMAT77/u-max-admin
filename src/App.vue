@@ -10,6 +10,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useThemeStore } from './stores';
+import ThemeProvider from './components/common/ThemeProvider.vue';
 
 // 获取主题状态管理实例
 const themeStore = useThemeStore();

@@ -3,14 +3,9 @@
  * 负责初始化Vue应用、集成Pinia、路由和全局组件
  */
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import { setupSvgIcon } from './icons'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
-import router from './router'
-import axios from 'axios'
-import i18n from './i18n'
-import ThemeProvider from './components/common/ThemeProvider.vue'
+import pinia from './stores/setup'
+import { setupSvgIcon } from './icons'
 
 // 导入全局样式
 import 'uno.css'
@@ -18,18 +13,20 @@ import './styles/normal.scss'
 
 // 创建Vue应用实例
 const app = createApp(App)
-// 创建Pinia实例
-const pinia = createPinia()
 
-// 使用Pinia持久化插件
-pinia.use(piniaPluginPersistedstate)
+// 集成Pinia状态管理（必须最先注册）
+app.use(pinia)
 
-// 注册全局组件
-app.component('ThemeProvider', ThemeProvider)
+// 导入 naive UI 全局 API（必须在 Pinia 注册后导入）
+import '@/utils/naive'
+
+// 导入路由（必须在 Pinia 和 naive.ts 之后导入）
+import router from './router'
+import axios from 'axios'
+import i18n from './i18n'
+
 // 注册SvgIcon组件
 setupSvgIcon(app)
-// 集成Pinia状态管理
-app.use(pinia)
 // 集成路由
 app.use(router)
 // 集成国际化

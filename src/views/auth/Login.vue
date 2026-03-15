@@ -30,18 +30,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useLoadingBar, useNotification, useMessage } from 'naive-ui';
+import { useNotification, useMessage } from 'naive-ui';
 import { userApi } from '@/api/user';
-import { useRouter } from 'vue-router';
-import { useLayoutStore } from '@/stores';
-import { setToken } from '@/utils/tokenStorage';
+import { useRouter, useRoute } from 'vue-router';
+import { useLayoutStore, useUserStore } from '@/stores';
 import { handleApiError } from '@/utils/errorHandler';
 
 import LoginPanel from '@/components/auth/LoginPanel.vue';
 
 const router = useRouter();
+const route = useRoute();
 const layoutStore = useLayoutStore();
-const loadingBar = useLoadingBar();
+const userStore = useUserStore();
 const notification = useNotification();
 const message = useMessage();
 
@@ -70,7 +70,6 @@ async function handleLogin(loginData: { type: string; data: any }) {
 
   // 开始加载
   const loading = message.loading('登录中...');
-  loadingBar.start();
 
   try {
     let response;
@@ -92,14 +91,21 @@ async function handleLogin(loginData: { type: string; data: any }) {
 
     // 登录成功处理
     if (response && response.code === 200 && response.data) {
-      // 保存token
-      setToken(response.data.token);
-      // 跳转到控制台
-      router.push('/dashboard/workbench');
+      // 使用 userStore 保存登录信息
+      userStore.login({
+        token: response.data.token,
+        userInfo: response.data.userInfo,
+      });
+
+      // 获取重定向地址
+      const redirect = (route.query.redirect as string) || '/dashboard/workbench';
+
+      // 跳转到重定向地址或控制台
+      router.push(redirect);
 
       notification.success({
         title: '登录成功',
-        content: 'Oi！欢迎您，superman',
+        content: `Oi！欢迎您，${userStore.getNickname || 'superman'}~`,
         duration: 2500,
         keepAliveOnHover: true,
       });
@@ -108,7 +114,6 @@ async function handleLogin(loginData: { type: string; data: any }) {
     handleApiError(error);
   } finally {
     // 结束加载
-    loadingBar.finish();
     loading.destroy();
   }
 }

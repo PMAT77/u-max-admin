@@ -1,13 +1,13 @@
 /** * 导航栏组件 * 显示顶部导航栏，包含 Logo 和导航菜单 */
 <template>
-  <div class="u-max-layout__nav flex items-center" :style="{ height: '56px' }">
+  <div class="u-max-navbar flex items-center" :style="{ height: '56px' }">
     <Logo v-if="layoutStore.getLayoutMode === 'sidebar'" />
 
-    <div class="u-max-layout__nav__left">
+    <div class="u-max-navbar__left">
       <div class="h-full flex items-center gap-1">
         <n-button
           quaternary
-          class="tool-btn w-38px h-38px ml-2"
+          class="u-max-navbar__btn w-38px h-38px ml-2"
           :focusable="false"
           @click="layoutStore.toggleSidebar(!layoutStore.getSidebarShow)"
         >
@@ -20,7 +20,7 @@
 
         <n-tooltip trigger="hover" placement="bottom">
           <template #trigger>
-            <n-button quaternary class="tool-btn w-38px h-38px mr-2" :focusable="false">
+            <n-button quaternary class="u-max-navbar__btn w-38px h-38px mr-2" :focusable="false">
               <template #icon>
                 <n-icon size="20"><Star /></n-icon>
               </template>
@@ -29,43 +29,443 @@
           收藏夹
         </n-tooltip>
 
-        <Breadcrumb />
+        <!-- 面包屑：中等屏幕及以上显示 -->
+        <div class="hidden lg:block">
+          <Breadcrumb />
+        </div>
       </div>
     </div>
 
-    <div class="u-max-layout__nav__center"></div>
+    <div class="u-max-navbar__center"></div>
 
-    <div class="u-max-layout__nav__right"></div>
+    <div class="u-max-navbar__right pr-4">
+      <n-flex align="center" :size="4">
+        <!-- 主题切换 -->
+        <n-button
+          quaternary
+          class="u-max-navbar__btn w-38px h-38px anim-rotate"
+          :focusable="false"
+          @click="themeStore.toggleTheme()"
+        >
+          <template #icon>
+            <n-icon :size="20">
+              <Sun v-if="themeStore.isDark" />
+              <Moon v-else />
+            </n-icon>
+          </template>
+        </n-button>
+
+        <!-- 全屏切换：小屏幕及以上显示 -->
+        <n-button
+          quaternary
+          class="u-max-navbar__btn w-38px h-38px hidden lg:flex"
+          :focusable="false"
+          @click="toggleFullScreen()"
+        >
+          <template #icon>
+            <n-icon :size="20">
+              <FullScreenMaximize20Filled v-if="!isFullScreen" />
+              <FullScreenMinimize24Regular v-else />
+            </n-icon>
+          </template>
+        </n-button>
+
+        <!-- 语言切换：中等屏幕及以上显示 -->
+        <n-dropdown
+          :options="translateOptions"
+          :value="localeStore.getLocale"
+          trigger="click"
+          placement="bottom-end"
+          class="hidden lg:block"
+          @select="toggleLocale"
+        >
+          <n-button
+            quaternary
+            class="u-max-navbar__btn w-38px h-38px hidden md:flex"
+            :focusable="false"
+          >
+            <template #icon>
+              <n-icon :size="20">
+                <Translate />
+              </n-icon>
+            </template>
+          </n-button>
+        </n-dropdown>
+
+        <!-- 通知消息 -->
+        <n-popover placement="bottom">
+          <template #trigger>
+            <n-badge class="hidden lg:block" :value="notificationCount" :max="99" :offset="[-7, 7]">
+              <n-button quaternary class="u-max-navbar__btn w-38px h-38px" :focusable="false">
+                <template #icon>
+                  <n-icon :size="20">
+                    <Notification />
+                  </n-icon>
+                </template>
+              </n-button>
+            </n-badge>
+          </template>
+
+          <n-card
+            size="small"
+            segmented
+            class="w-320px"
+            header-style="padding-left: 0; padding-right: 0;"
+            content-style="padding: 5px 0;"
+            :bordered="false"
+          >
+            <template #header>
+              <n-dropdown
+                :options="notificationOptions"
+                :value="notificationValue"
+                trigger="hover"
+                placement="bottom-end"
+                @select="toggleNotification"
+              >
+                <n-button class="flex" text :focusable="false">
+                  <n-icon class="mr-2" :size="20">
+                    <Notification />
+                  </n-icon>
+                  <span class="font-size-16px">全部通知</span>
+                  <n-icon class="ml-1" :size="18">
+                    <ChevronDown />
+                  </n-icon>
+                </n-button>
+              </n-dropdown>
+            </template>
+
+            <template #header-extra>
+              <n-dropdown
+                :options="notificationMoreOptions"
+                trigger="hover"
+                placement="bottom-end"
+                @select="handleNotificationMoreSelect"
+              >
+                <n-button quaternary circle size="small" :focusable="false">
+                  <n-icon :size="20">
+                    <OverflowMenuHorizontal />
+                  </n-icon>
+                </n-button>
+              </n-dropdown>
+            </template>
+
+            <template #default>
+              <n-list hoverable clickable>
+                <n-scrollbar style="max-height: 240px">
+                  <n-list-item v-for="item in notificationList" :key="item.id">
+                    <n-thing>
+                      <template #avatar>
+                        <n-button strong secondary circle type="primary" :focusable="false">
+                          <n-icon :size="20">
+                            <Notification />
+                          </n-icon>
+                        </n-button>
+                      </template>
+
+                      <template #header>
+                        <n-ellipsis style="max-width: 234px">
+                          {{ item.title }}
+                        </n-ellipsis>
+                      </template>
+
+                      <template #description>
+                        <n-flex justify="space-between" align="center" class="line-height-22px">
+                          <n-text depth="3">
+                            {{ item.createTime }}
+                          </n-text>
+
+                          <n-button
+                            quaternary
+                            circle
+                            size="tiny"
+                            :focusable="false"
+                            @click.stop="handleMarkRead"
+                          >
+                            <n-icon :size="16">
+                              <CheckmarkDone />
+                            </n-icon>
+                          </n-button>
+                        </n-flex>
+                      </template>
+                    </n-thing>
+                  </n-list-item>
+                </n-scrollbar>
+              </n-list>
+            </template>
+
+            <template #action>
+              <n-flex justify="center">
+                <n-button text :focusable="false">
+                  <n-icon class="mr-1" :size="18">
+                    <ChevronDown />
+                  </n-icon>
+                  <span>加载更多</span>
+                </n-button>
+              </n-flex>
+            </template>
+          </n-card>
+        </n-popover>
+
+        <n-divider vertical class="hidden sm:block" />
+
+        <!-- 用户信息 -->
+        <n-dropdown
+          placement="bottom-end"
+          size="huge"
+          style="padding: 10px"
+          :options="userMenuOptions"
+          @select="handleUserMenuSelect"
+        >
+          <n-button quaternary class="u-max-navbar__btn px-1">
+            <div class="flex items-center px-1">
+              <n-avatar
+                round
+                class="mr-2"
+                :style="{
+                  color: 'white',
+                  backgroundColor: 'orange',
+                }"
+              >
+                <n-icon :component="RobotFilled" />
+              </n-avatar>
+              <!-- 用户名：中等屏幕及以上显示 -->
+              <div class="hidden md:flex items-center">
+                <n-button class="flex" text :focusable="false">
+                  <span>{{ userStore.getUsername }}</span>
+                  <n-icon class="ml-1" :size="18">
+                    <ChevronDown />
+                  </n-icon>
+                </n-button>
+              </div>
+            </div>
+          </n-button>
+        </n-dropdown>
+      </n-flex>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { useLayoutStore } from '@/stores';
-import { Star } from '@vicons/carbon';
-import { AlignLeftOutlined } from '@vicons/antd';
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import { useLayoutStore, useThemeStore, useLocaleStore, useUserStore } from '@/stores';
+import { setI18nLocale } from '@/i18n';
+import {
+  Star,
+  Sun,
+  Moon,
+  User,
+  Locked,
+  Notification,
+  NotificationNew,
+  Translate,
+  ChevronDown,
+  Delete,
+  OverflowMenuHorizontal,
+} from '@vicons/carbon';
+import { AlignLeftOutlined, RobotFilled } from '@vicons/antd';
+import { FullScreenMaximize20Filled, FullScreenMinimize24Regular } from '@vicons/fluent';
+import { CheckmarkDone } from '@vicons/ionicons5';
+import { renderUserDropdownHeader, renderIcon, renderUserDropdownFooter } from '@/utils/renderer';
+
 import Logo from '../Logo/index.vue';
 import Breadcrumb from '../Breadcrumb/index.vue';
+import SvgIcon from '@/components/common/SvgIcon.vue';
+
+const router = useRouter();
 
 // 获取布局状态管理实例
 const layoutStore = useLayoutStore();
+// 获取主题状态管理实例
+const themeStore = useThemeStore();
+// 获取语言状态管理实例
+const localeStore = useLocaleStore();
+// 获取用户状态管理实例
+const userStore = useUserStore();
+
+const isFullScreen = ref(false);
+const notificationCount = ref(100);
+const notificationValue = ref('all');
+
+// 语言选项
+const translateOptions = computed(() =>
+  localeStore.getLocaleOptions.map((item) => ({
+    label: item.label,
+    key: item.key,
+    icon: renderIcon(h(SvgIcon, { name: item.icon })),
+  })),
+);
+
+// 通知选项
+const notificationOptions = computed(() => [
+  {
+    label: '全部通知',
+    key: 'all',
+    icon: renderIcon(h(Notification)),
+  },
+  {
+    label: '未读通知',
+    key: 'unread',
+    icon: renderIcon(h(NotificationNew)),
+  },
+]);
+
+// 更多通知选项
+const notificationMoreOptions = computed(() => [
+  {
+    label: '标记所有为已读',
+    key: 'mark-as-read',
+    icon: renderIcon(h(CheckmarkDone)),
+  },
+  {
+    label: '清除所有通知',
+    key: 'clear',
+    icon: renderIcon(h(Delete)),
+  },
+]);
+
+// 通知列表
+const notificationList = [
+  {
+    id: 1,
+    title: '重构布局系统，优化菜单和面包屑组件',
+    createTime: '2023-07-01 10:00:00',
+  },
+  {
+    id: 2,
+    title: '添加详细的 README 文档',
+    createTime: '2023-07-01 10:00:00',
+  },
+  {
+    id: 3,
+    title: '实现大体框架设计',
+    createTime: '2023-07-01 10:00:00',
+  },
+];
+
+// 用户菜单选项
+const userMenuOptions = computed(() => [
+  {
+    key: 'header',
+    type: 'render',
+    render: renderUserDropdownHeader,
+  },
+  {
+    key: 'header-divider',
+    type: 'divider',
+  },
+  {
+    label: '用户信息',
+    key: 'user-info',
+    icon: renderIcon(h(User)),
+  },
+  {
+    label: '修改密码',
+    key: 'change-password',
+    icon: renderIcon(h(Locked)),
+  },
+  {
+    key: 'header-divider',
+    type: 'divider',
+  },
+  {
+    type: 'render',
+    render: renderUserDropdownFooter,
+  },
+]);
+
+/**
+ * 处理语言切换
+ * @param key 语言代码
+ */
+function toggleLocale(key: string) {
+  localeStore.setLocale(key as any);
+  setI18nLocale(key);
+}
+
+/**
+ * 处理通知切换
+ * @param key 通知类型
+ */
+function toggleNotification(key: string) {
+  notificationValue.value = key;
+}
+
+/** * 切换全屏状态 */
+function toggleFullScreen() {
+  isFullScreen.value = !isFullScreen.value;
+}
+
+/**
+ * 处理标记为已读
+ */
+function handleMarkRead() {
+  notificationCount.value = 0;
+}
+
+/**
+ * 处理通知更多选择
+ * @param key 选项值
+ */
+function handleNotificationMoreSelect(key: string) {
+  switch (key) {
+    case 'mark-as-read':
+      notificationCount.value = 0;
+      break;
+    case 'clear':
+      notificationCount.value = 0;
+      break;
+    default:
+      break;
+  }
+}
+
+function handleUserMenuSelect(key: string) {
+  switch (key) {
+    case 'user-info':
+      router.push('/user-info');
+      break;
+    case 'change-password':
+      router.push('/change-password');
+      break;
+    default:
+      break;
+  }
+}
 </script>
 
 <style scoped lang="scss">
-.u-max-layout__nav {
-  .u-max-layout__nav__left {
-    .tool-btn i {
-      transition: all 0.3s var(--n-bezier);
-    }
-
-    .tool-btn:hover i {
-      transform: scale(1.1);
-    }
+.u-max-navbar {
+  .u-max-navbar__btn,
+  .u-max-navbar__btn i {
+    transition: all 0.3s var(--n-bezier);
   }
 
-  .u-max-layout__nav__center {
+  .u-max-navbar__btn:hover {
+    --n-btn-primary-bg-color: rgba(41, 122, 207, 0.1);
+    --n-btn-primary-color: #297acc;
+    background-color: var(--n-btn-primary-bg-color);
+    color: var(--n-btn-primary-color);
+  }
+
+  .u-max-navbar__btn:hover i {
+    transform: scale(1.1);
+  }
+
+  .u-max-navbar__left {
+    display: flex;
+    align-items: center;
+  }
+
+  .u-max-navbar__center {
     flex-grow: 1;
     flex-basis: 0;
     height: 100%;
+  }
+
+  .u-max-navbar__right {
+    .u-max-navbar__btn.anim-rotate:hover {
+      transform: rotate(90deg);
+    }
   }
 }
 </style>
