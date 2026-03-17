@@ -422,7 +422,7 @@ function handleNotificationMoreSelect(key: string) {
 function handleUserMenuSelect(key: string) {
   switch (key) {
     case 'user-info':
-      router.push('/user-info');
+      router.push('/user/profile');
       break;
     case 'change-password':
       router.push('/change-password');
@@ -435,6 +435,8 @@ function handleUserMenuSelect(key: string) {
 
 <style scoped lang="scss">
 .u-max-navbar {
+  border-bottom: 1px solid var(--n-border-color);
+
   .u-max-navbar__btn,
   .u-max-navbar__btn i {
     transition: all 0.3s var(--n-bezier);

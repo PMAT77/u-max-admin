@@ -2,7 +2,8 @@ import { NThing, NIcon, NAvatar, NText, NFlex, NButton } from 'naive-ui'
 import { RobotFilled } from '@vicons/antd'
 import { Logout } from '@vicons/carbon'
 import { useUserStore } from '@/stores/modules/user'
-import { globalDialog } from '@/utils/naive'
+import { globalDialog, globalMessage } from '@/utils/naive'
+import router from '@/router'
 import type { VNode, Component } from 'vue'
 
 /**
@@ -10,16 +11,8 @@ import type { VNode, Component } from 'vue'
  * @param {Component} icon - 图标组件
  * @returns {Function} 图标渲染函数
  */
-export function renderIcon(icon: Component): () => VNode {
-  return () => {
-    return h(
-      NIcon,
-      { size: 18 },
-      {
-        default: () => h(icon),
-      },
-    );
-  };
+export function renderIcon(icon: Component, options: Record<string, any> = { size: 18 }): () => VNode {
+  return () => h(NIcon, options, { default: () => h(icon) })
 }
 
 /**
@@ -77,6 +70,8 @@ export function renderUserDropdownFooter(): VNode {
             negativeText: '取消',
             onPositiveClick: () => {
               userStore.logout()
+              globalMessage.success('退出登录成功')
+              router.push('/auth/login')
             }, 
           })
         }},

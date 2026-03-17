@@ -11,7 +11,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/default/index.vue'),
     meta: {
       title: '控制台',
-      icon: 'Dashboard'
+      icon: 'Dashboard',
     },
     children: [
       {
@@ -20,7 +20,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/dashboard/Dashboard.vue'),
         meta: {
           title: '工作台', 
-          icon: 'Workbench'
+          icon: 'Workbench',
+          affix: true
         }
       }
     ]

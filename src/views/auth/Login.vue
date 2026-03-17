@@ -58,49 +58,37 @@ const getOrderClass = (isLeft: Boolean) => {
   return isLeft ? 'order-1' : 'order-2';
 };
 
-/**
- * 处理登录
- * @param {Object} loginData - 登录数据
- * @param {string} loginData.type - 登录类型
- * @param {Object} loginData.data - 登录数据
- */
 async function handleLogin(loginData: { type: string; data: any }) {
   const { type, data } = loginData;
   console.log('登录类型', type, '数据', data);
 
-  // 开始加载
   const loading = message.loading('登录中...');
 
   try {
     let response;
     switch (type) {
       case 'account':
-        // 账号密码登录
         response = await userApi.login({
           username: data.username,
           password: data.password,
+          captcha: data.captcha,
+          captchaId: data.captchaId,
         });
         break;
       case 'phone':
-        // 手机号登录逻辑
         console.log('手机号登录', data);
         break;
       default:
         break;
     }
 
-    // 登录成功处理
     if (response && response.code === 200 && response.data) {
-      // 使用 userStore 保存登录信息
       userStore.login({
         token: response.data.token,
         userInfo: response.data.userInfo,
       });
 
-      // 获取重定向地址
       const redirect = (route.query.redirect as string) || '/dashboard/workbench';
-
-      // 跳转到重定向地址或控制台
       router.push(redirect);
 
       notification.success({
@@ -113,7 +101,6 @@ async function handleLogin(loginData: { type: string; data: any }) {
   } catch (error) {
     handleApiError(error);
   } finally {
-    // 结束加载
     loading.destroy();
   }
 }

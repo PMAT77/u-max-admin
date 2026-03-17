@@ -42,7 +42,7 @@ export interface LoginByAccountProps {
  * LoginByAccount组件Emits
  */
 export type LoginByAccountEmits = {
-  (e: 'login', loginData: { type: string; data: { username: string; password: string; captcha: string } }): void
+  (e: 'login', loginData: { type: string; data: { username: string; password: string; captcha: string; captchaId: string } }): void
 }
 
 /**

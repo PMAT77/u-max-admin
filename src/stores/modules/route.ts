@@ -9,6 +9,7 @@ import { Home, Screen, Settings, Document, ChartPie, Calendar, ToolBox, MessageQ
 import { DashboardOutlined } from '@vicons/antd'
 import { menuApi } from '@/api/route'
 import routes from '@/router/routes'
+import { renderIcon } from '@/utils/renderer'
 
 export interface MenuOption {
   label: string
@@ -35,11 +36,7 @@ const iconMap: Record<string, any> = {
   MessageOutlined: MessageQueue,
   BellOutlined: Notification,
   HelpOutlined: Help
-}
-
-const renderIcon = (icon: Component) => {
-  return () => h(NIcon, null, { default: () => h(icon) })
-}
+} 
 
 const generateMenuFromRoutes = (routes: any[], parentPath: string = ''): MenuOption[] => {
   const menuOptions: MenuOption[] = []

@@ -37,17 +37,25 @@ export interface LoginResponse {
 }
 
 /**
+ * 登录参数接口
+ */
+export interface LoginParams {
+  username: string
+  password: string
+  captcha?: string
+  captchaId?: string
+}
+
+/**
  * 用户API对象
  */
 export const userApi = {
   /**
    * 登录
-   * @param {Object} data - 登录参数
-   * @param {string} data.username - 用户名
-   * @param {string} data.password - 密码
+   * @param {LoginParams} data - 登录参数
    * @returns {Promise<ApiResponse<LoginResponse>>} 登录响应
    */
-  login: (data: { username: string; password: string }): Promise<ApiResponse<LoginResponse>> => {
+  login: (data: LoginParams): Promise<ApiResponse<LoginResponse>> => {
     return service.post('/login', data)
   },
   

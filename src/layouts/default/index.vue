@@ -40,12 +40,15 @@
     <n-scrollbar class="u-max-scrollbar" content-style="overflow: hidden;">
       <n-layout-header bordered class="u-max-header u-max-header--fixed">
         <Navbar />
+        <TagView />
       </n-layout-header>
 
       <!-- 内容区域 -->
-      <n-layout-content class="u-max-content p-4" style="padding: 0">
-        <router-view />
-        <PreferenceButton />
+      <n-layout-content class="u-max-content p-4 h-full" style="padding: 0">
+        <div class="px-2.5 box-border size-full">
+          <router-view />
+          <PreferenceButton />
+        </div>
       </n-layout-content>
     </n-scrollbar>
   </n-layout>
@@ -58,6 +61,7 @@ import { useRouteStore } from '@/stores';
 import { TextIndentLess, TextIndentMore } from '@vicons/carbon';
 import Logo from './components/Logo/index.vue';
 import Navbar from './components/Navbar/index.vue';
+import TagView from './components/TagView/index.vue';
 import Menu from './components/Menu/index.vue';
 import PreferenceButton from '@/components/common/PreferenceButton.vue';
 
