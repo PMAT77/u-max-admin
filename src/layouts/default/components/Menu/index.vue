@@ -5,7 +5,7 @@
       :options="menuOptions"
       :collapsed="layoutStore.getIsCollapse"
       :collapsed-width="layoutStore.getCollapsedWidth"
-      :value="routeStore.activeMenu"
+      :value="menuStore.activeMenu"
       v-model:expanded-keys="expandedKeys"
       @update:value="handleMenuUpdate"
     />
@@ -15,14 +15,14 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useLayoutStore, useRouteStore } from '@/stores';
+import { useLayoutStore, useMenuStore } from '@/stores';
 
 const route = useRoute();
 const router = useRouter();
 const layoutStore = useLayoutStore();
-const routeStore = useRouteStore();
+const menuStore = useMenuStore();
 
-const menuOptions = computed(() => routeStore.getMenuOptions);
+const menuOptions = computed(() => menuStore.getMenuOptions);
 const expandedKeys = ref<string[]>([]);
 
 function handleMenuUpdate(key: string) {
@@ -32,11 +32,11 @@ function handleMenuUpdate(key: string) {
 function syncRouteState() {
   const currentPath =
     route.matched.length > 0 ? route.matched[route.matched.length - 1].path : route.path;
-  routeStore.setCurrentPath(currentPath);
+  menuStore.setCurrentPath(currentPath);
 }
 
 function updateExpandedKeys() {
-  const keys = routeStore.getExpandedKeys;
+  const keys = menuStore.getExpandedKeys;
   keys.forEach((key) => {
     if (!expandedKeys.value.includes(key)) {
       expandedKeys.value.push(key);
@@ -57,10 +57,10 @@ watch(
 );
 
 watch(
-  () => routeStore.getMenuOptions,
+  () => menuStore.getMenuOptions,
   (options) => {
     if (options.length > 0) {
-      expandedKeys.value = routeStore.getExpandedKeys;
+      expandedKeys.value = menuStore.getExpandedKeys;
     }
   },
   { immediate: true },

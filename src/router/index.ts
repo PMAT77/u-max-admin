@@ -3,9 +3,9 @@
  * 负责创建路由实例和配置路由守卫
  */
 import { createRouter, createWebHistory } from 'vue-router'
-import { globalLoadingBar, globalMessage } from '@/utils/naive'
-import { useStoreOutsideSetup } from '@/stores/setup'
+import { globalLoadingBar, globalMessage } from '@/utils/naive' 
 import { useUserStore } from '@/stores/modules/user'
+import { getPinia } from '@/stores/setup'
 import routes from './routes'
 
 /**
@@ -31,7 +31,7 @@ router.beforeEach((to, from, next) => {
   globalLoadingBar.start()
   
   // 在组件外部使用 userStore
-  const userStore = useStoreOutsideSetup(useUserStore)
+  const userStore = useUserStore(getPinia())
   const isLoggedIn = userStore.isLoggedIn
   const token = userStore.getToken
 

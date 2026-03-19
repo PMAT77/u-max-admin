@@ -436,6 +436,7 @@ function handleUserMenuSelect(key: string) {
 <style scoped lang="scss">
 .u-max-navbar {
   border-bottom: 1px solid var(--n-border-color);
+  transition: border 0.3s var(--n-bezier);
 
   .u-max-navbar__btn,
   .u-max-navbar__btn i {

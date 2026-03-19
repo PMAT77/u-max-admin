@@ -17,8 +17,9 @@
 9. [组件开发规范](#组件开发规范)
 10. [国际化规范](#国际化规范)
 11. [Mock 数据规范](#mock-数据规范)
-12. [常见开发场景指南](#常见开发场景指南)
-13. [技术债与注意事项](#技术债与注意事项)
+12. [主题系统](#主题系统)
+13. [常见开发场景指南](#常见开发场景指南)
+14. [技术债与注意事项](#技术债与注意事项)
 
 ---
 
@@ -28,12 +29,13 @@
 
 ### 核心特性
 
-- 🔐 完整的登录认证流程
-- 🎨 主题切换（亮色/暗色）+ 自定义主色
+- 🔐 完整的登录认证流程（账号/手机/二维码）
+- 🎨 主题切换（亮色/暗色）+ 自定义主色 + 圆角定制
 - 🌐 国际化支持（中/英）
 - 📐 多种布局模式（vertical/sidebar/top）
 - 🏷️ 标签页缓存
 - 🔧 Mock 数据支持
+- 🤖 验证码生成与验证
 
 ---
 
@@ -54,7 +56,7 @@
 | Naive UI | 2.44.x | Vue 3 组件库 |
 | UnoCSS | 66.x | 原子化 CSS 引擎 |
 | Sass | 1.98.x | CSS 预处理器 |
-| @vicons/* | 0.13.x | 图标库 |
+| @vicons/* | 0.13.x | 图标库（carbon/antd/fluent/ionicons5） |
 
 ### 状态与路由
 
@@ -84,6 +86,7 @@
 src/
 ├── api/                          # API 请求层
 │   ├── index.ts                  # Axios 实例 + 拦截器配置
+│   ├── captcha.ts                # 验证码 API
 │   ├── user.ts                   # 用户相关 API
 │   └── route.ts                  # 路由/菜单相关 API
 │
@@ -98,15 +101,19 @@ src/
 │   │   ├── LoginByPhone.vue      # 手机号登录表单
 │   │   └── LoginByQrcode.vue     # 扫码登录
 │   └── common/                   # 通用组件
-│       ├── ThemeProvider.vue     # 主题提供者
-│       ├── ThemeSwitcher.vue     # 主题切换器
-│       ├── PreferenceButton.vue  # 偏好设置按钮
+│       ├── ThemeProvider.vue     # 主题提供者（全局）
+│       ├── PreferenceButton.vue   # 偏好设置按钮
 │       └── SvgIcon.vue           # SVG 图标组件
 │
 ├── config/                       # 配置文件
-│   └── layouts/                  # 布局配置
-│       ├── index.ts              # 布局配置项
-│       └── type.ts               # 布局类型定义
+│   ├── layout/                   # 布局配置
+│   │   ├── index.ts              # 布局配置项
+│   │   └── type.ts               # 布局类型定义
+│   ├── route/                    # 路由配置
+│   │   └── index.ts              # 路由图标映射
+│   └── theme/                    # 主题配置
+│       ├── index.ts              # 主题配置项
+│       └── type.ts               # 主题类型定义
 │
 ├── i18n/                         # 国际化
 │   ├── index.ts                  # i18n 实例配置
@@ -131,6 +138,7 @@ src/
 │
 ├── mock/                         # Mock 数据
 │   ├── index.ts                  # Mock 配置
+│   ├── captcha.ts                # 验证码 Mock
 │   ├── user.ts                   # 用户 Mock
 │   └── route.ts                  # 路由 Mock
 │
@@ -139,19 +147,19 @@ src/
 │   ├── routes.ts                 # 路由配置汇总
 │   └── models/                   # 路由模块
 │       ├── auth.ts               # 认证路由
-│       ├── dashboard.ts          # 仪表盘路由
+│       ├── dashboard.ts           # 仪表盘路由
 │       ├── user.ts               # 用户路由
 │       └── common.ts             # 公共路由
 │
 ├── stores/                       # 状态管理
 │   ├── index.ts                  # Store 统一导出
-│   ├── setup.ts                  # Pinia 配置 + 外部使用工具
+│   ├── setup.ts                  # Pinia 配置
 │   └── modules/                  # Store 模块
 │       ├── user.ts               # 用户状态
-│       ├── theme.ts              # 主题状态
-│       ├── layout.ts             # 布局状态
-│       ├── route.ts              # 路由状态
-│       ├── locale.ts             # 国际化状态
+│       ├── theme.ts               # 主题状态
+│       ├── layout.ts              # 布局状态
+│       ├── menu.ts                # 菜单状态
+│       ├── locale.ts              # 国际化状态
 │       └── tagView.ts            # 标签页状态
 │
 ├── styles/                       # 全局样式
@@ -163,10 +171,11 @@ src/
 │   └── components.ts             # 组件类型
 │
 ├── utils/                        # 工具函数
-│   ├── naive.ts                  # Naive UI 全局 API
+│   ├── naive.ts                  # Naive UI 全局 API（延迟初始化）
 │   ├── renderer.ts               # 渲染工具
 │   ├── errorHandler.ts           # 错误处理
 │   ├── tokenStorage.ts           # Token 存储
+│   ├── captcha.ts                # 验证码生成
 │   └── menu.ts                   # 菜单工具
 │
 ├── views/                        # 页面视图
@@ -197,12 +206,27 @@ src/
 main.ts 初始化流程（顺序不可更改）：
 
 1. createApp(App)
-2. app.use(pinia)              ← 必须最先注册
-3. import '@/utils/naive'      ← 依赖 Pinia
-4. import router               ← 依赖 Pinia + Naive
+2. setupStore(app)              ← 使用 setup 函数注册 Pinia
+3. import '@/utils/naive'       ← 依赖 Pinia，延迟初始化 API
+4. import router                 ← 依赖 Pinia + Naive
 5. app.use(router)
 6. app.use(i18n)
 7. app.mount('#app')
+```
+
+### 关键说明：Naive UI 全局 API 延迟初始化
+
+`@/utils/naive.ts` 中的 `createDiscreteApi` 使用延迟初始化模式：
+- `globalLoadingBar`、`globalMessage`、`globalNotification`、`globalDialog` 在首次调用时才创建
+- 这确保了在 Naive UI 的 Provider 组件挂载前调用不会报错
+
+```typescript
+// 安全调用示例（可在路由守卫中使用）
+import { globalMessage, globalLoadingBar } from '@/utils/naive'
+
+router.beforeEach(() => {
+  globalLoadingBar.start()  // 安全：未就绪时为空操作
+})
 ```
 
 ### 文件命名规范
@@ -256,7 +280,7 @@ export const useXxxStore = defineStore('xxx', {
     setXxx(value: Type): void { this.xxx = value }
   },
 
-  persist: true  // 是否持久化
+  persist: true  // 是否持久化（可用 true 或配置对象）
 })
 ```
 
@@ -267,9 +291,27 @@ export const useXxxStore = defineStore('xxx', {
 | user | `stores/modules/user.ts` | Token、用户信息、登录状态 | ✅ |
 | theme | `stores/modules/theme.ts` | 主题模式、主色、圆角 | ✅ |
 | layout | `stores/modules/layout.ts` | 布局配置、侧边栏状态 | ✅ |
-| route | `stores/modules/route.ts` | 菜单、面包屑、当前路径 | ❌ |
+| menu | `stores/modules/menu.ts` | 菜单、面包屑、当前路径 | ✅ |
 | locale | `stores/modules/locale.ts` | 语言设置 | ✅ |
-| tagView | `stores/modules/tagView.ts` | 标签页缓存 | - |
+| tagView | `stores/modules/tagView.ts` | 标签页缓存 | ✅ |
+
+### 主题状态（theme store）
+
+```typescript
+// 状态结构
+interface ThemeState {
+  mode: 'light' | 'dark'
+  primaryColor: string    // 主色，如 '#2f54eb'
+  borderRadius: string    // 圆角，如 '0.5rem'
+}
+
+// 核心方法
+themeStore.toggleTheme()       // 切换亮/暗模式
+themeStore.setPrimaryColor()   // 设置主色
+themeStore.setBorderRadius()   // 设置圆角
+themeStore.resetTheme()        // 重置为默认
+themeStore.isDark              // getter: 是否暗色模式
+```
 
 ### 在组件中使用
 
@@ -291,11 +333,31 @@ themeStore.toggleTheme()
 ### 在组件外部使用（如路由守卫）
 
 ```typescript
-import { useStoreOutsideSetup } from '@/stores/setup'
 import { useUserStore } from '@/stores/modules/user'
+import { getPinia } from '@/stores/setup'
 
-const userStore = useStoreOutsideSetup(useUserStore)
+const userStore = useUserStore(getPinia())
 console.log(userStore.isLoggedIn)
+```
+
+### 主题配置
+
+主题相关配置在 `config/theme/` 目录下：
+
+```typescript
+// config/theme/index.ts
+export const defaultThemeMode: ThemeMode = 'dark'
+export const defaultThemeState: ThemeState = {
+  mode: 'dark',
+  primaryColor: '#2f54eb',
+  borderRadius: '0.5rem',
+}
+
+// 预设主色（11种）
+export const primaryColorPresets: PrimaryColorPreset[] = [...]
+
+// 预设圆角（5种）
+export const borderRadiusPresets: BorderRadiusPreset[] = [...]
 ```
 
 ---
@@ -315,10 +377,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/layouts/default/index.vue'),
     meta: {
       title: '模块名称',      // 必填：菜单标题
-      icon: 'IconName',       // 可选：菜单图标
+      icon: 'IconName',       // 可选：菜单图标（需在 iconMap 中注册）
       hideTag: false,         // 可选：是否隐藏标签
       show: true,             // 可选：是否显示在菜单
       affix: false,           // 可选：是否固定标签
+      noCache: false,         // 可选：是否缓存
     },
     children: [
       {
@@ -334,6 +397,22 @@ const routes: RouteRecordRaw[] = [
 export default routes
 ```
 
+### 图标映射
+
+图标需要在 `config/route/index.ts` 中注册：
+
+```typescript
+// config/route/index.ts
+import { Screen, Settings, Document } from '@vicons/carbon'
+import { DashboardOutlined } from '@vicons/antd'
+
+export const iconMap: Record<string, Component> = {
+  'Dashboard': DashboardOutlined,
+  'Workbench': Screen,
+  'User': User,
+}
+```
+
 ### 添加新路由模块
 
 1. 在 `router/models/` 下创建路由文件
@@ -347,6 +426,8 @@ const routes: RouteRecordRaw[] = [
   ...redirectRoutes,
   ...AuthRoutes,
   ...DashboardRoutes,
+  ...CommonRoutes,
+  ...UserRoutes,
   ...NewModuleRoutes,  // 添加新模块
 ]
 ```
@@ -434,41 +515,35 @@ export const xxxApi = {
   getList: (): Promise<ApiResponse<ListData[]>> => {
     return service.get('/xxx/list')
   },
-  
+
   getItem: (id: string): Promise<ApiResponse<ItemData>> => {
     return service.get(`/xxx/${id}`)
   },
-  
+
   create: (data: CreateParams): Promise<ApiResponse> => {
     return service.post('/xxx', data)
   },
-  
+
   update: (id: string, data: UpdateParams): Promise<ApiResponse> => {
     return service.put(`/xxx/${id}`, data)
   },
-  
+
   delete: (id: string): Promise<ApiResponse> => {
     return service.delete(`/xxx/${id}`)
   }
 }
 ```
 
-### 在页面中调用 API
+### 全局消息提示
 
 ```typescript
-import { xxxApi } from '@/api/xxx'
-import { handleApiError } from '@/utils/errorHandler'
+import { globalMessage } from '@/utils/naive'
 
-async function fetchData() {
-  try {
-    const response = await xxxApi.getList()
-    if (response.code === 200) {
-      // 处理数据
-    }
-  } catch (error) {
-    handleApiError(error)
-  }
-}
+// 使用示例
+globalMessage.info('消息内容')
+globalMessage.success('操作成功')
+globalMessage.warning('警告信息')
+globalMessage.error('错误信息')
 ```
 
 ---
@@ -509,34 +584,16 @@ async function fetchData() {
 <style scoped lang="scss">
 .component-name {
   // 样式
-  
+
   &--modifier {
     // 修饰符样式
   }
-  
+
   &__element {
     // 元素样式
   }
 }
 </style>
-```
-
-### 主题相关
-
-```typescript
-// 使用主题 Store
-import { useThemeStore } from '@/stores'
-
-const themeStore = useThemeStore()
-
-// 切换主题
-themeStore.toggleTheme()
-
-// 设置主色
-themeStore.setPrimaryColor('#1890ff')
-
-// 判断暗色模式
-const isDark = themeStore.isDark
 ```
 
 ---
@@ -551,6 +608,26 @@ const isDark = themeStore.isDark
 | `components/common/` | 通用组件 | 可复用、无业务逻辑 |
 | `views/` | 页面组件 | 路由级别 |
 | `layouts/` | 布局组件 | 页面框架 |
+
+### 主题提供者组件
+
+`ThemeProvider.vue` 是全局主题配置的关键组件：
+
+```vue
+<n-config-provider
+  :theme="configProviderProps.theme"
+  :theme-overrides="configProviderProps.themeOverrides"
+>
+  <n-global-style />
+  <n-loading-bar-provider>
+    <n-notification-provider>
+      <n-message-provider>
+        <slot />  <!-- 子组件 -->
+      </n-message-provider>
+    </n-notification-provider>
+  </n-loading-bar-provider>
+</n-config-provider>
+```
 
 ### 组件模板
 
@@ -599,21 +676,6 @@ function handleClick() {
   // 样式
 }
 </style>
-```
-
-### 类型定义位置
-
-```typescript
-// 组件特定的 Props/Emits 类型
-// 放在 types/components.ts
-
-export interface XxxProps {
-  title: string
-}
-
-export type XxxEmits = {
-  (e: 'close'): void
-}
 ```
 
 ---
@@ -708,7 +770,7 @@ export default [
 viteMockServe({
   mockPath: 'src/mock',
   localEnabled: true,    // 开发环境启用
-  prodEnabled: false,    // 生产环境禁用（建议）
+  prodEnabled: true,    // 生产环境启用（可根据需要调整）
   watchFiles: true
 })
 ```
@@ -717,6 +779,49 @@ viteMockServe({
 
 - Mock 接口路径需要带 `/api` 前缀
 - 确保 `.env` 中配置了 `VITE_API_BASE_URL=/api`
+
+---
+
+## 主题系统
+
+### 主题配置
+
+主题系统由以下部分组成：
+
+```
+config/theme/           # 主题配置
+├── index.ts           # 默认配置、预设颜色/圆角
+└── type.ts            # 类型定义
+
+stores/modules/theme.ts # 主题状态管理
+
+components/common/
+└── ThemeProvider.vue  # 主题提供者（全局）
+```
+
+### 主题切换机制
+
+1. `ThemeProvider.vue` 使用 `configProviderProps` 响应式获取主题状态
+2. `configProviderProps` 是 computed 属性，依赖 `themeStore`
+3. 切换主题时：`themeStore.toggleTheme()` → store 状态更新 → computed 重新计算 → UI 自动更新
+
+### 主题持久化
+
+- 主题设置通过 `pinia-plugin-persistedstate` 自动持久化到 localStorage
+- 刷新页面后主题设置会自动恢复
+
+### 自定义主题色
+
+```typescript
+// 设置主色
+themeStore.setPrimaryColor('#1890ff')
+
+// 设置圆角
+themeStore.setBorderRadius('0.75rem')
+
+// 重置为默认
+themeStore.resetTheme()
+```
 
 ---
 
@@ -732,7 +837,7 @@ viteMockServe({
        <!-- 页面内容 -->
      </div>
    </template>
-   
+
    <script setup lang="ts">
    // 页面逻辑
    </script>
@@ -763,7 +868,7 @@ viteMockServe({
    ```typescript
    // src/router/routes.ts
    import ModuleRoutes from './models/module'
-   
+
    const routes = [
      // ...
      ...ModuleRoutes
@@ -776,7 +881,7 @@ viteMockServe({
    ```typescript
    // src/api/module.ts
    import service from './index'
-   
+
    export const moduleApi = {
      getList: () => service.get('/module/list'),
      getItem: (id: string) => service.get(`/module/${id}`),
@@ -802,7 +907,7 @@ viteMockServe({
    ```typescript
    // src/stores/modules/newStore.ts
    import { defineStore } from 'pinia'
-   
+
    export const useNewStore = defineStore('new', {
      state: () => ({
        data: null
@@ -825,20 +930,25 @@ viteMockServe({
 
 ### 场景四：添加新的菜单图标
 
-1. **在路由 meta 中指定图标名**
-   ```typescript
-   meta: { title: '页面', icon: 'NewIcon' }
+1. **安装图标包**
+   ```bash
+   npm install @vicons/xxx
    ```
 
-2. **在 route store 中注册图标映射**
+2. **在 iconMap 中注册**
    ```typescript
-   // src/stores/modules/route.ts
-   import { NewIconComponent } from '@vicons/xxx'
-   
-   const iconMap: Record<string, any> = {
-     NewIcon: NewIconComponent,
-     // ...
+   // src/config/route/index.ts
+   import { NewIcon } from '@vicons/xxx'
+
+   export const iconMap: Record<string, Component> = {
+     // ...existing icons
+     'NewIcon': NewIcon,
    }
+   ```
+
+3. **在路由 meta 中使用**
+   ```typescript
+   meta: { title: '页面', icon: 'NewIcon' }
    ```
 
 ---
@@ -849,18 +959,17 @@ viteMockServe({
 
 | 问题 | 位置 | 建议 |
 |------|------|------|
-| 验证码功能未实现 | `LoginByAccount.vue` | 需要实现验证码生成和校验 |
-| 错误处理使用 alert | `api/index.ts` | 改用 `globalMessage` |
+| ThemeSwitcher.vue 缺失 | `components/common/` | 需创建或移除相关引用 |
 | API 路径配置不明确 | `.env` | 确保 `VITE_API_BASE_URL` 配置正确 |
 
 ### 中优先级
 
 | 问题 | 建议 |
 |------|------|
-| 类型定义重复 | 统一到 `types/` 目录 |
-| Token 双重存储 | 移除手动 localStorage 操作，依赖 persist 插件 |
-| 硬编码默认值 | 从配置或环境变量读取 |
-| 手机号/扫码登录未实现 | 需要补充完整逻辑 |
+| 类型定义分散 | 统一到 `types/` 目录 |
+| Token 双重存储 | 已有 pinia-plugin-persistedstate，可移除手动 localStorage 操作 |
+| 手机号/扫码登录 | 需要补充完整逻辑 |
+| 验证码功能 | 已有基础实现（utils/captcha.ts + mock/captcha.ts），需完善前端集成 |
 
 ### 低优先级
 
@@ -878,22 +987,24 @@ viteMockServe({
 
 ```typescript
 // Store
-import { useUserStore, useThemeStore, useLayoutStore } from '@/stores'
+import { useUserStore, useThemeStore, useLayoutStore, useMenuStore } from '@/stores'
 
 // Router
 import { useRouter, useRoute } from 'vue-router'
 
 // API
 import { userApi } from '@/api/user'
+import { captchaApi } from '@/api/captcha'
 
-// Naive UI
+// Naive UI（组件内）
 import { useMessage, useNotification, useDialog } from 'naive-ui'
 
-// 全局 API（组件外使用）
+// 全局 API（组件外使用，如路由守卫）
 import { globalMessage, globalLoadingBar } from '@/utils/naive'
 
 // 国际化
 import { useI18n } from 'vue-i18n'
+import { setI18nLocale } from '@/i18n'
 ```
 
 ### 环境变量
@@ -901,6 +1012,7 @@ import { useI18n } from 'vue-i18n'
 ```bash
 # .env
 VITE_API_BASE_URL=/api
+VITE_MOCK_ENABLE=true
 ```
 
 ### 常用命令
@@ -913,5 +1025,5 @@ npm run preview  # 预览生产版本
 
 ---
 
-*文档版本: 1.0.0*
-*最后更新: 2026-03-16*
+*文档版本: 1.1.0*
+*最后更新: 2026-03-19*

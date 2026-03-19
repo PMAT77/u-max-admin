@@ -2,14 +2,13 @@
  * 路由状态管理Store
  * 负责管理路由和菜单相关的状态
  */
-import { defineStore } from 'pinia'
-import { h } from 'vue'
-import { NIcon } from 'naive-ui'
-import { Home, Screen, Settings, Document, ChartPie, Calendar, ToolBox, MessageQueue, Notification, Help } from '@vicons/carbon'
-import { DashboardOutlined } from '@vicons/antd'
+import { defineStore } from 'pinia' 
 import { menuApi } from '@/api/route'
-import routes from '@/router/routes'
 import { renderIcon } from '@/utils/renderer'
+import { iconMap } from '@/config/route'
+import { DashboardOutlined } from '@vicons/antd'
+
+import routes from '@/router/routes'
 
 export interface MenuOption {
   label: string
@@ -25,19 +24,6 @@ export interface BreadcrumbItem {
   icon?: () => VNode
 }
 
-const iconMap: Record<string, any> = {
-  Dashboard: DashboardOutlined,
-  Workbench: Screen,
-  SettingOutlined: Settings,
-  FileTextOutlined: Document,
-  PieChartOutlined: ChartPie,
-  CalendarOutlined: Calendar,
-  InboxOutlined: ToolBox,
-  MessageOutlined: MessageQueue,
-  BellOutlined: Notification,
-  HelpOutlined: Help
-} 
-
 const generateMenuFromRoutes = (routes: any[], parentPath: string = ''): MenuOption[] => {
   const menuOptions: MenuOption[] = []
 
@@ -50,7 +36,7 @@ const generateMenuFromRoutes = (routes: any[], parentPath: string = ''): MenuOpt
       label: route.meta.title,
       key: fullPath,
       show: route.meta.show !== false,
-      icon: route.meta.icon ? renderIcon(iconMap[route.meta.icon] || Home) : undefined
+      icon: route.meta.icon ? renderIcon(iconMap[route.meta.icon] || DashboardOutlined) : undefined
     }
 
     if (route.children && route.children.length > 0) {
@@ -71,12 +57,12 @@ const getMenuFromMock = async (): Promise<MenuOption[]> => {
     label: item.meta.title,
     key: item.path,
     show: item.meta.show !== false,
-    icon: item.meta?.icon ? renderIcon(iconMap[item.meta.icon] || Home) : undefined,
+    icon: item.meta?.icon ? renderIcon(iconMap[item.meta.icon] || DashboardOutlined) : undefined,
     children: item.children?.map((child: any) => ({
       ...child,
       label: child.meta.title,
       key: child.path,
-      icon: child.meta?.icon ? renderIcon(iconMap[child.meta.icon] || Home) : undefined
+      icon: child.meta?.icon ? renderIcon(iconMap[child.meta.icon] || DashboardOutlined) : undefined
     }))
   }))
 }
@@ -111,7 +97,7 @@ const findParentKeys = (menus: MenuOption[], targetKey: string, parents: string[
   return null
 }
 
-export const useRouteStore = defineStore('route', {
+export const useMenuStore = defineStore('menu', {
   state: () => ({
     menuOptions: [] as MenuOption[],
     isLoading: false,
@@ -178,5 +164,5 @@ export const useRouteStore = defineStore('route', {
     },
   },
 
-  persist: false,
+  persist: true,
 })

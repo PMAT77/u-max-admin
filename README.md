@@ -18,12 +18,15 @@
 - 🎨 **Naive UI** - 优秀的 Vue 3 组件库
 - 📦 **Vite** - 极速的开发体验
 - 🎯 **TypeScript** - 完整的类型支持
-- 🗂️ **Pinia** - 轻量级状态管理
+- 🗂️ **Pinia** - 轻量级状态管理 + 持久化
 - 🎨 **UnoCSS** - 原子化 CSS 引擎
 - 📱 **响应式** - 完美支持移动端
-- 🌙 **主题切换** - 支持亮色/暗色主题
-- 🌐 **国际化** - 多语言支持
+- 🌙 **主题切换** - 支持亮色/暗色主题 + 自定义主色 + 圆角定制
+- 🌐 **国际化** - 多语言支持（中/英）
 - ⚙️ **配置驱动** - 灵活的布局配置系统
+- 🔐 **登录认证** - 多种登录方式（账号/手机/二维码）
+- 🏷️ **标签页** - 多页签缓存功能
+- 🤖 **验证码** - 集成验证码生成与验证
 
 ## 技术栈
 
@@ -34,10 +37,11 @@
 | Naive UI | ^2.44.1 | UI 组件库 |
 | TypeScript | ^5.9.3 | 类型支持 |
 | Pinia | ^3.0.4 | 状态管理 |
+| pinia-plugin-persistedstate | ^4.7.1 | 状态持久化 |
 | UnoCSS | ^66.6.6 | CSS 引擎 |
 | Axios | ^1.13.6 | HTTP 请求 |
 | Vue Router | ^4.6.4 | 路由管理 |
-| Vue I18n | ^12.0.0 | 国际化 |
+| Vue I18n | ^12.0.0-alpha.3 | 国际化 |
 
 ## 目录结构
 
@@ -45,9 +49,12 @@
 src/
 ├── api/                    # API 接口
 │   ├── index.ts           # Axios 实例配置
-│   ├── user.ts            # 用户相关 API
-│   └── route.ts           # 路由/菜单 API
+│   ├── captcha.ts        # 验证码 API
+│   ├── user.ts           # 用户相关 API
+│   └── route.ts          # 路由/菜单 API
 ├── assets/                 # 静态资源
+│   ├── imgs/             # 图片资源
+│   └── svgs/             # SVG 图标
 ├── components/            # 公共组件
 │   ├── auth/             # 认证相关组件
 │   │   ├── LoginByAccount.vue
@@ -56,50 +63,75 @@ src/
 │   │   └── LoginPanel.vue
 │   └── common/           # 通用组件
 │       ├── PreferenceButton.vue
-│       ├── ThemeProvider.vue
-│       └── ThemeSwitcher.vue
+│       ├── SvgIcon.vue
+│       └── ThemeProvider.vue
 ├── config/                # 配置文件
-│   └── layouts/          # 布局配置
-│       ├── index.ts      # 布局配置入口
-│       └── type.ts       # 布局类型定义
+│   ├── layout/           # 布局配置
+│   │   ├── index.ts
+│   │   └── type.ts
+│   ├── route/            # 路由配置
+│   │   └── index.ts      # 图标映射
+│   └── theme/            # 主题配置
+│       ├── index.ts
+│       └── type.ts
 ├── i18n/                  # 国际化
 │   ├── index.ts          # i18n 配置
 │   └── locales/          # 语言包
-│       ├── zh-CN.ts      # 中文
-│       └── en-US.ts      # 英文
+│       ├── zh-CN.ts
+│       └── en-US.ts
+├── icons/                 # 图标配置
+│   └── index.ts
 ├── layouts/              # 布局组件
 │   ├── blank/           # 空白布局
 │   └── default/         # 默认布局
 │       └── components/
-│           ├── Breadcrumb/  # 面包屑
-│           ├── Logo/        # Logo
-│           ├── Menu/        # 菜单
-│           └── Navbar/      # 导航栏
+│           ├── Breadcrumb/
+│           ├── Logo/
+│           ├── Menu/
+│           ├── Navbar/
+│           └── TagView/
 ├── mock/                 # Mock 数据
+│   ├── index.ts
+│   ├── captcha.ts
+│   ├── user.ts
+│   └── route.ts
 ├── router/              # 路由配置
-│   ├── index.ts        # 路由入口
-│   ├── routes.ts       # 路由汇总
-│   └── models/         # 路由模块
+│   ├── index.ts         # 路由入口 + 守卫
+│   ├── routes.ts        # 路由汇总
+│   └── models/          # 路由模块
 │       ├── auth.ts
 │       ├── common.ts
-│       └── dashboard.ts
+│       ├── dashboard.ts
+│       └── user.ts
 ├── stores/              # Pinia 状态管理
 │   ├── index.ts        # Store 统一导出
+│   ├── setup.ts        # Pinia 配置
 │   └── modules/        # 模块化 Store
 │       ├── layout.ts   # 布局状态
-│       ├── route.ts    # 路由/菜单状态
-│       └── theme.ts    # 主题状态
-├── styles/             # 全局样式
-├── types/              # 类型定义
-│   ├── api.ts          # API 类型
-│   └── components.ts   # 组件类型
-├── utils/              # 工具函数
+│       ├── locale.ts   # 国际化状态
+│       ├── menu.ts     # 菜单状态
+│       ├── tagView.ts  # 标签页状态
+│       ├── theme.ts    # 主题状态
+│       └── user.ts     # 用户状态
+├── styles/              # 全局样式
+│   ├── normal.scss
+│   └── variables.scss
+├── types/               # 类型定义
+│   ├── api.ts
+│   └── components.ts
+├── utils/               # 工具函数
+│   ├── captcha.ts      # 验证码生成
 │   ├── errorHandler.ts # 错误处理
+│   ├── menu.ts         # 菜单工具
+│   ├── naive.ts        # Naive UI 全局 API
+│   ├── renderer.ts     # 渲染工具
 │   └── tokenStorage.ts # Token 存储
 ├── views/              # 页面视图
-│   ├── auth/          # 认证页面
-│   ├── common/        # 通用页面
-│   └── dashboard/     # 仪表盘
+│   ├── auth/
+│   ├── common/
+│   ├── dashboard/
+│   ├── redirect/
+│   └── user/
 ├── App.vue
 └── main.ts
 ```
@@ -140,7 +172,7 @@ npm run preview
 | UI 框架集成 | Naive UI 组件库集成 | ✅ |
 | 状态管理 | Pinia 模块化状态管理 + 持久化 | ✅ |
 | 路由管理 | Vue Router 路由配置 + 守卫 | ✅ |
-| 主题系统 | 亮色/暗色主题切换 | ✅ |
+| 主题系统 | 亮色/暗色主题切换 + 自定义主色 + 圆角 | ✅ |
 | 登录页 | 三种登录方式（账号/手机/二维码） | ✅ |
 | 布局架构 | 配置驱动布局系统 | ✅ |
 | 多布局模式 | 支持 vertical/sidebar/top 三种布局 | ✅ |
@@ -148,14 +180,16 @@ npm run preview
 | Mock 数据 | 开发环境 Mock 数据支持 | ✅ |
 | 自动导入 | unplugin-auto-import API 自动导入 | ✅ |
 | 组件自动导入 | unplugin-vue-components 组件自动导入 | ✅ |
-| 图标支持 | ionicons5 / carbon / antd 图标库 | ✅ |
+| 图标支持 | ionicons5 / carbon / antd / fluent 图标库 | ✅ |
 | CSS 预处理器 | SCSS 支持 | ✅ |
 | CSS 工具 | UnoCSS 原子化 CSS | ✅ |
 | 路由菜单 | 从路由自动生成菜单 | ✅ |
 | 面包屑导航 | 动态面包屑导航 | ✅ |
-| 国际化 | 多语言支持 (中/英) | ✅ |
+| 国际化 | 多语言支持（中/英） | ✅ |
 | 404 页面 | 404 未找到页面 | ✅ |
 | 登录守卫 | 路由守卫权限控制 | ✅ |
+| 标签页缓存 | 多页签缓存功能 | ✅ |
+| 验证码功能 | 验证码生成与验证 | ✅ |
 
 ### 🚧 开发中
 
@@ -173,8 +207,6 @@ npm run preview
 | 表格组件 | 通用表格封装 | 📋 |
 | 表单组件 | 通用表单封装 | 📋 |
 | 权限指令 | v-permission 指令 | 📋 |
-| 标签栏 | 多页签缓存功能 | 📋 |
-| 主题自定义 | 主题色/圆角自定义 | 📋 |
 | 导出功能 | Excel/PDF 导出 | 📋 |
 | 富文本编辑器 | 文本编辑功能 | 📋 |
 | 图片上传 | 图片上传组件 | 📋 |
@@ -222,7 +254,7 @@ layoutStore.setLayoutMode('sidebar')
 ### 扩展新布局
 
 ```typescript
-// 1. 在 config/layouts/index.ts 添加新配置
+// 1. 在 config/layout/index.ts 添加新配置
 const layouts = {
   // ...
   mixin: {
@@ -246,16 +278,22 @@ layoutStore.setLayoutMode('mixin')
 | Store | 说明 |
 |-------|------|compact
 | layout | 布局配置、侧边栏状态 |
-| route | 菜单数据、面包屑、激活状态 |
-| theme | 主题配置、语言设置 |
+| menu | 菜单数据、面包屑、激活状态 |
+| theme | 主题配置（模式、主色、圆角） |
+| user | 用户信息、登录状态、Token |
+| locale | 语言设置 |
+| tagView | 标签页缓存 |
 
 ```typescript
 // 使用示例
-import { useLayoutStore, useRouteStore, useThemeStore } from '@/stores'
+import { useLayoutStore, useMenuStore, useThemeStore } from '@/stores'
 
 const layoutStore = useLayoutStore()
-const routeStore = useRouteStore()
+const menuStore = useMenuStore()
 const themeStore = useThemeStore()
+
+// 主题切换
+themeStore.toggleTheme()
 ```
 
 ## 环境变量
@@ -271,14 +309,6 @@ const themeStore = useThemeStore()
 - Firefox >= 90
 - Safari >= 15
 - Edge >= 90
-
-## 贡献指南
-
-1. Fork 本仓库
-2. 创建特性分支 (`git checkout -b feature/xxx`)
-3. 提交更改 (`git commit -m 'feat: add xxx'`)
-4. 推送到分支 (`git push origin feature/xxx`)
-5. 创建 Pull Request
 
 ## License
 

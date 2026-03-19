@@ -2,9 +2,9 @@
  * 布局状态管理Store
  * 使用配置驱动的方式管理应用的布局配置
  */
-import { defineStore } from 'pinia'
-import type { LayoutMode, LayoutConfig, SidebarConfig, LoginConfig } from '@/config/layouts/type'
-import { layouts, defaultMode, defaultLayoutConfig } from '@/config/layouts/index'
+import { defineStore } from 'pinia' 
+import { layouts, defaultMode, defaultLayoutConfig } from '@/config/layout/index'
+import type { LayoutMode, LayoutConfig, SidebarConfig, LoginConfig } from '@/config/layout/type'
 
 interface LayoutState {
   mode: LayoutMode
@@ -122,5 +122,5 @@ export const useLayoutStore = defineStore('layout', {
     },
   },
 
-  persist: true,
+  persist: true
 })

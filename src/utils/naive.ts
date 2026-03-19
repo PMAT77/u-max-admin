@@ -2,24 +2,14 @@
  * Naive UI 独立 API
  * 用于在组件外部使用 Naive UI 的 API
  * 如 loadingBar、message、notification、dialog 等
- * 
+ *
  * 注意：此文件必须在 Pinia 注册后导入
  */
 import { createDiscreteApi, darkTheme } from 'naive-ui'
 import { computed } from 'vue'
-import { setActivePinia } from 'pinia'
 import { useThemeStore } from '@/stores/modules/theme'
-import pinia from '@/stores/setup'
+import { getPinia } from '@/stores/setup'
 
-// 设置当前活跃的 Pinia 实例
-setActivePinia(pinia)
-
-// 获取 themeStore
-const themeStore = useThemeStore()
-
-/**
- * 颜色变亮函数
- */
 function lightenColor(color: string, percent: number): string {
   const num = parseInt(color.replace('#', ''), 16)
   const amt = Math.round(2.55 * percent)
@@ -39,9 +29,6 @@ function lightenColor(color: string, percent: number): string {
   )
 }
 
-/**
- * 颜色变暗函数
- */
 function darkenColor(color: string, percent: number): string {
   const num = parseInt(color.replace('#', ''), 16)
   const amt = Math.round(2.55 * percent)
@@ -56,56 +43,64 @@ function darkenColor(color: string, percent: number): string {
   )
 }
 
-// 动态计算 configProviderProps，实现主题响应式更新
-const configProviderProps = computed(() => ({
-  theme: themeStore.isDark ? darkTheme : null,
-  themeOverrides: {
-    common: {
-      primaryColor: themeStore.primaryColor,
-      primaryColorHover: lightenColor(themeStore.primaryColor, 10),
-      primaryColorPressed: darkenColor(themeStore.primaryColor, 10),
-      primaryColorSuppl: themeStore.primaryColor,
-      borderRadius: themeStore.borderRadius,
-    },
-  },
-}))
+let naiveApiInstance: ReturnType<typeof createDiscreteApi> | null = null
 
-const { loadingBar, message, notification, dialog } = createDiscreteApi(
-  ['loadingBar', 'message', 'notification', 'dialog'],
-  {
-    configProviderProps,
-  }
-)
-
-/**
- * 全局 Naive UI API
- * 可在组件外部使用
- */
-export const naiveApi = {
-  loadingBar,
-  message,
-  notification,
-  dialog,
+const discreteApiMap = {
+  loadingBar: null as any,
+  message: null as any,
+  notification: null as any,
+  dialog: null as any,
 }
 
-/**
- * 全局 loadingBar
- */
-export const globalLoadingBar = loadingBar
+const noop = () => {} 
+ 
 
-/**
- * 全局 message
- */
-export const globalMessage = message
+export const configProviderProps = computed(() => {
+  const themeStore = useThemeStore(getPinia())
+  return {
+    theme: themeStore.isDark ? darkTheme : null,
+    themeOverrides: {
+      common: {
+        primaryColor: themeStore.primaryColor,
+        primaryColorHover: lightenColor(themeStore.primaryColor, 10),
+        primaryColorPressed: darkenColor(themeStore.primaryColor, 10),
+        primaryColorSuppl: themeStore.primaryColor,
+        borderRadius: themeStore.borderRadius,
+      },
+    },
+  }
+})
 
-/**
- * 全局 notification
- */
-export const globalNotification = notification
+export const globalLoadingBar = {
+  start: () => discreteApiMap.loadingBar?.start?.() || noop,
+  finish: () => discreteApiMap.loadingBar?.finish?.() || noop,
+  error: () => discreteApiMap.loadingBar?.error?.() || noop,
+}
 
-/**
- * 全局 dialog
- */
-export const globalDialog = dialog
+export const globalMessage = {
+  info: (content: string) => discreteApiMap.message?.info?.(content) || noop,
+  success: (content: string) => discreteApiMap.message?.success?.(content) || noop,
+  warning: (content: string) => discreteApiMap.message?.warning?.(content) || noop,
+  error: (content: string) => discreteApiMap.message?.error?.(content) || noop,
+}
 
-export default naiveApi
+export const globalNotification = {
+  info: (content: string) => discreteApiMap.notification?.info?.({ content }) || noop,
+  success: (content: string) => discreteApiMap.notification?.success?.({ content }) || noop,
+  warning: (content: string) => discreteApiMap.notification?.warning?.({ content }) || noop,
+  error: (content: string) => discreteApiMap.notification?.error?.({ content }) || noop,
+}
+
+export const globalDialog = {
+  info: (content: string) => discreteApiMap.dialog?.info?.({ content }) || noop,
+  success: (content: string) => discreteApiMap.dialog?.success?.({ content }) || noop,
+  warning: (content: string) => discreteApiMap.dialog?.warning?.({ content }) || noop,
+  error: (content: string) => discreteApiMap.dialog?.error?.({ content }) || noop,
+}
+
+export default {
+  loadingBar: globalLoadingBar,
+  message: globalMessage,
+  notification: globalNotification,
+  dialog: globalDialog,
+}

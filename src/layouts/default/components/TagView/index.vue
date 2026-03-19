@@ -19,7 +19,11 @@
           @drop="handleDrop($event, index)"
           @dragend="handleDragEnd"
         >
-          <n-icon size="14" class="u-max-tagview__item-icon"> </n-icon>
+          <component
+            v-if="tag.icon"
+            class="u-max-tagview__item-icon"
+            :is="renderIcon(iconMap[tag.icon], { size: 16 })"
+          />
           <span class="u-max-tagview__item-title">{{ tag.title }}</span>
           <n-icon
             v-if="!tag.affix"
@@ -48,10 +52,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, shallowRef } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { Close } from '@vicons/ionicons5';
 import { renderIcon } from '@/utils/renderer';
+import { iconMap } from '@/config/route';
 import { useTagViewStore, type TagView } from '@/stores/modules/tagView';
 
 const router = useRouter();
@@ -251,7 +256,6 @@ onMounted(() => {
 <style scoped lang="scss">
 .u-max-tagview {
   height: 47px;
-  background-color: var(--n-color);
   user-select: none;
 
   :deep(.n-scrollbar-content) {
@@ -313,6 +317,10 @@ onMounted(() => {
       cursor: grabbing;
     }
   }
+}
+
+.u-max-tagview__item-icon {
+  margin-right: 4px;
 }
 
 .u-max-tagview__item-title {

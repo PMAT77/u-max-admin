@@ -19,10 +19,11 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useLayoutStore } from '@/stores';
+import { useLayoutStore, useThemeStore } from '@/stores';
 import { RobotFilled } from '@vicons/antd';
 
 const layoutStore = useLayoutStore();
+const themeStore = useThemeStore();
 
 const mode = computed(() => layoutStore.getLayoutMode);
 const isCollapse = computed(() => layoutStore.getIsCollapse);
@@ -56,7 +57,7 @@ const logoCircle = computed(() => {
 
 const logoStyle = computed(() => ({
   color: '#ffffff',
-  backgroundColor: '#00a4e4',
+  backgroundColor: '#297acf',
 }));
 
 const showText = computed(() => {
@@ -71,14 +72,8 @@ const showText = computed(() => {
   display: flex;
   align-items: center;
 
-  &.u-max-logo--vertical {
-    // flex-direction: column;
-  }
   &.u-max-logo--sidebar {
     width: 220px;
-  }
-  &.u-max-logo--top {
-    // flex-direction: row;
   }
 
   .u-max__logo--item {

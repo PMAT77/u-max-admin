@@ -30,6 +30,7 @@ declare module 'vue' {
     NFloatButton: typeof import('naive-ui')['NFloatButton']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
+    NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
     NGradientText: typeof import('naive-ui')['NGradientText']
     NH2: typeof import('naive-ui')['NH2']
     NIcon: typeof import('naive-ui')['NIcon']
@@ -64,7 +65,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     SvgIcon: typeof import('./components/common/SvgIcon.vue')['default']
     ThemeProvider: typeof import('./components/common/ThemeProvider.vue')['default']
-    ThemeSwitcher: typeof import('./components/common/ThemeSwitcher.vue')['default']
   }
 }
 
@@ -88,6 +88,7 @@ declare global {
   const NFloatButton: typeof import('naive-ui')['NFloatButton']
   const NForm: typeof import('naive-ui')['NForm']
   const NFormItem: typeof import('naive-ui')['NFormItem']
+  const NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
   const NGradientText: typeof import('naive-ui')['NGradientText']
   const NH2: typeof import('naive-ui')['NH2']
   const NIcon: typeof import('naive-ui')['NIcon']
@@ -122,5 +123,4 @@ declare global {
   const RouterView: typeof import('vue-router')['RouterView']
   const SvgIcon: typeof import('./components/common/SvgIcon.vue')['default']
   const ThemeProvider: typeof import('./components/common/ThemeProvider.vue')['default']
-  const ThemeSwitcher: typeof import('./components/common/ThemeSwitcher.vue')['default']
 }

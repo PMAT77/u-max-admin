@@ -17,7 +17,7 @@ export const useLocaleStore = defineStore('locale', {
     locale: Locale
     localeOptions: LocaleOption[]
   } => ({
-    locale: (localStorage.getItem('locale') as Locale) || 'zh-CN',
+    locale: 'zh-CN',
     localeOptions: [
       {
         label: '简体中文',
@@ -44,9 +44,10 @@ export const useLocaleStore = defineStore('locale', {
   actions: {
     setLocale(locale: Locale): void {
       this.locale = locale
-      localStorage.setItem('locale', locale)
     },
   },
 
-  persist: true,
+  persist: {
+    key: 'locale',
+  },
 })

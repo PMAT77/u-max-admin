@@ -11,8 +11,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouteStore } from '@/stores';
+import { useMenuStore } from '@/stores';
 
-const routeStore = useRouteStore();
-const breadcrumbs = computed(() => routeStore.getBreadcrumbs);
+const menuStore = useMenuStore();
+const breadcrumbs = computed(() => menuStore.getBreadcrumbs);
 </script>

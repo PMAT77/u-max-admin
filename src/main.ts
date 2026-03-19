@@ -4,27 +4,26 @@
  */
 import { createApp } from 'vue'
 import App from './App.vue'
-import pinia from './stores/setup'
-import { setupSvgIcon } from './icons'
+import { setupStore } from './stores/setup'
+import { setupSvgIcon } from './icons'  
 
 // 导入全局样式
 import 'uno.css'
 import './styles/normal.scss'
 
+// 导入 naive UI 全局 API（必须在 Pinia 注册后导入）
+
 // 创建Vue应用实例
 const app = createApp(App)
 
 // 集成Pinia状态管理（必须最先注册）
-app.use(pinia)
+setupStore(app)
 
-// 导入 naive UI 全局 API（必须在 Pinia 注册后导入）
-import '@/utils/naive'
-
-// 导入路由（必须在 Pinia 和 naive.ts 之后导入）
+import './utils/naive'
 import router from './router'
 import axios from 'axios'
 import i18n from './i18n'
-
+ 
 // 注册SvgIcon组件
 setupSvgIcon(app)
 // 集成路由

@@ -20,7 +20,7 @@ export const useUserStore = defineStore('user', {
     token: string
     userInfo: UserInfo | null
   } => ({
-    token: localStorage.getItem('token') || '',
+    token: '',
     userInfo: null,
   }),
 
@@ -55,27 +55,14 @@ export const useUserStore = defineStore('user', {
   },
 
   actions: {
-    /**
-     * 设置 Token
-     * @param token Token 字符串
-     */
     setToken(token: string): void {
       this.token = token
-      localStorage.setItem('token', token)
     },
 
-    /**
-     * 设置用户信息
-     * @param userInfo 用户信息对象
-     */
     setUserInfo(userInfo: UserInfo): void {
       this.userInfo = userInfo
     },
 
-    /**
-     * 登录成功后设置用户数据
-     * @param data 登录响应数据
-     */
     login(data: { token: string; userInfo?: UserInfo }): void {
       this.setToken(data.token)
       if (data.userInfo) {
@@ -83,19 +70,11 @@ export const useUserStore = defineStore('user', {
       }
     },
 
-    /**
-     * 退出登录
-     */
     logout(): void {
       this.token = ''
       this.userInfo = null
-      localStorage.removeItem('token')
     },
 
-    /**
-     * 更新用户信息
-     * @param userInfo 部分用户信息
-     */
     updateUserInfo(userInfo: Partial<UserInfo>): void {
       if (this.userInfo) {
         this.userInfo = { ...this.userInfo, ...userInfo }
@@ -103,5 +82,5 @@ export const useUserStore = defineStore('user', {
     },
   },
 
-  persist: true,
+  persist: true
 })

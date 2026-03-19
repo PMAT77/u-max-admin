@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useLayoutStore } from '@/stores';
-import { useRouteStore } from '@/stores';
+import { useMenuStore } from '@/stores';
 import { TextIndentLess, TextIndentMore } from '@vicons/carbon';
 import Logo from './components/Logo/index.vue';
 import Navbar from './components/Navbar/index.vue';
@@ -66,10 +66,10 @@ import Menu from './components/Menu/index.vue';
 import PreferenceButton from '@/components/common/PreferenceButton.vue';
 
 const layoutStore = useLayoutStore();
-const routeStore = useRouteStore();
+const menuStore = useMenuStore();
 
 onMounted(() => {
-  routeStore.initMenu();
+  menuStore.initMenu();
 });
 </script>
 

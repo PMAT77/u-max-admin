@@ -1,37 +1,54 @@
 /**
  * 主题状态管理Store
- * 用于管理应用的主题配置，包括主题模式、主色、边框圆角和登录页布局
+ * 用于管理应用的主题配置，包括主题模式、主色、边框圆角
  */
 import { defineStore } from 'pinia'
+import { 
+  defaultThemeMode, 
+  defaultThemeState, 
+  primaryColorPresets,
+  borderRadiusPresets 
+} from '@/config/theme'
+import type { ThemeState, ThemeMode, BorderRadiusSize, PrimaryColorPreset, BorderRadiusPreset } from '@/config/theme/type' 
+
 
 export const useThemeStore = defineStore('theme', {
-  state: (): {
-    theme: 'light' | 'dark'
-    primaryColor: string
-    borderRadius: '0rem' | '0.25rem' | '0.5rem' | '0.75rem' | '1rem'
-  } => ({
-    theme: 'dark',
-    primaryColor: '#297acf',
-    borderRadius: '0.5rem',
+  state: (): ThemeState => ({
+    mode: defaultThemeMode as ThemeMode,
+    primaryColor: defaultThemeState.primaryColor,
+    borderRadius: defaultThemeState.borderRadius as BorderRadiusSize,
   }),
 
   getters: {
-    isDark: (state): boolean => state.theme === 'dark'
+    isDark: (state): boolean => state.mode === 'dark',
+    getPrimaryColorPresets: (): PrimaryColorPreset[] => primaryColorPresets,
+    getBorderRadiusPresets: (): BorderRadiusPreset[] => borderRadiusPresets,
   },
 
   actions: {
-    setTheme(theme: 'light' | 'dark'): void {
-      this.theme = theme
+    setTheme(mode: ThemeMode): void {
+      this.mode = mode
     },
 
     setPrimaryColor(color: string): void {
       this.primaryColor = color
     },
 
+    setBorderRadius(radius: BorderRadiusSize): void {
+      this.borderRadius = radius
+    },
+
     toggleTheme(): void {
-      this.theme = this.theme === 'light' ? 'dark' : 'light'
+      this.mode = this.mode === 'light' ? 'dark' : 'light'
+    },
+
+    resetTheme(): void {
+      this.mode = defaultThemeMode
+      this.primaryColor = defaultThemeState.primaryColor
+      this.borderRadius = defaultThemeState.borderRadius
     },
   },
 
   persist: true
+,
 })
