@@ -171,7 +171,8 @@ src/
 │   └── components.ts             # 组件类型
 │
 ├── utils/                        # 工具函数
-│   ├── naive.ts                  # Naive UI 全局 API（延迟初始化）
+│   ├── naive.ts                  # Naive UI 全局 API（依赖 providerStore）
+│   ├── provider.ts               # Naive UI API 实例存储（Pinia Store）
 │   ├── renderer.ts               # 渲染工具
 │   ├── errorHandler.ts           # 错误处理
 │   ├── tokenStorage.ts           # Token 存储
