@@ -1,0 +1,75 @@
+:root {
+  --u-bg-page: #f5f7fa;
+  --u-bg-card: #ffffff;
+  --u-bg-elevated: #ffffff;
+  --u-text-primary: #1f2329;
+  --u-text-secondary: #4e5969;
+  --u-text-muted: #86909c;
+  --u-border-color: rgba(5, 5, 5, 0.08);
+  --u-shadow-card: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --u-shadow-elevated: 0 12px 32px rgba(31, 35, 41, 0.12);
+  --u-login-overlay: linear-gradient(135deg, #03020c),
+    radial-gradient(800px circle at 30% 40%, rgba(40, 80, 120, 0.35), transparent 60%),
+    radial-gradient(600px circle at 70% 30%, rgba(50, 100, 150, 0.35), transparent 70%),
+    radial-gradient(700px circle at 50% 90%, rgba(60, 70, 120, 0.35), transparent 60%);
+
+  --u-primary-color: #2f54eb;
+  --u-radius-base: 0.5rem;
+  --u-radius-lg: 0.75rem;
+  --u-layout-header-height: 56px;
+  --u-layout-sidebar-width: 220px;
+  --u-layout-collapsed-width: 64px;
+  --u-layout-gap-size: 12px;
+  --u-layout-logo-height: 56px;
+  --u-layout-logo-extra-height: 60px;
+  --u-control-size: 38px;
+  --u-radius-circle: 999px;
+  --u-space-1: 4px;
+  --u-space-2: 8px;
+  --u-space-3: 12px;
+  --u-font-size-xs: 12px;
+  --u-menu-group-title-padding: 8px 12px 6px;
+  --u-menu-divider-margin: 8px 12px;
+  --u-tag-item-padding: 6px 12px;
+  --u-tag-item-gap: 4px;
+  --u-tag-item-font-size: 13px;
+  --u-tag-icon-size: 8px;
+  --u-tag-title-max-width: 120px;
+  --u-tag-close-gap: 6px;
+  --u-transition-duration: 0.3s;
+  --u-transition-duration-fast: 0.2s;
+  --u-sider-bg-color: #ffffff;
+  --u-sider-border-color: rgba(5, 5, 5, 0.08);
+  --u-sider-text-color: #1f2329;
+  --u-sider-item-hover-bg: rgba(5, 5, 5, 0.06);
+  --u-sider-item-active-bg: rgba(47, 84, 235, 0.16);
+  --u-header-bg-color: #ffffff;
+  --u-header-border-color: rgba(5, 5, 5, 0.08);
+  --u-header-text-color: #1f2329;
+
+  --font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-base: 14px;
+  --line-height-base: 1.5;
+  --text-color: var(--u-text-primary);
+  --bg-color: var(--u-bg-page);
+}
+
+html[data-theme='dark'] {
+  --u-bg-page: #121217;
+  --u-bg-card: #1a1a22;
+  --u-bg-elevated: #1d1f29;
+  --u-text-primary: #eceff5;
+  --u-text-secondary: #c9cfda;
+  --u-text-muted: #9ba3b4;
+  --u-border-color: rgba(255, 255, 255, 0.1);
+  --u-shadow-card: 0 12px 36px rgba(0, 0, 0, 0.35);
+  --u-shadow-elevated: 0 14px 42px rgba(0, 0, 0, 0.45);
+  --u-sider-bg-color: #1d1f29;
+  --u-sider-border-color: rgba(255, 255, 255, 0.12);
+  --u-sider-text-color: #eceff5;
+  --u-sider-item-hover-bg: rgba(255, 255, 255, 0.08);
+  --u-sider-item-active-bg: rgba(47, 84, 235, 0.28);
+  --u-header-bg-color: #1d1f29;
+  --u-header-border-color: rgba(255, 255, 255, 0.12);
+  --u-header-text-color: #eceff5;
+}

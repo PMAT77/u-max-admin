@@ -1,9 +1,9 @@
 /** * 导航栏组件 * 显示顶部导航栏，包含 Logo 和导航菜单 */
 <template>
-  <div class="u-max-navbar flex items-center" :style="{ height: '56px' }">
+  <div class="u-max-navbar flex items-center" :style="{ height: `${layoutStore.getHeaderHeight}px` }">
     <Logo v-if="layoutStore.getLayoutMode === 'sidebar'" />
 
-    <div class="u-max-navbar__left">
+    <div class="flex items-center">
       <div class="h-full flex items-center gap-1">
         <n-button
           quaternary
@@ -30,13 +30,13 @@
         </n-tooltip>
 
         <!-- 面包屑：中等屏幕及以上显示 -->
-        <div class="hidden lg:block">
+        <div v-if="layoutStore.getShowBreadcrumb" class="hidden lg:block">
           <Breadcrumb />
         </div>
       </div>
     </div>
 
-    <div class="u-max-navbar__center"></div>
+    <div class="flex-grow basis-0 h-full"></div>
 
     <div class="u-max-navbar__right pr-4">
       <n-flex align="center" :size="4">
@@ -223,8 +223,8 @@
                 round
                 class="mr-2"
                 :style="{
-                  color: 'white',
-                  backgroundColor: 'orange',
+                  color: 'var(--u-bg-card)',
+                  backgroundColor: 'var(--u-primary-color)',
                 }"
               >
                 <n-icon :component="RobotFilled" />
@@ -432,34 +432,27 @@ function handleUserMenuSelect(key: string) {
 
 <style scoped lang="scss">
 .u-max-navbar {
-  border-bottom: 1px solid var(--n-border-color);
-  transition: border 0.3s var(--n-bezier);
+  border-bottom: 1px solid var(--u-header-border-color, var(--u-border-color));
+  background-color: var(--u-header-bg-color, var(--u-bg-elevated));
+  color: var(--u-header-text-color, var(--u-text-primary));
+  transition:
+    background-color var(--u-transition-duration) var(--n-bezier),
+    border-color var(--u-transition-duration) var(--n-bezier);
 
   .u-max-navbar__btn,
   .u-max-navbar__btn i {
-    transition: all 0.3s var(--n-bezier);
+    transition: all var(--u-transition-duration) var(--n-bezier);
   }
 
   .u-max-navbar__btn:hover {
-    --n-btn-primary-bg-color: rgba(41, 122, 207, 0.1);
-    --n-btn-primary-color: #297acc;
+    --n-btn-primary-bg-color: color-mix(in srgb, var(--u-primary-color) 12%, transparent);
+    --n-btn-primary-color: var(--u-primary-color);
     background-color: var(--n-btn-primary-bg-color);
     color: var(--n-btn-primary-color);
   }
 
   .u-max-navbar__btn:hover i {
     transform: scale(1.1);
-  }
-
-  .u-max-navbar__left {
-    display: flex;
-    align-items: center;
-  }
-
-  .u-max-navbar__center {
-    flex-grow: 1;
-    flex-basis: 0;
-    height: 100%;
   }
 
   .u-max-navbar__right {

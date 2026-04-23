@@ -9,7 +9,16 @@ export interface LayoutConfig {
   showSidebar: boolean
   showTopbar: boolean
   headerFixed: boolean
-  siderClass: string 
+  showBreadcrumb: boolean
+  showBreadcrumbIcon: boolean
+  showTagView: boolean
+  showTagIcon: boolean
+  menuSplit: boolean
+  showMenuBorder: boolean
+  isGap: boolean
+  headerHeight: number
+  tagHeight: number
+  siderClass: string
   logoClass: string
 }
 

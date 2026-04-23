@@ -3,17 +3,8 @@
  * 显示系统概览、统计数据和最近活动
  */
 <template>
-  <div class="dashboard"> 
+  <div class="min-h-full"> 
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
- 
-</script>
-
-<style scoped>  
-.dashboard {
-  height: 100vh;
-}
-</style>
+<script setup></script>

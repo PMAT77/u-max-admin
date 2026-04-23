@@ -105,5 +105,3 @@ async function handleLogin() {
   }
 }
 </script>
-
-<style lang="scss" scoped></style>

@@ -10,5 +10,3 @@
 <script setup>
 import ThemeProvider from './components/common/ThemeProvider.vue';
 </script>
-
-<style></style>

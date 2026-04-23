@@ -1,9 +1,15 @@
 /** * 默认布局组件 * 包含侧边栏、顶部导航栏和内容区域 */
 <template>
-  <n-layout class="u-max-layout h-screen" has-sider>
+  <n-layout
+    class="u-max-layout h-screen"
+    :class="{ 'u-max-layout--gap': layoutStore.getIsGap }"
+    :has-sider="layoutStore.getSidebarShow"
+  >
     <!-- 侧边栏 -->
     <n-layout-sider
+      v-if="layoutStore.getSidebarShow"
       bordered
+      :inverted="themeStore.isSiderDark"
       position="static"
       collapse-mode="width"
       class="u-max-sider"
@@ -12,12 +18,14 @@
       :width="layoutStore.getSidebarWidth"
       :class="layoutStore.getSidebarClass"
     >
-      <div class="flex flex-col h-full">
-        <Logo v-if="layoutStore.getShowLogo" />
+      <div class="flex min-h-0 flex-col h-full">
+        <Logo v-if="layoutStore.getShowLogo" class="shrink-0" />
 
-        <Menu />
+        <div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <Menu />
+        </div>
 
-        <div class="u-max-sider__footer">
+        <div class="flex shrink-0 items-center justify-end w-full">
           <div class="flex justify-end py-2 w-full">
             <n-button
               quaternary
@@ -38,13 +46,21 @@
     </n-layout-sider>
 
     <n-scrollbar class="u-max-scrollbar" content-style="overflow: hidden;">
-      <n-layout-header bordered class="u-max-header u-max-header--fixed">
-        <Navbar />
-        <TagView />
+      <n-layout-header
+        v-if="showHeader"
+        bordered
+        class="u-max-header"
+        :class="{
+          'u-max-header--fixed': layoutStore.getHeaderFixed,
+          'u-max-header--no-tag': !layoutStore.getShowTagView,
+        }"
+      >
+        <Navbar v-if="layoutStore.getShowTopbar" />
+        <TagView v-if="layoutStore.getShowTagView" />
       </n-layout-header>
 
       <!-- 内容区域 -->
-      <n-layout-content class="u-max-content p-4 h-full" style="padding: 0">
+      <n-layout-content class="u-max-content p-4 h-full" :style="contentStyle">
         <div class="px-2.5 box-border size-full">
           <router-view />
           <PreferenceButton />
@@ -55,8 +71,8 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useLayoutStore } from '@/stores';
+import { computed, onMounted } from 'vue';
+import { useLayoutStore, useThemeStore } from '@/stores';
 import { useMenuStore } from '@/stores';
 import { TextIndentLess, TextIndentMore } from '@vicons/carbon';
 import Logo from './components/Logo/index.vue';
@@ -66,7 +82,20 @@ import Menu from './components/Menu/index.vue';
 import PreferenceButton from '@/components/common/PreferenceButton.vue';
 
 const layoutStore = useLayoutStore();
+const themeStore = useThemeStore();
 const menuStore = useMenuStore();
+const showHeader = computed(() => layoutStore.getShowTopbar || layoutStore.getShowTagView);
+const contentStyle = computed(() => {
+  if (!showHeader.value || !layoutStore.getHeaderFixed) {
+    return { padding: '0' };
+  }
+
+  const topbarHeight = layoutStore.getShowTopbar ? layoutStore.getHeaderHeight : 0;
+  const tagHeight = layoutStore.getShowTagView ? layoutStore.getTagHeight : 0;
+  return {
+    padding: `calc(${topbarHeight}px + ${tagHeight}px) 0 0`,
+  };
+});
 
 onMounted(() => {
   menuStore.initMenu();
@@ -75,13 +104,33 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .u-max-layout {
-  --u-max-radius: 0.5rem;
   --u-max-z-index: 1000;
-  --u-max-header-height: 56px;
+  --u-max-header-height: var(--u-layout-header-height);
+}
+
+.u-max-layout--gap {
+  .u-max-header {
+    margin-left: var(--u-layout-gap-size);
+    margin-right: var(--u-layout-gap-size);
+  }
+
+  .u-max-header--fixed {
+    left: var(--u-layout-gap-size);
+    right: auto;
+    width: calc(100% - (var(--u-layout-gap-size) * 2));
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .u-max-sider {
-  transition: all 0.3s var(--n-bezier);
+  background-color: var(--u-sider-bg-color);
+  color: var(--u-sider-text-color);
+  border-right-color: var(--u-sider-border-color);
+  transition:
+    background-color var(--u-transition-duration) var(--n-bezier),
+    color var(--u-transition-duration) var(--n-bezier),
+    border-color var(--u-transition-duration) var(--n-bezier);
 
   &--vertical {
     height: 100vh;
@@ -96,24 +145,45 @@ onMounted(() => {
   }
 }
 
-.u-max-sider__menu {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.u-max-sider__footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 100%;
-}
-
 .u-max-header {
+  width: auto;
+  color: var(--u-header-text-color);
+  backdrop-filter: saturate(180%) blur(4px);
+  transition:
+    background-color var(--u-transition-duration) var(--n-bezier),
+    border-color var(--u-transition-duration) var(--n-bezier);
+}
+
+.u-max-layout--gap .u-max-header {
+  border-bottom-left-radius: var(--u-radius-base);
+  border-bottom-right-radius: var(--u-radius-base);
+  overflow: hidden;
+}
+
+.u-max-header--no-tag {
+  :deep(.u-max-navbar) {
+    border-bottom-color: transparent;
+  }
+}
+
+.u-max-header--fixed {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--u-max-z-index);
+}
+
+:deep(.u-max-scrollbar) {
+  position: relative;
+}
+
+:deep(.u-max-sider .n-layout-sider-scroll-container),
+:deep(.u-max-sider .n-layout-scroll-container) {
+  background-color: var(--u-sider-bg-color);
+  color: var(--u-sider-text-color);
+  transition:
+    background-color var(--u-transition-duration) var(--n-bezier),
+    color var(--u-transition-duration) var(--n-bezier);
 }
 </style>

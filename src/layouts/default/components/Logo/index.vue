@@ -19,11 +19,10 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useLayoutStore, useThemeStore } from '@/stores';
+import { useLayoutStore } from '@/stores';
 import { RobotFilled } from '@vicons/antd';
 
 const layoutStore = useLayoutStore();
-const themeStore = useThemeStore();
 
 const mode = computed(() => layoutStore.getLayoutMode);
 const isCollapse = computed(() => layoutStore.getIsCollapse);
@@ -32,9 +31,9 @@ const logoClass = computed(() => layoutStore.getLogoClass);
 
 const containerStyle = computed(() => {
   if (mode.value === 'vertical' && !isCollapse.value) {
-    return { height: 'calc(56px + 60px)' };
+    return { height: 'calc(var(--u-layout-logo-height) + var(--u-layout-logo-extra-height))' };
   }
-  return { height: '56px' };
+  return { height: 'var(--u-layout-logo-height)' };
 });
 
 const logoItemClass = computed(() => {
@@ -56,8 +55,8 @@ const logoCircle = computed(() => {
 });
 
 const logoStyle = computed(() => ({
-  color: '#ffffff',
-  backgroundColor: '#297acf',
+  color: 'var(--u-bg-card)',
+  backgroundColor: 'var(--u-primary-color)',
 }));
 
 const showText = computed(() => {
@@ -71,16 +70,17 @@ const showText = computed(() => {
 .u-max__logo {
   display: flex;
   align-items: center;
+  color: var(--u-sider-text-color);
 
   &.u-max-logo--sidebar {
-    width: 220px;
+    width: var(--u-layout-sidebar-width);
   }
 
   .u-max__logo--item {
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--u-transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     padding-inline: 0;
     text-align: center;

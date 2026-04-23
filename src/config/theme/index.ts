@@ -2,7 +2,7 @@
  * 主题配置
  * 管理系统默认主题、预设颜色和边框圆角配置
  */
-import type { ThemeMode, ThemeState, BorderRadiusPreset } from './type'
+import type { ThemeMode, ThemeState, BorderRadiusPreset, ThemeTone } from './type'
 
 export interface PrimaryColorPreset {
   label: string
@@ -15,6 +15,8 @@ export const defaultThemeState: ThemeState = {
   mode: defaultThemeMode,
   primaryColor: '#2f54eb',
   borderRadius: '0.5rem',
+  siderTheme: 'light',
+  headerTheme: 'light',
 }
 
 export const primaryColorPresets: PrimaryColorPreset[] = [
@@ -38,3 +40,46 @@ export const borderRadiusPresets: BorderRadiusPreset[] = [
   { label: '大圆角', value: '0.75rem' },
   { label: '超大圆角', value: '1rem' },
 ]
+
+export interface AreaThemePalette {
+  bg: string
+  border: string
+  text: string
+  itemHoverBg: string
+}
+
+export const areaThemePalettes: Record<ThemeMode, Record<ThemeTone, AreaThemePalette>> = {
+  light: {
+    light: {
+      bg: '#ffffff',
+      border: 'rgba(5, 5, 5, 0.08)',
+      text: '#1f2329',
+      itemHoverBg: 'rgba(5, 5, 5, 0.06)',
+    },
+    dark: {
+      bg: '#1d1f29',
+      border: 'rgba(255, 255, 255, 0.12)',
+      text: '#eceff5',
+      itemHoverBg: 'rgba(255, 255, 255, 0.08)',
+    },
+  },
+  dark: {
+    light: {
+      bg: '#2a2d3a',
+      border: 'rgba(255, 255, 255, 0.14)',
+      text: '#eef2f8',
+      itemHoverBg: 'rgba(255, 255, 255, 0.08)',
+    },
+    dark: {
+      bg: '#1d1f29',
+      border: 'rgba(255, 255, 255, 0.12)',
+      text: '#eceff5',
+      itemHoverBg: 'rgba(255, 255, 255, 0.08)',
+    },
+  },
+}
+
+export const areaThemeActiveAlpha: Record<ThemeTone, number> = {
+  light: 0.16,
+  dark: 0.32,
+}

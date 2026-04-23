@@ -30,7 +30,7 @@
 ### 核心特性
 
 - 🔐 完整的登录认证流程（账号/手机/二维码）
-- 🎨 主题切换（亮色/暗色）+ 自定义主色 + 圆角定制
+- 🎨 主题切换（亮色/暗色）+ 自定义主色 + 圆角定制 + 侧栏/顶栏独立明暗主题
 - 🌐 国际化支持（中/英）
 - 📐 多种布局模式（vertical/sidebar/top）
 - 🏷️ 标签页缓存
@@ -164,7 +164,7 @@ src/
 │
 ├── styles/                       # 全局样式
 │   ├── normal.scss               # 全局样式重置
-│   └── variables.scss            # SCSS 变量
+│   └── tokens.scss               # 设计令牌（CSS Variables）
 │
 ├── types/                        # TypeScript 类型定义
 │   ├── api.ts                    # API 类型
@@ -297,7 +297,7 @@ export const useXxxStore = defineStore('xxx', {
 | 模块     | 文件                         | 职责                      | 持久化 |
 | -------- | ---------------------------- | ------------------------- | ------ |
 | user     | `stores/modules/user.ts`     | accessToken、refreshToken、用户信息、权限方法 | ✅     |
-| theme    | `stores/modules/theme.ts`    | 主题模式、主色、圆角      | ✅     |
+| theme    | `stores/modules/theme.ts`    | 主题模式、主色、圆角、侧栏主题、顶栏主题 | ✅     |
 | layout   | `stores/modules/layout.ts`   | 布局配置、侧边栏状态      | ✅     |
 | menu     | `stores/modules/menu.ts`     | 菜单、面包屑、当前路径    | ✅     |
 | locale   | `stores/modules/locale.ts`   | 语言设置                  | ✅     |
@@ -312,12 +312,16 @@ interface ThemeState {
   mode: 'light' | 'dark';
   primaryColor: string; // 主色，如 '#2f54eb'
   borderRadius: string; // 圆角，如 '0.5rem'
+  siderTheme: 'light' | 'dark'; // 侧栏主题
+  headerTheme: 'light' | 'dark'; // 顶栏主题
 }
 
 // 核心方法
 themeStore.toggleTheme(); // 切换亮/暗模式
 themeStore.setPrimaryColor(); // 设置主色
 themeStore.setBorderRadius(); // 设置圆角
+themeStore.setSiderTheme(); // 设置侧栏主题
+themeStore.setHeaderTheme(); // 设置顶栏主题
 themeStore.resetTheme(); // 重置为默认
 themeStore.isDark; // getter: 是否暗色模式
 ```
@@ -360,6 +364,8 @@ export const defaultThemeState: ThemeState = {
   mode: 'dark',
   primaryColor: '#2f54eb',
   borderRadius: '0.5rem',
+  siderTheme: 'light',
+  headerTheme: 'light',
 }
 
 // 预设主色（11种）
@@ -593,7 +599,18 @@ globalMessage.error('错误信息');
 | -------------------- | -------------- | -------------------------------- |
 | 布局、间距、简单样式 | UnoCSS 原子类  | `class="flex items-center mt-4"` |
 | 复杂样式、主题相关   | SCSS           | `<style scoped lang="scss">`     |
-| 全局变量             | variables.scss | `$primary-color: #667eea`        |
+| 设计令牌             | CSS Variables  | `var(--u-bg-card)`               |
+
+### 设计令牌规范（Theme Tokens）
+
+统一在 `src/styles/tokens.scss` 维护语义化变量：
+
+- 颜色：`--u-bg-page` / `--u-bg-card` / `--u-text-primary` / `--u-border-color`
+- 主题能力：`--u-primary-color`
+- 尺寸能力：`--u-radius-base` / `--u-layout-header-height`
+- 阴影：`--u-shadow-card` / `--u-shadow-elevated`
+
+明暗主题通过 `html[data-theme='light|dark']` 切换，不直接在业务组件写死颜色值。
 
 ### UnoCSS 常用类
 
@@ -855,7 +872,8 @@ components/common/
 
 1. `ThemeProvider.vue` 使用 `configProviderProps` 响应式获取主题状态
 2. `configProviderProps` 是 computed 属性，依赖 `themeStore`
-3. 切换主题时：`themeStore.toggleTheme()` → store 状态更新 → computed 重新计算 → UI 自动更新
+3. 切换主题时：`themeStore` 状态更新（包括 `mode / primaryColor / borderRadius / siderTheme / headerTheme`）
+4. `ThemeProvider.vue` 负责把侧栏/顶栏主题同步为 CSS 变量（`--u-sider-*`、`--u-header-*`），布局组件自动响应
 
 ### 主题持久化
 
@@ -871,9 +889,27 @@ themeStore.setPrimaryColor('#1890ff');
 // 设置圆角
 themeStore.setBorderRadius('0.75rem');
 
+// 设置侧栏/顶栏主题
+themeStore.setSiderTheme('dark');
+themeStore.setHeaderTheme('light');
+
 // 重置为默认
 themeStore.resetTheme();
 ```
+
+### 侧栏背景过渡与结构（`layouts/default/index.vue`）
+
+**背景色过渡**
+
+- 侧栏背景由 CSS 变量 `--u-sider-bg-color` 驱动（`ThemeProvider.vue` 写入）。
+- `n-layout-sider` 实际铺色往往在内部节点（如 `.n-layout-sider-scroll-container`），与外层 `.u-max-sider` 是**不同元素**。
+- **父元素上的 `transition` 不会让子元素上的 `background-color` 随变量变化产生过渡**；必须在每个使用 `--u-sider-bg-color` 绘制背景的节点上声明 `transition: background-color …`（必要时同时过渡 `color` / `border-color`）。
+- 过渡时长与曲线使用 `src/styles/tokens.scss` 中的 `--u-transition-duration` 与 Naive 的 `--n-bezier`。
+
+**收拢按钮与滚动**
+
+- 侧栏内容区采用 **纵向 flex + `min-h-0`**：Logo `shrink-0`、菜单外包一层 **`flex-1 min-h-0 overflow-y-auto`**（仅菜单区域滚动）、收拢按钮容器 **`shrink-0`** 固定在侧栏最底部。
+- 避免整块侧栏随 Naive 滚动容器一起滚动，否则收拢按钮会随菜单滚到可视区上方。
 
 ---
 

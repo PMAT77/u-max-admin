@@ -173,5 +173,3 @@ onMounted(() => {
   refreshCaptcha();
 });
 </script>
-
-<style lang="scss" scoped></style>

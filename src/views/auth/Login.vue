@@ -117,11 +117,7 @@ async function handleLogin(loginData: { type: string; data: any }) {
 
 <style scoped lang="scss">
 .login-bg {
-  background:
-    linear-gradient(135deg, #03020c),
-    radial-gradient(800px circle at 30% 40%, rgba(40, 80, 120, 0.35), transparent 60%),
-    radial-gradient(600px circle at 70% 30%, rgba(50, 100, 150, 0.35), transparent 70%),
-    radial-gradient(700px circle at 50% 90%, rgba(60, 70, 120, 0.35), transparent 60%);
+  background: var(--u-login-overlay);
 }
 
 .login-left-container {
@@ -129,16 +125,13 @@ async function handleLogin(loginData: { type: string; data: any }) {
 }
 
 .login-form-container {
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  border-radius: 16px 0 0 16px;
+  background: var(--u-bg-card);
+  color: var(--u-text-primary);
+  box-shadow: var(--u-shadow-elevated);
+  border-radius: calc(var(--u-radius-base) * 2) 0 0 calc(var(--u-radius-base) * 2);
   padding: 40px;
   height: 100vh;
   overflow-y: auto;
-}
-
-.dark .login-form-container {
-  background: #1a1a2e;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .login-content {

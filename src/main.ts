@@ -9,6 +9,7 @@ import { setupSvgIcon } from './icons'
 
 // 导入全局样式
 import 'uno.css'
+import './styles/tokens.scss'
 import './styles/normal.scss'
 
 // 导入 naive UI 全局 API（必须在 Pinia 注册后导入）

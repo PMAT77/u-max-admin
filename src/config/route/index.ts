@@ -1,9 +1,11 @@
-import { Screen, Locked, Document, ChartPie, Calendar, ToolBox, MessageQueue, Notification, Help, User } from '@vicons/carbon'
+import { Screen, Locked, Document, ToolBox, User } from '@vicons/carbon'
 import { DashboardOutlined } from '@vicons/antd'
 
 export const iconMap: Record<string, Component> = {
   'Dashboard': DashboardOutlined,
-  'Workbench': Screen, 
+  'Workbench': Screen,
+  'Document': Document,
+  'Settings': ToolBox,
   'User': User,
   'Lock': Locked,
- } 
+}

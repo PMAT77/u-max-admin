@@ -106,5 +106,3 @@ function handleLogin(loginData: { type: string; data: any }) {
   emit('login', loginData);
 }
 </script>
-
-<style scoped lang="scss"></style>

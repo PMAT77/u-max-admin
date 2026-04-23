@@ -1,7 +1,5 @@
-<script lang="ts" setup></script>
-
 <template>
-  <div>123</div>
+  <div class="min-h-full rounded-3 p-4" style="background-color: var(--u-bg-card)">123</div>
 </template>
 
-<style lang="scss" scoped></style>
+<script lang="ts" setup></script>

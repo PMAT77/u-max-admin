@@ -24,5 +24,3 @@ import { Restart } from '@vicons/carbon';
  */
 const text = ref('https://pmat77.github.io/PMAT77');
 </script>
-
-<style lang="scss" scoped></style>

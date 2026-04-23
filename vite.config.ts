@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite'
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
-import { presetWind3, presetAttributify, presetIcons } from 'unocss'
 import { viteMockServe } from 'vite-plugin-mock'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import path from 'path'
@@ -15,13 +14,7 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    unocss({
-      presets: [
-        presetWind3(),
-        presetAttributify,
-        presetIcons()
-      ]
-    }),
+    unocss(),
     AutoImport({
       imports: [
         'vue',

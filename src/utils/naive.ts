@@ -44,6 +44,8 @@ function darkenColor(color: string, percent: number): string {
 
 export const configProviderProps = computed(() => {
   const themeStore = useThemeStore(getPinia())
+  const bodyColor = themeStore.isDark ? '#121217' : '#f5f7fa'
+  const cardColor = themeStore.isDark ? '#1a1a22' : '#ffffff'
   return {
     theme: themeStore.isDark ? darkTheme : null,
     themeOverrides: {
@@ -53,6 +55,8 @@ export const configProviderProps = computed(() => {
         primaryColorPressed: darkenColor(themeStore.primaryColor, 10),
         primaryColorSuppl: themeStore.primaryColor,
         borderRadius: themeStore.borderRadius,
+        bodyColor,
+        cardColor,
       },
     },
   }

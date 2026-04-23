@@ -21,7 +21,7 @@
 - 🗂️ **Pinia** - 轻量级状态管理 + 持久化
 - 🎨 **UnoCSS** - 原子化 CSS 引擎
 - 📱 **响应式** - 完美支持移动端
-- 🌙 **主题切换** - 支持亮色/暗色主题 + 自定义主色 + 圆角定制
+- 🌙 **主题切换** - 支持亮色/暗色主题 + 自定义主色 + 圆角定制 + 侧栏/顶栏独立明暗主题
 - 🌐 **国际化** - 多语言支持（中/英）
 - ⚙️ **配置驱动** - 灵活的布局配置系统
 - 🔐 **登录认证** - 多种登录方式（账号/手机/二维码）
@@ -119,7 +119,7 @@ src/
 │       └── user.ts     # 用户状态
 ├── styles/              # 全局样式
 │   ├── normal.scss
-│   └── variables.scss
+│   └── tokens.scss
 ├── types/               # 类型定义
 │   ├── api.ts
 │   └── components.ts
@@ -177,7 +177,7 @@ npm run preview
 | UI 框架集成  | Naive UI 组件库集成                       | ✅   |
 | 状态管理     | Pinia 模块化状态管理 + 持久化             | ✅   |
 | 路由管理     | Vue Router 路由配置 + 守卫                | ✅   |
-| 主题系统     | 亮色/暗色主题切换 + 自定义主色 + 圆角     | ✅   |
+| 主题系统     | 亮色/暗色主题切换 + 自定义主色 + 圆角 + 侧栏/顶栏独立主题 | ✅   |
 | 登录页       | 三种登录方式（账号/手机/二维码）          | ✅   |
 | 布局架构     | 配置驱动布局系统                          | ✅   |
 | 多布局模式   | 支持 vertical/sidebar/top 三种布局        | ✅   |
@@ -235,8 +235,17 @@ interface LayoutConfig {
   showSidebar: boolean
   showTopbar: boolean
   headerFixed: boolean
+  showBreadcrumb: boolean
+  showBreadcrumbIcon: boolean
+  showTagView: boolean
+  showTagIcon: boolean
+  menuSplit: boolean
+  showMenuBorder: boolean
+  isGap: boolean
+  headerHeight: number
+  tagHeight: number
   siderClass: string
-  headerClass: string
+  logoClass: string
 }
 
 // 2. 配置不同布局模式
@@ -253,10 +262,15 @@ layoutStore.setLayoutMode('sidebar')
 ### 布局模式
 
 | 模式 | 说明 |
-|------|------|compact
+|------|------|
 | vertical | 垂直布局，侧边栏全屏高度 |
 | sidebar | 侧边栏布局，侧边栏在头部下方 |
 | top | 顶部导航布局，无侧边栏 |
+
+### 侧栏说明
+
+- **收拢按钮**固定在侧栏最底部；菜单区域单独滚动，避免按钮随长菜单滚走。
+- **侧栏背景过渡**：主题变量在内部滚动容器上生效时，需在该节点声明 `background-color` 的 `transition`（详见 `docs/PROJECT_ARCHITECTURE.md`「主题系统」小节）。
 
 ### 扩展新布局
 
@@ -283,10 +297,10 @@ layoutStore.setLayoutMode('mixin');
 采用 Pinia 模块化架构，状态清晰分离：
 
 | Store | 说明 |
-|-------|------|compact
-| layout | 布局配置、侧边栏状态 |
+|-------|------|
+| layout | 布局配置（含菜单分割/分割线、间隙布局、顶栏/页签高度、面包屑/页签显隐）与侧边栏状态 |
 | menu | 菜单数据、面包屑、激活状态 |
-| theme | 主题配置（模式、主色、圆角） |
+| theme | 主题配置（模式、主色、圆角、侧栏主题、顶栏主题） |
 | user | 用户信息、登录状态、Token |
 | locale | 语言设置 |
 | tagView | 标签页缓存 |
@@ -306,7 +320,7 @@ themeStore.toggleTheme();
 ## 环境变量
 
 | 变量名 | 说明 | 默认值 |
-|--------|------|--------|compact
+|--------|------|--------|
 | VITE_API_BASE_URL | API 基础路径 | /api |
 | VITE_MOCK_ENABLE | 是否启用 Mock | true |
 

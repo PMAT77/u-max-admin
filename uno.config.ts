@@ -1,9 +1,13 @@
 import { defineConfig } from 'unocss'
+import { presetAttributify, presetIcons, presetWind3 } from 'unocss'
 
 export default defineConfig({
+  presets: [presetWind3(), presetAttributify(), presetIcons()],
   safelist: [
     'order-1',
     'order-2',
-    // 添加所有可能的动态类名
+    'lg:block',
+    'md:flex',
+    'hidden',
   ],
 })

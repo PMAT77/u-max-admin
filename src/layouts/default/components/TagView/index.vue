@@ -1,5 +1,5 @@
 <template>
-  <div class="u-max-tagview" :style="cssVars">
+  <div class="u-max-tagview" :style="{ ...cssVars, height: `${layoutStore.getTagHeight}px` }">
     <n-scrollbar x-scrollable>
       <draggable
         v-model="tagList"
@@ -23,7 +23,7 @@
             @contextmenu.prevent="handleContextMenu($event, tag)"
           >
             <component
-              v-if="tag.icon && iconMap[tag.icon]"
+              v-if="layoutStore.getShowTagIcon && tag.icon && iconMap[tag.icon]"
               class="u-max-tagview__item-icon"
               :is="renderIcon(iconMap[tag.icon], { size: 16 })"
             />
@@ -65,18 +65,21 @@ import {
 import { renderIcon } from '@/utils/renderer';
 import { iconMap } from '@/config/route';
 import { useTagViewStore, type TagView } from '@/stores/modules/tagView';
-import { useThemeStore } from '@/stores';
+import { useLayoutStore, useThemeStore } from '@/stores';
 import draggable from 'vuedraggable';
 
 const router = useRouter();
 const route = useRoute();
 const tagViewStore = useTagViewStore();
 const themeStore = useThemeStore();
+const layoutStore = useLayoutStore();
 
 const cssVars = computed(() => ({
   '--tag-active-bg-color': `${themeStore.primaryColor}1a`,
   '--tag-active-shadow-color': `${themeStore.primaryColor}1a`,
   '--tag-border-radius': themeStore.borderRadius,
+  '--tag-item-hover-color': 'color-mix(in srgb, var(--u-primary-color) 12%, transparent)',
+  '--tag-item-close-hover-color': 'color-mix(in srgb, var(--u-text-primary) 12%, transparent)',
 }));
 
 const tagList = computed({
@@ -263,10 +266,13 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .u-max-tagview {
-  height: 47px;
   user-select: none;
-
-  --tag-item-hover-color: rgba(255, 255, 255, 0.06);
+  background-color: var(--u-header-bg-color, var(--u-bg-elevated));
+  color: var(--u-header-text-color, var(--u-text-primary));
+  border-bottom: 1px solid var(--u-header-border-color, var(--u-border-color));
+  transition:
+    background-color 0.3s var(--n-bezier),
+    border-color 0.3s var(--n-bezier);
 
   :deep(.n-scrollbar-content) {
     height: 100%;
@@ -277,22 +283,22 @@ onMounted(() => {
   display: flex;
   align-items: center;
   height: 100%;
-  padding: 0 8px;
-  gap: 4px;
+  padding: 0 var(--u-space-2);
+  gap: var(--u-tag-item-gap);
 }
 
 .u-max-tagview__item {
   display: flex;
   align-items: center;
-  padding: 6px 12px;
-  font-size: 13px;
+  padding: var(--u-tag-item-padding);
+  font-size: var(--u-tag-item-font-size);
   color: var(--n-text-color-2);
   background-color: var(--n-color-hover);
   border-radius: var(--tag-border-radius);
   cursor: pointer;
   transition:
-    background-color 0.3s var(--n-bezier),
-    box-shadow 0.3s var(--n-bezier);
+    background-color var(--u-transition-duration) var(--n-bezier),
+    box-shadow var(--u-transition-duration) var(--n-bezier);
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
@@ -310,8 +316,8 @@ onMounted(() => {
       content: '';
       position: absolute;
       left: 8px;
-      width: 8px;
-      height: 8px;
+      width: var(--u-tag-icon-size);
+      height: var(--u-tag-icon-size);
       border-radius: 50%;
       background-color: var(--n-primary-color);
     }
@@ -337,30 +343,27 @@ onMounted(() => {
 .u-max-tagview__drag {
   opacity: 1;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--u-shadow-card);
 }
 
 .u-max-tagview__item-icon {
-  margin-right: 5px;
+  margin-right: var(--u-space-1);
 }
 
 .u-max-tagview__item-title {
-  max-width: 120px;
+  max-width: var(--u-tag-title-max-width);
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .u-max-tagview__item-close {
   cursor: pointer;
-  margin-left: 6px;
+  margin-left: var(--u-tag-close-gap);
   border-radius: 50%;
-  transition: all 0.2s ease;
+  transition: all var(--u-transition-duration-fast) ease;
 }
 
-// 暗色主题
-:global(.dark) {
-  .u-max-tagview__item-close:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
+.u-max-tagview__item-close:hover {
+  background-color: var(--tag-item-close-hover-color);
 }
 </style>
