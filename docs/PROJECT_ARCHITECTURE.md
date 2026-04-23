@@ -43,40 +43,40 @@
 
 ### 核心框架
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Vue | 3.5.x | 核心框架，使用 Composition API |
-| TypeScript | 5.9.x | 类型安全 |
-| Vite | 7.x | 构建工具 |
+| 技术       | 版本  | 说明                           |
+| ---------- | ----- | ------------------------------ |
+| Vue        | 3.5.x | 核心框架，使用 Composition API |
+| TypeScript | 5.9.x | 类型安全                       |
+| Vite       | 7.x   | 构建工具                       |
 
 ### UI 与样式
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Naive UI | 2.44.x | Vue 3 组件库 |
-| UnoCSS | 66.x | 原子化 CSS 引擎 |
-| Sass | 1.98.x | CSS 预处理器 |
-| @vicons/* | 0.13.x | 图标库（carbon/antd/fluent/ionicons5） |
+| 技术       | 版本   | 说明                                   |
+| ---------- | ------ | -------------------------------------- |
+| Naive UI   | 2.44.x | Vue 3 组件库                           |
+| UnoCSS     | 66.x   | 原子化 CSS 引擎                        |
+| Sass       | 1.98.x | CSS 预处理器                           |
+| @vicons/\* | 0.13.x | 图标库（carbon/antd/fluent/ionicons5） |
 
 ### 状态与路由
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Pinia | 3.x | 状态管理 |
-| pinia-plugin-persistedstate | 4.x | 状态持久化 |
-| Vue Router | 4.x | 路由管理 |
+| 技术                        | 版本 | 说明       |
+| --------------------------- | ---- | ---------- |
+| Pinia                       | 3.x  | 状态管理   |
+| pinia-plugin-persistedstate | 4.x  | 状态持久化 |
+| Vue Router                  | 4.x  | 路由管理   |
 
 ### 工具链
 
-| 技术 | 说明 |
-|------|------|
-| unplugin-auto-import | 自动导入 Vue API |
-| unplugin-vue-components | 组件自动注册 |
-| vite-plugin-mock | Mock 数据 |
-| vite-plugin-svg-icons | SVG 图标注册 |
-| vue-i18n | 国际化 |
-| axios | HTTP 请求 |
-| @vueuse/core | Vue 工具集 |
+| 技术                    | 说明             |
+| ----------------------- | ---------------- |
+| unplugin-auto-import    | 自动导入 Vue API |
+| unplugin-vue-components | 组件自动注册     |
+| vite-plugin-mock        | Mock 数据        |
+| vite-plugin-svg-icons   | SVG 图标注册     |
+| vue-i18n                | 国际化           |
+| axios                   | HTTP 请求        |
+| @vueuse/core            | Vue 工具集       |
 
 ---
 
@@ -173,9 +173,10 @@ src/
 ├── utils/                        # 工具函数
 │   ├── naive.ts                  # Naive UI 全局 API（依赖 providerStore）
 │   ├── provider.ts               # Naive UI API 实例存储（Pinia Store）
+│   ├── permission.ts             # 权限判断工具 + v-permission 指令
 │   ├── renderer.ts               # 渲染工具
 │   ├── errorHandler.ts           # 错误处理
-│   ├── tokenStorage.ts           # Token 存储
+│   ├── tokenStorage.ts           # access/refresh token 存储
 │   ├── captcha.ts                # 验证码生成
 │   └── menu.ts                   # 菜单工具
 │
@@ -215,31 +216,33 @@ main.ts 初始化流程（顺序不可更改）：
 7. app.mount('#app')
 ```
 
-### 关键说明：Naive UI 全局 API 延迟初始化
+### 关键说明：Naive UI 全局 API 通过 Pinia Store 初始化
 
-`@/utils/naive.ts` 中的 `createDiscreteApi` 使用延迟初始化模式：
-- `globalLoadingBar`、`globalMessage`、`globalNotification`、`globalDialog` 在首次调用时才创建
-- 这确保了在 Naive UI 的 Provider 组件挂载前调用不会报错
+Naive UI 的 `useLoadingBar()` 等 hooks 需要在 Provider 组件内部调用。本项目通过 Pinia Store 保存实例：
+
+1. **`NaiveProvider.vue`** - 在 `n-loading-bar-provider` 等内部调用 hooks，将实例存入 `providerStore`
+2. **`stores/modules/provider.ts`** - 保存 loadingBar、message、notification、dialog 实例
+3. **`utils/naive.ts`** - 提供 `globalLoadingBar` 等全局 API，内部通过 store 获取实例
 
 ```typescript
 // 安全调用示例（可在路由守卫中使用）
-import { globalMessage, globalLoadingBar } from '@/utils/naive'
+import { globalMessage, globalLoadingBar } from '@/utils/naive';
 
 router.beforeEach(() => {
-  globalLoadingBar.start()  // 安全：未就绪时为空操作
-})
+  globalLoadingBar.start(); // 安全：未就绪时为空操作
+});
 ```
 
 ### 文件命名规范
 
-| 类型 | 规范 | 示例 |
-|------|------|------|
-| 组件文件 | PascalCase | `LoginPanel.vue` |
-| 工具文件 | camelCase | `errorHandler.ts` |
-| 类型文件 | camelCase | `components.ts` |
-| Store 模块 | camelCase | `user.ts` |
-| 路由模块 | camelCase | `dashboard.ts` |
-| 样式文件 | camelCase | `normal.scss` |
+| 类型       | 规范       | 示例              |
+| ---------- | ---------- | ----------------- |
+| 组件文件   | PascalCase | `LoginPanel.vue`  |
+| 工具文件   | camelCase  | `errorHandler.ts` |
+| 类型文件   | camelCase  | `components.ts`   |
+| Store 模块 | camelCase  | `user.ts`         |
+| 路由模块   | camelCase  | `dashboard.ts`    |
+| 样式文件   | camelCase  | `normal.scss`     |
 
 ### 导入路径别名
 
@@ -264,7 +267,7 @@ import LoginPanel from '@/components/auth/LoginPanel.vue'
 
 ```typescript
 // stores/modules/xxx.ts
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
 export const useXxxStore = defineStore('xxx', {
   state: () => ({
@@ -273,72 +276,77 @@ export const useXxxStore = defineStore('xxx', {
 
   getters: {
     // 获取器（命名以 get 开头）
-    getXxx(): Type { return this.xxx }
+    getXxx(): Type {
+      return this.xxx;
+    },
   },
 
   actions: {
     // 操作方法
-    setXxx(value: Type): void { this.xxx = value }
+    setXxx(value: Type): void {
+      this.xxx = value;
+    },
   },
 
-  persist: true  // 是否持久化（可用 true 或配置对象）
-})
+  persist: true, // 是否持久化（可用 true 或配置对象）
+});
 ```
 
 ### 现有 Store 模块
 
-| 模块 | 文件 | 职责 | 持久化 |
-|------|------|------|--------|
-| user | `stores/modules/user.ts` | Token、用户信息、登录状态 | ✅ |
-| theme | `stores/modules/theme.ts` | 主题模式、主色、圆角 | ✅ |
-| layout | `stores/modules/layout.ts` | 布局配置、侧边栏状态 | ✅ |
-| menu | `stores/modules/menu.ts` | 菜单、面包屑、当前路径 | ✅ |
-| locale | `stores/modules/locale.ts` | 语言设置 | ✅ |
-| tagView | `stores/modules/tagView.ts` | 标签页缓存 | ✅ |
+| 模块     | 文件                         | 职责                      | 持久化 |
+| -------- | ---------------------------- | ------------------------- | ------ |
+| user     | `stores/modules/user.ts`     | accessToken、refreshToken、用户信息、权限方法 | ✅     |
+| theme    | `stores/modules/theme.ts`    | 主题模式、主色、圆角      | ✅     |
+| layout   | `stores/modules/layout.ts`   | 布局配置、侧边栏状态      | ✅     |
+| menu     | `stores/modules/menu.ts`     | 菜单、面包屑、当前路径    | ✅     |
+| locale   | `stores/modules/locale.ts`   | 语言设置                  | ✅     |
+| tagView  | `stores/modules/tagView.ts`  | 标签页缓存                | ✅     |
+| provider | `stores/modules/provider.ts` | Naive UI API 实例存储     | ❌     |
 
 ### 主题状态（theme store）
 
 ```typescript
 // 状态结构
 interface ThemeState {
-  mode: 'light' | 'dark'
-  primaryColor: string    // 主色，如 '#2f54eb'
-  borderRadius: string    // 圆角，如 '0.5rem'
+  mode: 'light' | 'dark';
+  primaryColor: string; // 主色，如 '#2f54eb'
+  borderRadius: string; // 圆角，如 '0.5rem'
 }
 
 // 核心方法
-themeStore.toggleTheme()       // 切换亮/暗模式
-themeStore.setPrimaryColor()   // 设置主色
-themeStore.setBorderRadius()   // 设置圆角
-themeStore.resetTheme()        // 重置为默认
-themeStore.isDark              // getter: 是否暗色模式
+themeStore.toggleTheme(); // 切换亮/暗模式
+themeStore.setPrimaryColor(); // 设置主色
+themeStore.setBorderRadius(); // 设置圆角
+themeStore.resetTheme(); // 重置为默认
+themeStore.isDark; // getter: 是否暗色模式
 ```
 
 ### 在组件中使用
 
 ```typescript
-import { useUserStore, useThemeStore } from '@/stores'
+import { useUserStore, useThemeStore } from '@/stores';
 
-const userStore = useUserStore()
-const themeStore = useThemeStore()
+const userStore = useUserStore();
+const themeStore = useThemeStore();
 
 // 读取状态
-const isLoggedIn = userStore.isLoggedIn
-const isDark = themeStore.isDark
+const isLoggedIn = userStore.isLoggedIn;
+const isDark = themeStore.isDark;
 
 // 调用方法
-userStore.setToken('xxx')
-themeStore.toggleTheme()
+userStore.setToken('xxx');
+themeStore.toggleTheme();
 ```
 
 ### 在组件外部使用（如路由守卫）
 
 ```typescript
-import { useUserStore } from '@/stores/modules/user'
-import { getPinia } from '@/stores/setup'
+import { useUserStore } from '@/stores/modules/user';
+import { getPinia } from '@/stores/setup';
 
-const userStore = useUserStore(getPinia())
-console.log(userStore.isLoggedIn)
+const userStore = useUserStore(getPinia());
+console.log(userStore.isLoggedIn);
 ```
 
 ### 主题配置
@@ -369,7 +377,7 @@ export const borderRadiusPresets: BorderRadiusPreset[] = [...]
 
 ```typescript
 // router/models/xxx.ts
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -377,25 +385,25 @@ const routes: RouteRecordRaw[] = [
     name: 'ModuleName',
     component: () => import('@/layouts/default/index.vue'),
     meta: {
-      title: '模块名称',      // 必填：菜单标题
-      icon: 'IconName',       // 可选：菜单图标（需在 iconMap 中注册）
-      hideTag: false,         // 可选：是否隐藏标签
-      show: true,             // 可选：是否显示在菜单
-      affix: false,           // 可选：是否固定标签
-      noCache: false,         // 可选：是否缓存
+      title: '模块名称', // 必填：菜单标题
+      icon: 'IconName', // 可选：菜单图标（需在 iconMap 中注册）
+      hideTag: false, // 可选：是否隐藏标签
+      show: true, // 可选：是否显示在菜单
+      affix: false, // 可选：是否固定标签
+      noCache: false, // 可选：是否缓存
     },
     children: [
       {
         path: 'page',
         name: 'PageName',
         component: () => import('@/views/module/Page.vue'),
-        meta: { title: '页面名称' }
-      }
-    ]
-  }
-]
+        meta: { title: '页面名称' },
+      },
+    ],
+  },
+];
 
-export default routes
+export default routes;
 ```
 
 ### 图标映射
@@ -404,14 +412,14 @@ export default routes
 
 ```typescript
 // config/route/index.ts
-import { Screen, Settings, Document } from '@vicons/carbon'
-import { DashboardOutlined } from '@vicons/antd'
+import { Screen, Settings, Document } from '@vicons/carbon';
+import { DashboardOutlined } from '@vicons/antd';
 
 export const iconMap: Record<string, Component> = {
-  'Dashboard': DashboardOutlined,
-  'Workbench': Screen,
-  'User': User,
-}
+  Dashboard: DashboardOutlined,
+  Workbench: Screen,
+  User: User,
+};
 ```
 
 ### 添加新路由模块
@@ -421,7 +429,7 @@ export const iconMap: Record<string, Component> = {
 
 ```typescript
 // router/routes.ts
-import NewModuleRoutes from './models/newModule'
+import NewModuleRoutes from './models/newModule';
 
 const routes: RouteRecordRaw[] = [
   ...redirectRoutes,
@@ -429,8 +437,8 @@ const routes: RouteRecordRaw[] = [
   ...DashboardRoutes,
   ...CommonRoutes,
   ...UserRoutes,
-  ...NewModuleRoutes,  // 添加新模块
-]
+  ...NewModuleRoutes, // 添加新模块
+];
 ```
 
 ### 路由守卫逻辑
@@ -438,32 +446,48 @@ const routes: RouteRecordRaw[] = [
 ```
 beforeEach
     │
-    ├── globalLoadingBar.start()
+    ├── providerStore.loadingBar.start()
     │
     ├── 检查登录状态
     │   ├── 已登录 + 访问登录页 → 重定向到工作台
-    │   ├── 已登录 + 其他页面 → 放行
+    │   ├── 已登录 + 其他页面
+    │   │   ├── 校验 to.meta.roles（支持 super_admin / *）
+    │   │   └── 无权限 → 提示并重定向到工作台
     │   └── 未登录
     │       ├── 白名单页面 → 放行
     │       └── 需认证页面 → 重定向登录页
     │
     ↓
-afterEach → globalLoadingBar.finish()
+afterEach → providerStore.loadingBar.finish()
 ```
 
 ### 白名单配置
 
 ```typescript
 // router/index.ts
-const whiteList = ['/auth/login', '/auth/register', '/auth/forgot-password']
+const whiteList = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 ```
+
+### 操作级权限控制（permissions）
+
+项目提供两层 permissions 能力：
+
+1. **模板层**：全局 `v-permission` 指令（`utils/permission.ts`）
+2. **脚本层**：`userStore.hasPermission()` / `userStore.hasAnyPermission()`
+
+```vue
+<n-button v-permission="'user:password:update'">修改密码</n-button>
+<n-button v-permission="['user:create', 'user:update']">保存</n-button>
+```
+
+约定：后端返回 `permissions: ['*']` 时视为超级权限，前端直接放行。
 
 ### 布局选择
 
-| 布局 | 使用场景 | 路径 |
-|------|----------|------|
+| 布局    | 使用场景               | 路径                          |
+| ------- | ---------------------- | ----------------------------- |
 | default | 需要侧边栏和导航的页面 | `@/layouts/default/index.vue` |
-| blank | 登录页等纯净页面 | `@/layouts/blank/index.vue` |
+| blank   | 登录页等纯净页面       | `@/layouts/blank/index.vue`   |
 
 ---
 
@@ -475,26 +499,28 @@ const whiteList = ['/auth/login', '/auth/register', '/auth/forgot-password']
 // api/index.ts
 const service = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000
-})
+  timeout: 10000,
+});
 ```
 
 ### 请求拦截器
 
 ```typescript
 service.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token')
+  const token = userStore.getToken || getAccessToken();
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  return config
-})
+  return config;
+});
 ```
 
 ### 响应拦截器
 
-统一处理以下错误：
-- 401: 登录过期 → 清除 Token → 跳转登录页
+统一处理以下错误与续期逻辑：
+
+- 401: 触发 refresh token 流程，刷新成功后重放原请求
+- refresh 失败: 清理登录态并跳转登录页
 - 403: 权限不足
 - 404: 资源不存在
 - 500: 服务器错误
@@ -504,47 +530,57 @@ service.interceptors.request.use((config) => {
 
 ```typescript
 // api/xxx.ts
-import service from './index'
+import service from './index';
 
 export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data?: T
+  code: number;
+  message: string;
+  data?: T;
 }
 
 export const xxxApi = {
   getList: (): Promise<ApiResponse<ListData[]>> => {
-    return service.get('/xxx/list')
+    return service.get('/xxx/list');
   },
 
   getItem: (id: string): Promise<ApiResponse<ItemData>> => {
-    return service.get(`/xxx/${id}`)
+    return service.get(`/xxx/${id}`);
   },
 
   create: (data: CreateParams): Promise<ApiResponse> => {
-    return service.post('/xxx', data)
+    return service.post('/xxx', data);
   },
 
   update: (id: string, data: UpdateParams): Promise<ApiResponse> => {
-    return service.put(`/xxx/${id}`, data)
+    return service.put(`/xxx/${id}`, data);
   },
 
   delete: (id: string): Promise<ApiResponse> => {
-    return service.delete(`/xxx/${id}`)
-  }
-}
+    return service.delete(`/xxx/${id}`);
+  },
+};
 ```
+
+### 登录与权限热更新流程
+
+当前登录流程以服务端权限为准，避免仅依赖登录接口返回：
+
+1. 调用 `/login` 获取 `accessToken` 与 `refreshToken`
+2. 写入 `userStore` 与 token 存储（access: sessionStorage，refresh: localStorage）
+3. 立即调用 `/user/info` 拉取最新角色与权限
+4. 使用 `/user/info` 返回值覆盖 `userStore.userInfo`
+5. 若 `/user/info` 失败，立即登出并回到登录页
 
 ### 全局消息提示
 
 ```typescript
-import { globalMessage } from '@/utils/naive'
+import { globalMessage } from '@/utils/naive';
 
 // 使用示例
-globalMessage.info('消息内容')
-globalMessage.success('操作成功')
-globalMessage.warning('警告信息')
-globalMessage.error('错误信息')
+globalMessage.info('消息内容');
+globalMessage.success('操作成功');
+globalMessage.warning('警告信息');
+globalMessage.error('错误信息');
 ```
 
 ---
@@ -553,30 +589,34 @@ globalMessage.error('错误信息')
 
 ### 样式方案选择
 
-| 场景 | 推荐方案 | 示例 |
-|------|----------|------|
-| 布局、间距、简单样式 | UnoCSS 原子类 | `class="flex items-center mt-4"` |
-| 复杂样式、主题相关 | SCSS | `<style scoped lang="scss">` |
-| 全局变量 | variables.scss | `$primary-color: #667eea` |
+| 场景                 | 推荐方案       | 示例                             |
+| -------------------- | -------------- | -------------------------------- |
+| 布局、间距、简单样式 | UnoCSS 原子类  | `class="flex items-center mt-4"` |
+| 复杂样式、主题相关   | SCSS           | `<style scoped lang="scss">`     |
+| 全局变量             | variables.scss | `$primary-color: #667eea`        |
 
 ### UnoCSS 常用类
 
 ```html
 <!-- 布局 -->
 <div class="flex items-center justify-center">
-<div class="flex flex-col h-full">
-
-<!-- 间距 -->
-<div class="mt-4 mb-2 px-4 py-2">
-<div class="m-6 p-4">
-
-<!-- 尺寸 -->
-<div class="w-full h-screen">
-<div class="w-65 max-w-md">
-
-<!-- 显示 -->
-<div class="hidden lg:block">
-<div class="overflow-y-auto">
+  <div class="flex flex-col h-full">
+    <!-- 间距 -->
+    <div class="mt-4 mb-2 px-4 py-2">
+      <div class="m-6 p-4">
+        <!-- 尺寸 -->
+        <div class="w-full h-screen">
+          <div class="w-65 max-w-md">
+            <!-- 显示 -->
+            <div class="hidden lg:block">
+              <div class="overflow-y-auto"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 ```
 
 ### SCSS 作用域样式
@@ -603,31 +643,42 @@ globalMessage.error('错误信息')
 
 ### 组件分类
 
-| 目录 | 用途 | 特点 |
-|------|------|------|
-| `components/auth/` | 认证业务组件 | 与登录流程相关 |
-| `components/common/` | 通用组件 | 可复用、无业务逻辑 |
-| `views/` | 页面组件 | 路由级别 |
-| `layouts/` | 布局组件 | 页面框架 |
+| 目录                 | 用途         | 特点               |
+| -------------------- | ------------ | ------------------ |
+| `components/auth/`   | 认证业务组件 | 与登录流程相关     |
+| `components/common/` | 通用组件     | 可复用、无业务逻辑 |
+| `views/`             | 页面组件     | 路由级别           |
+| `layouts/`           | 布局组件     | 页面框架           |
 
 ### 主题提供者组件
 
-`ThemeProvider.vue` 是全局主题配置的关键组件：
+`ThemeProvider.vue` 是全局主题配置的关键组件，配合 `NaiveProvider.vue` 提供 Naive UI 全局 API：
 
 ```vue
+<!-- ThemeProvider.vue -->
 <n-config-provider
   :theme="configProviderProps.theme"
   :theme-overrides="configProviderProps.themeOverrides"
 >
   <n-global-style />
-  <n-loading-bar-provider>
-    <n-notification-provider>
-      <n-message-provider>
-        <slot />  <!-- 子组件 -->
-      </n-message-provider>
-    </n-notification-provider>
-  </n-loading-bar-provider>
+  <NaiveProvider>
+    <slot />
+  </NaiveProvider>
 </n-config-provider>
+```
+
+```vue
+<!-- NaiveProvider.vue -->
+<n-loading-bar-provider>
+  <n-notification-provider>
+    <n-message-provider>
+      <n-dialog-provider>
+        <NaiveProvider /> <!-- 保存 API 实例到 store -->
+        <slot />
+      </n-dialog-provider>
+    </n-message-provider>
+  </n-notification-provider>
+</n-loading-bar-provider>
 ```
 
 ### 组件模板
@@ -641,34 +692,34 @@ globalMessage.error('错误信息')
 
 <script setup lang="ts">
 // 1. 导入
-import { ref, computed } from 'vue'
-import type { PropType } from 'vue'
+import { ref, computed } from 'vue';
+import type { PropType } from 'vue';
 
 // 2. Props 定义
 interface Props {
-  title: string
-  count?: number
+  title: string;
+  count?: number;
 }
 const props = withDefaults(defineProps<Props>(), {
-  count: 0
-})
+  count: 0,
+});
 
 // 3. Emits 定义
 interface Emits {
-  (e: 'update', value: string): void
-  (e: 'close'): void
+  (e: 'update', value: string): void;
+  (e: 'close'): void;
 }
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
 // 4. 响应式状态
-const loading = ref(false)
+const loading = ref(false);
 
 // 5. 计算属性
-const displayTitle = computed(() => props.title.toUpperCase())
+const displayTitle = computed(() => props.title.toUpperCase());
 
 // 6. 方法
 function handleClick() {
-  emit('update', 'value')
+  emit('update', 'value');
 }
 </script>
 
@@ -700,16 +751,16 @@ export default {
     password: '密码',
   },
   // ...
-}
+};
 ```
 
 ### 使用国际化
 
 ```vue
 <script setup>
-import { useI18n } from 'vue-i18n'
+import { useI18n } from 'vue-i18n';
 
-const { t } = useI18n()
+const { t } = useI18n();
 </script>
 
 <template>
@@ -720,9 +771,9 @@ const { t } = useI18n()
 ### 切换语言
 
 ```typescript
-import { setI18nLocale } from '@/i18n'
+import { setI18nLocale } from '@/i18n';
 
-setI18nLocale('en-US')
+setI18nLocale('en-US');
 ```
 
 ---
@@ -733,7 +784,7 @@ setI18nLocale('en-US')
 
 ```typescript
 // mock/xxx.ts
-import type { MockMethod } from 'vite-plugin-mock'
+import type { MockMethod } from 'vite-plugin-mock';
 
 export default [
   {
@@ -746,9 +797,9 @@ export default [
         data: [
           { id: 1, name: 'Item 1' },
           { id: 2, name: 'Item 2' },
-        ]
-      }
-    }
+        ],
+      };
+    },
   },
   {
     url: '/api/xxx/create',
@@ -757,11 +808,11 @@ export default [
       return {
         code: 200,
         message: '创建成功',
-        data: { id: Date.now(), ...body }
-      }
-    }
-  }
-] as MockMethod[]
+        data: { id: Date.now(), ...body },
+      };
+    },
+  },
+] as MockMethod[];
 ```
 
 ### Mock 配置
@@ -770,10 +821,10 @@ export default [
 // vite.config.ts
 viteMockServe({
   mockPath: 'src/mock',
-  localEnabled: true,    // 开发环境启用
-  prodEnabled: true,    // 生产环境启用（可根据需要调整）
-  watchFiles: true
-})
+  localEnabled: true, // 开发环境启用
+  prodEnabled: true, // 生产环境启用（可根据需要调整）
+  watchFiles: true,
+});
 ```
 
 ### 注意事项
@@ -815,13 +866,13 @@ components/common/
 
 ```typescript
 // 设置主色
-themeStore.setPrimaryColor('#1890ff')
+themeStore.setPrimaryColor('#1890ff');
 
 // 设置圆角
-themeStore.setBorderRadius('0.75rem')
+themeStore.setBorderRadius('0.75rem');
 
 // 重置为默认
-themeStore.resetTheme()
+themeStore.resetTheme();
 ```
 
 ---
@@ -831,6 +882,7 @@ themeStore.resetTheme()
 ### 场景一：添加新页面
 
 1. **创建页面组件**
+
    ```typescript
    // src/views/module/Page.vue
    <template>
@@ -845,6 +897,7 @@ themeStore.resetTheme()
    ```
 
 2. **添加路由配置**
+
    ```typescript
    // src/router/models/module.ts
    const routes: RouteRecordRaw[] = [
@@ -858,36 +911,38 @@ themeStore.resetTheme()
            path: 'page',
            name: 'Page',
            component: () => import('@/views/module/Page.vue'),
-           meta: { title: '页面' }
-         }
-       ]
-     }
-   ]
+           meta: { title: '页面' },
+         },
+       ],
+     },
+   ];
    ```
 
 3. **注册路由模块**
+
    ```typescript
    // src/router/routes.ts
-   import ModuleRoutes from './models/module'
+   import ModuleRoutes from './models/module';
 
    const routes = [
      // ...
-     ...ModuleRoutes
-   ]
+     ...ModuleRoutes,
+   ];
    ```
 
 ### 场景二：添加新 API
 
 1. **定义 API 模块**
+
    ```typescript
    // src/api/module.ts
-   import service from './index'
+   import service from './index';
 
    export const moduleApi = {
      getList: () => service.get('/module/list'),
      getItem: (id: string) => service.get(`/module/${id}`),
      create: (data: any) => service.post('/module', data),
-   }
+   };
    ```
 
 2. **添加 Mock 数据**（可选）
@@ -897,54 +952,61 @@ themeStore.resetTheme()
      {
        url: '/api/module/list',
        method: 'get',
-       response: () => ({ code: 200, data: [] })
-     }
-   ] as MockMethod[]
+       response: () => ({ code: 200, data: [] }),
+     },
+   ] as MockMethod[];
    ```
 
 ### 场景三：添加新的全局状态
 
 1. **创建 Store 模块**
+
    ```typescript
    // src/stores/modules/newStore.ts
-   import { defineStore } from 'pinia'
+   import { defineStore } from 'pinia';
 
    export const useNewStore = defineStore('new', {
      state: () => ({
-       data: null
+       data: null,
      }),
      getters: {
-       getData() { return this.data }
+       getData() {
+         return this.data;
+       },
      },
      actions: {
-       setData(data: any) { this.data = data }
+       setData(data: any) {
+         this.data = data;
+       },
      },
-     persist: true
-   })
+     persist: true,
+   });
    ```
 
 2. **导出 Store**
    ```typescript
    // src/stores/index.ts
-   export { useNewStore } from './modules/newStore'
+   export { useNewStore } from './modules/newStore';
    ```
 
 ### 场景四：添加新的菜单图标
 
 1. **安装图标包**
+
    ```bash
    npm install @vicons/xxx
    ```
 
 2. **在 iconMap 中注册**
+
    ```typescript
    // src/config/route/index.ts
-   import { NewIcon } from '@vicons/xxx'
+   import { NewIcon } from '@vicons/xxx';
 
    export const iconMap: Record<string, Component> = {
      // ...existing icons
-     'NewIcon': NewIcon,
-   }
+     NewIcon: NewIcon,
+   };
    ```
 
 3. **在路由 meta 中使用**
@@ -958,27 +1020,26 @@ themeStore.resetTheme()
 
 ### 高优先级
 
-| 问题 | 位置 | 建议 |
-|------|------|------|
-| ThemeSwitcher.vue 缺失 | `components/common/` | 需创建或移除相关引用 |
-| API 路径配置不明确 | `.env` | 确保 `VITE_API_BASE_URL` 配置正确 |
+| 问题                   | 位置                 | 建议                              |
+| ---------------------- | -------------------- | --------------------------------- |
+| ThemeSwitcher.vue 缺失 | `components/common/` | 需创建或移除相关引用              |
+| API 路径配置不明确     | `.env`               | 确保 `VITE_API_BASE_URL` 配置正确 |
 
 ### 中优先级
 
-| 问题 | 建议 |
-|------|------|
-| 类型定义分散 | 统一到 `types/` 目录 |
-| Token 双重存储 | 已有 pinia-plugin-persistedstate，可移除手动 localStorage 操作 |
-| 手机号/扫码登录 | 需要补充完整逻辑 |
-| 验证码功能 | 已有基础实现（utils/captcha.ts + mock/captcha.ts），需完善前端集成 |
+| 问题            | 建议                                                               |
+| --------------- | ------------------------------------------------------------------ |
+| 类型定义分散    | 统一到 `types/` 目录                                               |
+| 手机号/扫码登录 | 需要补充完整逻辑                                                   |
+| 验证码功能      | 已有基础实现（utils/captcha.ts + mock/captcha.ts），需完善前端集成 |
 
 ### 低优先级
 
-| 问题 | 建议 |
-|------|------|
+| 问题             | 建议                      |
+| ---------------- | ------------------------- |
 | 缺少请求取消机制 | 添加 AbortController 支持 |
-| 缺少请求重试机制 | 网络异常时自动重试 |
-| 缺少 API 缓存 | 对不常变化的数据添加缓存 |
+| 缺少请求重试机制 | 网络异常时自动重试        |
+| 缺少 API 缓存    | 对不常变化的数据添加缓存  |
 
 ---
 
@@ -988,24 +1049,24 @@ themeStore.resetTheme()
 
 ```typescript
 // Store
-import { useUserStore, useThemeStore, useLayoutStore, useMenuStore } from '@/stores'
+import { useUserStore, useThemeStore, useLayoutStore, useMenuStore } from '@/stores';
 
 // Router
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router';
 
 // API
-import { userApi } from '@/api/user'
-import { captchaApi } from '@/api/captcha'
+import { userApi } from '@/api/user';
+import { captchaApi } from '@/api/captcha';
 
 // Naive UI（组件内）
-import { useMessage, useNotification, useDialog } from 'naive-ui'
+import { useMessage, useNotification, useDialog } from 'naive-ui';
 
 // 全局 API（组件外使用，如路由守卫）
-import { globalMessage, globalLoadingBar } from '@/utils/naive'
+import { globalMessage, globalLoadingBar } from '@/utils/naive';
 
 // 国际化
-import { useI18n } from 'vue-i18n'
-import { setI18nLocale } from '@/i18n'
+import { useI18n } from 'vue-i18n';
+import { setI18nLocale } from '@/i18n';
 ```
 
 ### 环境变量
@@ -1026,5 +1087,5 @@ npm run preview  # 预览生产版本
 
 ---
 
-*文档版本: 1.1.0*
-*最后更新: 2026-03-19*
+_文档版本: 1.3.0_
+_最后更新: 2026-04-23_

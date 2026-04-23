@@ -175,6 +175,7 @@
                           </n-text>
 
                           <n-button
+                            v-permission="'notification:mark-read'"
                             quaternary
                             circle
                             size="tiny"
@@ -266,6 +267,7 @@ import { AlignLeftOutlined, RobotFilled } from '@vicons/antd';
 import { FullScreenMaximize20Filled, FullScreenMinimize24Regular } from '@vicons/fluent';
 import { CheckmarkDone } from '@vicons/ionicons5';
 import { renderUserDropdownHeader, renderIcon, renderUserDropdownFooter } from '@/utils/renderer';
+import { useDocumentFullscreen } from '@/utils/fullscreen';
 
 import Logo from '../Logo/index.vue';
 import Breadcrumb from '../Breadcrumb/index.vue';
@@ -273,16 +275,12 @@ import SvgIcon from '@/components/common/SvgIcon.vue';
 
 const router = useRouter();
 
-// 获取布局状态管理实例
 const layoutStore = useLayoutStore();
-// 获取主题状态管理实例
 const themeStore = useThemeStore();
-// 获取语言状态管理实例
 const localeStore = useLocaleStore();
-// 获取用户状态管理实例
 const userStore = useUserStore();
 
-const isFullScreen = ref(false);
+const { isFullscreen: isFullScreen, toggle: toggleFullScreen } = useDocumentFullscreen();
 const notificationCount = ref(100);
 const notificationValue = ref('all');
 
@@ -358,11 +356,15 @@ const userMenuOptions = computed(() => [
     key: 'user-info',
     icon: renderIcon(h(User)),
   },
-  {
-    label: '修改密码',
-    key: 'change-password',
-    icon: renderIcon(h(Locked)),
-  },
+  ...(userStore.hasPermission('user:password:update')
+    ? [
+        {
+          label: '修改密码',
+          key: 'change-password',
+          icon: renderIcon(h(Locked)),
+        },
+      ]
+    : []),
   {
     key: 'header-divider',
     type: 'divider',
@@ -390,14 +392,6 @@ function toggleNotification(key: string) {
   notificationValue.value = key;
 }
 
-/** * 切换全屏状态 */
-function toggleFullScreen() {
-  isFullScreen.value = !isFullScreen.value;
-}
-
-/**
- * 处理标记为已读
- */
 function handleMarkRead() {
   notificationCount.value = 0;
 }
@@ -425,7 +419,10 @@ function handleUserMenuSelect(key: string) {
       router.push('/user/profile');
       break;
     case 'change-password':
-      router.push('/change-password');
+      if (!userStore.hasPermission('user:password:update')) {
+        return;
+      }
+      router.push('/user/change-password');
       break;
     default:
       break;

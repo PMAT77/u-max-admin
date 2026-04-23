@@ -4,6 +4,9 @@
  */
 import axios from 'axios'
 import { globalMessage } from '@/utils/naive'
+import { getPinia } from '@/stores/setup'
+import { useUserStore } from '@/stores/modules/user'
+import { getAccessToken, getRefreshToken } from '@/utils/tokenStorage'
 
 /**
  * 创建axios实例
@@ -13,19 +16,58 @@ const service = axios.create({
   timeout: 10000
 })
 
-/**
- * 从localStorage获取token
- * @returns {string | null} token值
- */
-const getToken = (): string | null => {
-  return localStorage.getItem('token')
+const refreshClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 10000
+})
+
+interface RetryAxiosRequestConfig {
+  headers?: Record<string, string>
+  _retry?: boolean
+  url?: string
+}
+
+let refreshingPromise: Promise<string> | null = null
+
+const performTokenRefresh = async (): Promise<string> => {
+  if (!refreshingPromise) {
+    const userStore = useUserStore(getPinia())
+    const refreshToken = userStore.getRefreshToken || getRefreshToken()
+    if (!refreshToken) {
+      return Promise.reject(new Error('缺少 refresh token'))
+    }
+
+    refreshingPromise = refreshClient
+      .post('/refresh-token', { refreshToken })
+      .then((response) => {
+        const payload = response.data?.data || response.data
+        const nextAccessToken = payload?.token
+        const nextRefreshToken = payload?.refreshToken
+
+        if (!nextAccessToken) {
+          throw new Error('刷新 token 失败')
+        }
+
+        userStore.setToken(nextAccessToken)
+        if (nextRefreshToken) {
+          userStore.setRefreshToken(nextRefreshToken)
+        }
+        return nextAccessToken
+      })
+      .finally(() => {
+        refreshingPromise = null
+      })
+  }
+
+  return refreshingPromise
 }
 
 /**
  * 处理登录过期
  */
 const handleLoginExpired = () => {
-  localStorage.removeItem('token')
+  const userStore = useUserStore(getPinia())
+  userStore.logout()
   globalMessage.warning('登录已过期，请重新登录')
   setTimeout(() => {
     window.location.href = '/auth/login'
@@ -68,7 +110,8 @@ const handleRequestError = () => {
 service.interceptors.request.use(
   (config) => {
     // 添加token认证信息
-    const token = getToken()
+    const userStore = useUserStore(getPinia())
+    const token = userStore.getToken || getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -88,13 +131,32 @@ service.interceptors.response.use(
   (response) => {
     return response.data
   },
-  (error) => {
+  async (error) => {
     if (error.response) {
       const { status, data } = error.response
+      const originalRequest: RetryAxiosRequestConfig = error.config || {}
       
       switch (status) {
         case 401:
-          handleLoginExpired()
+          if (
+            !originalRequest._retry &&
+            originalRequest.url &&
+            !originalRequest.url.includes('/refresh-token')
+          ) {
+            try {
+              originalRequest._retry = true
+              const nextToken = await performTokenRefresh()
+              originalRequest.headers = {
+                ...(originalRequest.headers || {}),
+                Authorization: `Bearer ${nextToken}`
+              }
+              return service(originalRequest)
+            } catch {
+              handleLoginExpired()
+            }
+          } else {
+            handleLoginExpired()
+          }
           break
         case 403:
           handlePermissionDenied()

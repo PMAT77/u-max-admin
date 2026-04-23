@@ -23,6 +23,16 @@ const routes: RouteRecordRaw[] = [
           roles: ['admin', 'user']
         },
         component: () => import('@/views/user/profile/index.vue')
+      },
+      {
+        path: 'change-password',
+        name: 'ChangePassword',
+        meta: {
+          title: '修改密码',
+          icon: 'Lock',
+          roles: ['admin', 'user']
+        },
+        component: () => import('@/views/user/change-password/index.vue')
       }
     ]
   }, 

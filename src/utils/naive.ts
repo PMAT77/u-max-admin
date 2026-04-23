@@ -2,12 +2,11 @@
  * Naive UI 独立 API
  * 用于在组件外部使用 Naive UI 的 API
  * 如 loadingBar、message、notification、dialog 等
- *
- * 注意：此文件必须在 Pinia 注册后导入
  */
-import { createDiscreteApi, darkTheme } from 'naive-ui'
+import { darkTheme } from 'naive-ui'
 import { computed } from 'vue'
 import { useThemeStore } from '@/stores/modules/theme'
+import { useProviderStore } from '@/stores/modules/provider'
 import { getPinia } from '@/stores/setup'
 
 function lightenColor(color: string, percent: number): string {
@@ -43,18 +42,6 @@ function darkenColor(color: string, percent: number): string {
   )
 }
 
-let naiveApiInstance: ReturnType<typeof createDiscreteApi> | null = null
-
-const discreteApiMap = {
-  loadingBar: null as any,
-  message: null as any,
-  notification: null as any,
-  dialog: null as any,
-}
-
-const noop = () => {} 
- 
-
 export const configProviderProps = computed(() => {
   const themeStore = useThemeStore(getPinia())
   return {
@@ -72,30 +59,75 @@ export const configProviderProps = computed(() => {
 })
 
 export const globalLoadingBar = {
-  start: () => discreteApiMap.loadingBar?.start?.() || noop,
-  finish: () => discreteApiMap.loadingBar?.finish?.() || noop,
-  error: () => discreteApiMap.loadingBar?.error?.() || noop,
+  start: () => {
+    const store = useProviderStore(getPinia())
+    store.loadingBar?.start()
+  },
+  finish: () => {
+    const store = useProviderStore(getPinia())
+    store.loadingBar?.finish()
+  },
+  error: () => {
+    const store = useProviderStore(getPinia())
+    store.loadingBar?.error()
+  },
 }
 
 export const globalMessage = {
-  info: (content: string) => discreteApiMap.message?.info?.(content) || noop,
-  success: (content: string) => discreteApiMap.message?.success?.(content) || noop,
-  warning: (content: string) => discreteApiMap.message?.warning?.(content) || noop,
-  error: (content: string) => discreteApiMap.message?.error?.(content) || noop,
+  info: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.message?.info(content)
+  },
+  success: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.message?.success(content)
+  },
+  warning: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.message?.warning(content)
+  },
+  error: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.message?.error(content)
+  },
 }
 
 export const globalNotification = {
-  info: (content: string) => discreteApiMap.notification?.info?.({ content }) || noop,
-  success: (content: string) => discreteApiMap.notification?.success?.({ content }) || noop,
-  warning: (content: string) => discreteApiMap.notification?.warning?.({ content }) || noop,
-  error: (content: string) => discreteApiMap.notification?.error?.({ content }) || noop,
+  info: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.notification?.info({ content })
+  },
+  success: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.notification?.success({ content })
+  },
+  warning: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.notification?.warning({ content })
+  },
+  error: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.notification?.error({ content })
+  },
 }
 
 export const globalDialog = {
-  info: (content: string) => discreteApiMap.dialog?.info?.({ content }) || noop,
-  success: (content: string) => discreteApiMap.dialog?.success?.({ content }) || noop,
-  warning: (content: string) => discreteApiMap.dialog?.warning?.({ content }) || noop,
-  error: (content: string) => discreteApiMap.dialog?.error?.({ content }) || noop,
+  info: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.dialog?.info({ content })
+  },
+  success: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.dialog?.success({ content })
+  },
+  warning: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.dialog?.warning({ content })
+  },
+  error: (content: string) => {
+    const store = useProviderStore(getPinia())
+    store.dialog?.error({ content })
+  },
 }
 
 export default {

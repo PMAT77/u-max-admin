@@ -118,6 +118,10 @@ export const useTagViewStore = defineStore('tagView', {
       }
     },
 
+    restoreTags(tags: TagView[]): void {
+      this.visitedTags = tags;
+    },
+
     moveTag(fromIndex: number, toIndex: number): void {
       const tag = this.visitedTags.splice(fromIndex, 1)[0]
       this.visitedTags.splice(toIndex, 0, tag)

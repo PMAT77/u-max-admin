@@ -25,23 +25,25 @@
 - 🌐 **国际化** - 多语言支持（中/英）
 - ⚙️ **配置驱动** - 灵活的布局配置系统
 - 🔐 **登录认证** - 多种登录方式（账号/手机/二维码）
+- 🛡️ **RBAC 权限闭环** - 路由 `meta.roles` + 菜单过滤 + 按钮/操作级 `v-permission`
+- 🔄 **Token 自动续期** - accessToken + refreshToken 双令牌与 401 自动刷新重试
 - 🏷️ **标签页** - 多页签缓存功能
 - 🤖 **验证码** - 集成验证码生成与验证
 
 ## 技术栈
 
-| 技术 | 版本 | 说明 |
-|------|------|------|
-| Vue | ^3.5.25 | 核心框架 |
-| Vite | ^7.3.1 | 构建工具 |
-| Naive UI | ^2.44.1 | UI 组件库 |
-| TypeScript | ^5.9.3 | 类型支持 |
-| Pinia | ^3.0.4 | 状态管理 |
-| pinia-plugin-persistedstate | ^4.7.1 | 状态持久化 |
-| UnoCSS | ^66.6.6 | CSS 引擎 |
-| Axios | ^1.13.6 | HTTP 请求 |
-| Vue Router | ^4.6.4 | 路由管理 |
-| Vue I18n | ^12.0.0-alpha.3 | 国际化 |
+| 技术                        | 版本            | 说明       |
+| --------------------------- | --------------- | ---------- |
+| Vue                         | ^3.5.25         | 核心框架   |
+| Vite                        | ^7.3.1          | 构建工具   |
+| Naive UI                    | ^2.44.1         | UI 组件库  |
+| TypeScript                  | ^5.9.3          | 类型支持   |
+| Pinia                       | ^3.0.4          | 状态管理   |
+| pinia-plugin-persistedstate | ^4.7.1          | 状态持久化 |
+| UnoCSS                      | ^66.6.6         | CSS 引擎   |
+| Axios                       | ^1.13.6         | HTTP 请求  |
+| Vue Router                  | ^4.6.4          | 路由管理   |
+| Vue I18n                    | ^12.0.0-alpha.3 | 国际化     |
 
 ## 目录结构
 
@@ -63,6 +65,7 @@ src/
 │   │   └── LoginPanel.vue
 │   └── common/           # 通用组件
 │       ├── PreferenceButton.vue
+│       ├── NaiveProvider.vue
 │       ├── SvgIcon.vue
 │       └── ThemeProvider.vue
 ├── config/                # 配置文件
@@ -110,6 +113,7 @@ src/
 │       ├── layout.ts   # 布局状态
 │       ├── locale.ts   # 国际化状态
 │       ├── menu.ts     # 菜单状态
+│       ├── provider.ts # Naive UI 全局 API 容器
 │       ├── tagView.ts  # 标签页状态
 │       ├── theme.ts    # 主题状态
 │       └── user.ts     # 用户状态
@@ -124,8 +128,9 @@ src/
 │   ├── errorHandler.ts # 错误处理
 │   ├── menu.ts         # 菜单工具
 │   ├── naive.ts        # Naive UI 全局 API
+│   ├── permission.ts   # 权限判断 + v-permission 指令
 │   ├── renderer.ts     # 渲染工具
-│   └── tokenStorage.ts # Token 存储
+│   └── tokenStorage.ts # access/refresh token 存储
 ├── views/              # 页面视图
 │   ├── auth/
 │   ├── common/
@@ -166,50 +171,52 @@ npm run preview
 
 ### ✅ 已完成
 
-| 功能 | 说明 | 状态 |
-|------|------|------|
-| 项目初始化 | Vue 3 + Vite + TypeScript 基础项目搭建 | ✅ |
-| UI 框架集成 | Naive UI 组件库集成 | ✅ |
-| 状态管理 | Pinia 模块化状态管理 + 持久化 | ✅ |
-| 路由管理 | Vue Router 路由配置 + 守卫 | ✅ |
-| 主题系统 | 亮色/暗色主题切换 + 自定义主色 + 圆角 | ✅ |
-| 登录页 | 三种登录方式（账号/手机/二维码） | ✅ |
-| 布局架构 | 配置驱动布局系统 | ✅ |
-| 多布局模式 | 支持 vertical/sidebar/top 三种布局 | ✅ |
-| API 封装 | Axios 请求封装 + 错误处理 | ✅ |
-| Mock 数据 | 开发环境 Mock 数据支持 | ✅ |
-| 自动导入 | unplugin-auto-import API 自动导入 | ✅ |
-| 组件自动导入 | unplugin-vue-components 组件自动导入 | ✅ |
-| 图标支持 | ionicons5 / carbon / antd / fluent 图标库 | ✅ |
-| CSS 预处理器 | SCSS 支持 | ✅ |
-| CSS 工具 | UnoCSS 原子化 CSS | ✅ |
-| 路由菜单 | 从路由自动生成菜单 | ✅ |
-| 面包屑导航 | 动态面包屑导航 | ✅ |
-| 国际化 | 多语言支持（中/英） | ✅ |
-| 404 页面 | 404 未找到页面 | ✅ |
-| 登录守卫 | 路由守卫权限控制 | ✅ |
-| 标签页缓存 | 多页签缓存功能 | ✅ |
-| 验证码功能 | 验证码生成与验证 | ✅ |
+| 功能         | 说明                                      | 状态 |
+| ------------ | ----------------------------------------- | ---- |
+| 项目初始化   | Vue 3 + Vite + TypeScript 基础项目搭建    | ✅   |
+| UI 框架集成  | Naive UI 组件库集成                       | ✅   |
+| 状态管理     | Pinia 模块化状态管理 + 持久化             | ✅   |
+| 路由管理     | Vue Router 路由配置 + 守卫                | ✅   |
+| 主题系统     | 亮色/暗色主题切换 + 自定义主色 + 圆角     | ✅   |
+| 登录页       | 三种登录方式（账号/手机/二维码）          | ✅   |
+| 布局架构     | 配置驱动布局系统                          | ✅   |
+| 多布局模式   | 支持 vertical/sidebar/top 三种布局        | ✅   |
+| API 封装     | Axios 请求封装 + 错误处理                 | ✅   |
+| Mock 数据    | 开发环境 Mock 数据支持                    | ✅   |
+| 自动导入     | unplugin-auto-import API 自动导入         | ✅   |
+| 组件自动导入 | unplugin-vue-components 组件自动导入      | ✅   |
+| 图标支持     | ionicons5 / carbon / antd / fluent 图标库 | ✅   |
+| CSS 预处理器 | SCSS 支持                                 | ✅   |
+| CSS 工具     | UnoCSS 原子化 CSS                         | ✅   |
+| 路由菜单     | 从路由自动生成菜单                        | ✅   |
+| 面包屑导航   | 动态面包屑导航                            | ✅   |
+| 国际化       | 多语言支持（中/英）                       | ✅   |
+| 404 页面     | 404 未找到页面                            | ✅   |
+| 登录守卫     | 路由守卫权限控制                          | ✅   |
+| 操作级权限   | `v-permission` + store 权限判断          | ✅   |
+| Token 续期   | 401 自动刷新 Token 并重试原请求          | ✅   |
+| 权限热更新   | 登录后主动拉取 `/user/info` 覆盖权限数据 | ✅   |
+| 标签页缓存   | 多页签缓存功能                            | ✅   |
+| 验证码功能   | 验证码生成与验证                          | ✅   |
 
 ### 🚧 开发中
 
-| 功能 | 说明 | 状态 |
-|------|------|------|compact
-| 用户管理 | 用户列表/增删改查 | 🚧 |
-| 角色管理 | 角色权限配置 | 🚧 |
-| 菜单管理 | 动态菜单配置 | 🚧 |
-| 系统设置 | 系统配置页面 | 🚧 |
+| 功能     | 说明              | 状态 |
+| -------- | ----------------- | ---- |
+| 用户管理 | 用户列表/增删改查 | 🚧   |
+| 角色管理 | 角色权限配置      | 🚧   |
+| 菜单管理 | 动态菜单配置      | 🚧   |
+| 系统设置 | 系统配置页面      | 🚧   |
 
 ### 📋 待实现
 
-| 功能 | 说明 | 状态 |
-|------|------|------|compact
-| 表格组件 | 通用表格封装 | 📋 |
-| 表单组件 | 通用表单封装 | 📋 |
-| 权限指令 | v-permission 指令 | 📋 |
-| 导出功能 | Excel/PDF 导出 | 📋 |
-| 富文本编辑器 | 文本编辑功能 | 📋 |
-| 图片上传 | 图片上传组件 | 📋 |
+| 功能         | 说明              | 状态 |
+| ------------ | ----------------- | ---- |
+| 表格组件     | 通用表格封装      | 📋   |
+| 表单组件     | 通用表单封装      | 📋   |
+| 导出功能     | Excel/PDF 导出    | 📋   |
+| 富文本编辑器 | 文本编辑功能      | 📋   |
+| 图片上传     | 图片上传组件      | 📋   |
 
 ## 布局架构
 
@@ -261,14 +268,14 @@ const layouts = {
     mode: 'mixin',
     sidebarWidth: 200,
     // ...其他配置
-  }
-}
+  },
+};
 
 // 2. 在 type.ts 添加类型
-export type LayoutMode = 'vertical' | 'sidebar' | 'top' | 'mixin'
+export type LayoutMode = 'vertical' | 'sidebar' | 'top' | 'mixin';
 
 // 3. 切换布局
-layoutStore.setLayoutMode('mixin')
+layoutStore.setLayoutMode('mixin');
 ```
 
 ## 状态管理
@@ -286,14 +293,14 @@ layoutStore.setLayoutMode('mixin')
 
 ```typescript
 // 使用示例
-import { useLayoutStore, useMenuStore, useThemeStore } from '@/stores'
+import { useLayoutStore, useMenuStore, useThemeStore } from '@/stores';
 
-const layoutStore = useLayoutStore()
-const menuStore = useMenuStore()
-const themeStore = useThemeStore()
+const layoutStore = useLayoutStore();
+const menuStore = useMenuStore();
+const themeStore = useThemeStore();
 
 // 主题切换
-themeStore.toggleTheme()
+themeStore.toggleTheme();
 ```
 
 ## 环境变量

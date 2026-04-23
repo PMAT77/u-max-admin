@@ -1,54 +1,62 @@
 /**
  * Token 存储工具
- * 提供安全的Token存储和管理功能
- * 使用localStorage存储Token，比localStorage更安全，因为localStorage在会话结束后会自动清除
+ * accessToken 使用 sessionStorage（会话级）
+ * refreshToken 使用 localStorage（跨会话续期）
  */
+const ACCESS_TOKEN_KEY = 'access_token'
+const REFRESH_TOKEN_KEY = 'refresh_token'
 
-/**
- * 存储Token
- * @param token Token字符串
- * @description 将Token存储到localStorage中
- */
-export const setToken = (token: string): void => {
+export const setAccessToken = (token: string): void => {
   try {
-    // 使用localStorage存储，比localStorage更安全
-    localStorage.setItem('token', token);
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, token)
   } catch (error) {
-    console.error('Token存储失败:', error);
+    console.error('access token 存储失败:', error)
   }
-};
+}
 
-/**
- * 获取Token
- * @returns Token字符串或null
- * @description 从localStorage中获取Token
- */
-export const getToken = (): string | null => {
+export const getAccessToken = (): string => {
   try {
-    return localStorage.getItem('token');
+    return sessionStorage.getItem(ACCESS_TOKEN_KEY) || ''
   } catch (error) {
-    console.error('Token获取失败:', error);
-    return null;
+    console.error('access token 读取失败:', error)
+    return ''
   }
-};
+}
 
-/**
- * 删除Token
- * @description 从localStorage中删除Token
- */
-export const removeToken = (): void => {
+export const removeAccessToken = (): void => {
   try {
-    localStorage.removeItem('token');
+    sessionStorage.removeItem(ACCESS_TOKEN_KEY)
   } catch (error) {
-    console.error('Token删除失败:', error);
+    console.error('access token 删除失败:', error)
   }
-};
+}
 
-/**
- * 检查是否存在Token
- * @returns 是否存在Token
- * @description 检查localStorage中是否存在Token
- */
-export const hasToken = (): boolean => {
-  return getToken() !== null;
-};
+export const setRefreshToken = (token: string): void => {
+  try {
+    localStorage.setItem(REFRESH_TOKEN_KEY, token)
+  } catch (error) {
+    console.error('refresh token 存储失败:', error)
+  }
+}
+
+export const getRefreshToken = (): string => {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY) || ''
+  } catch (error) {
+    console.error('refresh token 读取失败:', error)
+    return ''
+  }
+}
+
+export const removeRefreshToken = (): void => {
+  try {
+    localStorage.removeItem(REFRESH_TOKEN_KEY)
+  } catch (error) {
+    console.error('refresh token 删除失败:', error)
+  }
+}
+
+export const clearAuthTokens = (): void => {
+  removeAccessToken()
+  removeRefreshToken()
+}

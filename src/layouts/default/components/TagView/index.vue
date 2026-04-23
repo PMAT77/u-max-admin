@@ -1,43 +1,43 @@
-/** * TagView 组件 * 谷歌风格的标签页导航，支持拖拽和右键菜单 */
 <template>
-  <div class="u-max-tagview">
+  <div class="u-max-tagview" :style="cssVars">
     <n-scrollbar x-scrollable>
-      <div class="u-max-tagview__container" @contextmenu.prevent="handleContextMenu($event, null)">
-        <div
-          v-for="(tag, index) in tagViewStore.getVisitedTags"
-          :key="tag.path"
-          class="u-max-tagview__item"
-          :class="{
-            'u-max-tagview__item--active': isActive(tag),
-            'u-max-tagview__item--affix': tag.affix,
-          }"
-          :draggable="!tag.affix"
-          @click="handleClick(tag)"
-          @contextmenu.prevent="handleContextMenu($event, tag)"
-          @dragstart="handleDragStart($event, index)"
-          @dragover.prevent="handleDragOver($event, index)"
-          @drop="handleDrop($event, index)"
-          @dragend="handleDragEnd"
-        >
-          <component
-            v-if="tag.icon"
-            class="u-max-tagview__item-icon"
-            :is="renderIcon(iconMap[tag.icon], { size: 16 })"
-          />
-          <span class="u-max-tagview__item-title">{{ tag.title }}</span>
-          <n-icon
-            v-if="!tag.affix"
-            class="u-max-tagview__item-close"
-            size="14"
-            @click.stop="handleClose(tag)"
+      <draggable
+        v-model="tagList"
+        class="u-max-tagview__container"
+        item-key="path"
+        ghost-class="u-max-tagview__ghost"
+        chosen-class="u-max-tagview__chosen"
+        drag-class="u-max-tagview__drag"
+        :animation="200"
+        :move="checkMove"
+      >
+        <template #item="{ element: tag }">
+          <div
+            class="u-max-tagview__item"
+            :class="{
+              'u-max-tagview__item--active': isActive(tag),
+              'u-max-tagview__item--affix': tag.affix,
+            }"
+            :draggable="!tag.affix"
+            @click="handleClick(tag)"
+            @contextmenu.prevent="handleContextMenu($event, tag)"
           >
-            <Close />
-          </n-icon>
-        </div>
-      </div>
+            <component
+              v-if="tag.icon && iconMap[tag.icon]"
+              class="u-max-tagview__item-icon"
+              :is="renderIcon(iconMap[tag.icon], { size: 16 })"
+            />
+            <span class="u-max-tagview__item-title">{{ tag.title }}</span>
+            <n-button text circle class="u-max-tagview__item-close">
+              <n-icon v-if="!tag.affix" size="14" @click.stop="handleClose(tag)">
+                <Close />
+              </n-icon>
+            </n-button>
+          </div>
+        </template>
+      </draggable>
     </n-scrollbar>
 
-    <!-- 右键菜单 -->
     <n-dropdown
       placement="bottom-start"
       trigger="manual"
@@ -52,39 +52,60 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, shallowRef } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { Close } from '@vicons/ionicons5';
+import {
+  Close,
+  Remove,
+  Refresh,
+  SwapHorizontal,
+  ReturnUpBack,
+  ReturnDownForward,
+} from '@vicons/ionicons5';
 import { renderIcon } from '@/utils/renderer';
 import { iconMap } from '@/config/route';
 import { useTagViewStore, type TagView } from '@/stores/modules/tagView';
+import { useThemeStore } from '@/stores';
+import draggable from 'vuedraggable';
 
 const router = useRouter();
 const route = useRoute();
 const tagViewStore = useTagViewStore();
+const themeStore = useThemeStore();
 
-// 拖拽状态
-const dragIndex = ref<number | null>(null);
-const dropIndex = ref<number | null>(null);
+const cssVars = computed(() => ({
+  '--tag-active-bg-color': `${themeStore.primaryColor}1a`,
+  '--tag-active-shadow-color': `${themeStore.primaryColor}1a`,
+  '--tag-border-radius': themeStore.borderRadius,
+}));
 
-// 右键菜单状态
+const tagList = computed({
+  get: () => tagViewStore.getVisitedTags,
+  set: (val) => {
+    tagViewStore.visitedTags = val;
+  },
+});
+
 const showContextMenu = ref(false);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
 const selectedTag = ref<TagView | null>(null);
 
-// 右键菜单选项
 const contextMenuOptions = computed(() =>
   [
     {
-      label: '刷新',
+      label: '重新加载',
       key: 'refresh',
+      icon: renderIcon(Refresh, { size: 16 }),
       show: !!selectedTag.value,
+      disabled: false,
     },
     {
-      label: '关闭',
+      label: '关闭当前',
       key: 'close',
-      show: !!selectedTag.value && !selectedTag.value?.affix,
+      icon: renderIcon(Close, { size: 16 }),
+      show: !!selectedTag.value && !selectedTag.value.affix,
+      disabled: selectedTag.value?.affix || selectedTagIsOnly.value,
     },
     {
       type: 'divider',
@@ -94,48 +115,48 @@ const contextMenuOptions = computed(() =>
     {
       label: '关闭左侧',
       key: 'closeLeft',
-      show: !!selectedTag.value,
+      icon: renderIcon(ReturnUpBack, { size: 16 }),
+      show: !!selectedTag.value && !selectedTagIsFirst.value,
+      disabled: selectedTagIsFirst.value,
     },
     {
       label: '关闭右侧',
       key: 'closeRight',
-      show: !!selectedTag.value,
+      icon: renderIcon(ReturnDownForward, { size: 16 }),
+      show: !!selectedTag.value && !selectedTagIsLast.value,
+      disabled: selectedTagIsLast.value,
     },
     {
       label: '关闭其他',
       key: 'closeOther',
+      icon: renderIcon(SwapHorizontal, { size: 16 }),
       show: !!selectedTag.value,
+      disabled: selectedTagIsOnly.value,
     },
     {
       type: 'divider',
       key: 'd2',
+      show: !!selectedTag.value,
     },
     {
       label: '关闭所有',
       key: 'closeAll',
+      icon: renderIcon(Remove, { size: 16 }),
+      disabled: false,
     },
   ].filter((item) => item.show !== false),
 );
 
-/**
- * 判断标签是否激活
- */
 function isActive(tag: TagView): boolean {
   return tag.path === route.path;
 }
 
-/**
- * 点击标签
- */
 function handleClick(tag: TagView): void {
   if (tag.path !== route.path) {
     router.push(tag.fullPath);
   }
 }
 
-/**
- * 关闭标签
- */
 function handleClose(tag: TagView): void {
   const nextTag = tagViewStore.closeTag(tag.path);
   if (nextTag && isActive(tag)) {
@@ -143,25 +164,43 @@ function handleClose(tag: TagView): void {
   }
 }
 
-/**
- * 处理右键菜单
- */
 function handleContextMenu(e: MouseEvent, tag: TagView | null): void {
+  if (!tag) return;
+  const isValidTag = tagViewStore.getVisitedTags.some((t) => t.path === tag.path);
+  if (!isValidTag) return;
   selectedTag.value = tag;
   contextMenuX.value = e.clientX;
   contextMenuY.value = e.clientY;
   showContextMenu.value = true;
 }
 
-/**
- * 处理右键菜单选择
- */
+const selectedTagIndex = computed(() => {
+  if (!selectedTag.value) return -1;
+  return tagViewStore.getVisitedTags.findIndex((t) => t.path === selectedTag.value?.path);
+});
+
+const selectedTagIsFirst = computed(() => selectedTagIndex.value === 0);
+const selectedTagIsLast = computed(
+  () => selectedTagIndex.value === tagViewStore.getVisitedTags.length - 1,
+);
+const selectedTagIsOnly = computed(() => tagViewStore.getVisitedTags.length === 1);
+
 function handleContextMenuSelect(key: string): void {
   showContextMenu.value = false;
 
   switch (key) {
     case 'refresh':
-      router.replace({ path: '/redirect' + route.fullPath });
+      if (selectedTag.value) {
+        router.replace({
+          path: selectedTag.value.fullPath,
+          query: { ...route.query, t: Date.now() },
+        });
+      } else {
+        router.replace({
+          path: '/redirect' + route.fullPath,
+          query: { ...route.query, t: Date.now() },
+        });
+      }
       break;
     case 'close':
       if (selectedTag.value) {
@@ -195,50 +234,20 @@ function handleContextMenuSelect(key: string): void {
   }
 }
 
-/**
- * 拖拽开始
- */
-function handleDragStart(e: DragEvent, index: number): void {
-  dragIndex.value = index;
-  if (e.dataTransfer) {
-    e.dataTransfer.effectAllowed = 'move';
-  }
+function checkMove(evt: any): boolean {
+  const { relatedContext, draggedContext } = evt;
+
+  if (draggedContext.element?.affix || relatedContext.element?.affix) return false;
+
+  return true;
 }
 
-/**
- * 拖拽经过
- */
-function handleDragOver(e: DragEvent, index: number): void {
-  dropIndex.value = index;
-}
-
-/**
- * 拖拽放下
- */
-function handleDrop(e: DragEvent, index: number): void {
-  if (dragIndex.value !== null && dragIndex.value !== index) {
-    tagViewStore.moveTag(dragIndex.value, index);
-  }
-}
-
-/**
- * 拖拽结束
- */
-function handleDragEnd(): void {
-  dragIndex.value = null;
-  dropIndex.value = null;
-}
-
-/**
- * 添加当前路由到标签
- */
 function addCurrentRoute(): void {
   if (route.name && !route.meta?.hideTag) {
     tagViewStore.addTag(route);
   }
 }
 
-// 监听路由变化
 watch(
   () => route.path,
   () => {
@@ -247,7 +256,6 @@ watch(
   { immediate: true },
 );
 
-// 初始化固定标签
 onMounted(() => {
   addCurrentRoute();
 });
@@ -257,6 +265,8 @@ onMounted(() => {
 .u-max-tagview {
   height: 47px;
   user-select: none;
+
+  --tag-item-hover-color: rgba(255, 255, 255, 0.06);
 
   :deep(.n-scrollbar-content) {
     height: 100%;
@@ -274,26 +284,27 @@ onMounted(() => {
 .u-max-tagview__item {
   display: flex;
   align-items: center;
-  // height: 28px;
   padding: 6px 12px;
   font-size: 13px;
   color: var(--n-text-color-2);
   background-color: var(--n-color-hover);
-  border-radius: 4px;
+  border-radius: var(--tag-border-radius);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color 0.3s var(--n-bezier),
+    box-shadow 0.3s var(--n-bezier);
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
 
   &:hover {
-    background-color: var(--n-color-pressed);
+    background-color: var(--tag-item-hover-color);
   }
 
   &--active {
     color: var(--n-text-color);
-    background-color: var(--n-color-target);
-    box-shadow: 0 0 0 1px var(--n-border-color);
+    background-color: var(--tag-active-bg-color);
+    box-shadow: 0 0 0 1px var(--tag-active-shadow-color);
 
     &::before {
       content: '';
@@ -306,10 +317,6 @@ onMounted(() => {
     }
   }
 
-  &--affix {
-    padding-left: 20px;
-  }
-
   &[draggable='true'] {
     cursor: grab;
 
@@ -319,8 +326,22 @@ onMounted(() => {
   }
 }
 
+.u-max-tagview__ghost {
+  opacity: 0.4;
+}
+
+.u-max-tagview__chosen {
+  opacity: 0.8;
+}
+
+.u-max-tagview__drag {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 .u-max-tagview__item-icon {
-  margin-right: 4px;
+  margin-right: 5px;
 }
 
 .u-max-tagview__item-title {
@@ -330,14 +351,10 @@ onMounted(() => {
 }
 
 .u-max-tagview__item-close {
+  cursor: pointer;
   margin-left: 6px;
   border-radius: 50%;
   transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: var(--n-text-color);
-  }
 }
 
 // 暗色主题

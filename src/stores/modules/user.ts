@@ -3,6 +3,13 @@
  * 用于管理用户信息和登录状态
  */
 import { defineStore } from 'pinia'
+import {
+  clearAuthTokens,
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken as persistAccessToken,
+  setRefreshToken as persistRefreshToken
+} from '@/utils/tokenStorage'
 
 export interface UserInfo {
   id: string | number
@@ -18,15 +25,20 @@ export interface UserInfo {
 export const useUserStore = defineStore('user', {
   state: (): {
     token: string
+    refreshToken: string
     userInfo: UserInfo | null
   } => ({
-    token: '',
+    token: getAccessToken(),
+    refreshToken: getRefreshToken(),
     userInfo: null,
   }),
 
   getters: {
     getToken(): string {
       return this.token
+    },
+    getRefreshToken(): string {
+      return this.refreshToken
     },
     getUserInfo(): UserInfo | null {
       return this.userInfo
@@ -49,6 +61,21 @@ export const useUserStore = defineStore('user', {
     getPermissions(): string[] {
       return this.userInfo?.permissions || []
     },
+    hasPermission(): (permission: string) => boolean {
+      return (permission: string): boolean => {
+        if (!permission) return true
+        const permissions = this.userInfo?.permissions || []
+        return permissions.includes('*') || permissions.includes(permission)
+      }
+    },
+    hasAnyPermission(): (permissions: string[]) => boolean {
+      return (permissions: string[]): boolean => {
+        if (!permissions.length) return true
+        const userPermissions = this.userInfo?.permissions || []
+        if (userPermissions.includes('*')) return true
+        return permissions.some((item) => userPermissions.includes(item))
+      }
+    },
     getEmail(): string {
       return this.userInfo?.email || ''
     },
@@ -57,14 +84,26 @@ export const useUserStore = defineStore('user', {
   actions: {
     setToken(token: string): void {
       this.token = token
+      if (token) {
+        persistAccessToken(token)
+      }
+    },
+    setRefreshToken(token: string): void {
+      this.refreshToken = token
+      if (token) {
+        persistRefreshToken(token)
+      }
     },
 
     setUserInfo(userInfo: UserInfo): void {
       this.userInfo = userInfo
     },
 
-    login(data: { token: string; userInfo?: UserInfo }): void {
+    login(data: { token: string; refreshToken?: string; userInfo?: UserInfo }): void {
       this.setToken(data.token)
+      if (data.refreshToken) {
+        this.setRefreshToken(data.refreshToken)
+      }
       if (data.userInfo) {
         this.setUserInfo(data.userInfo)
       }
@@ -72,7 +111,9 @@ export const useUserStore = defineStore('user', {
 
     logout(): void {
       this.token = ''
+      this.refreshToken = ''
       this.userInfo = null
+      clearAuthTokens()
     },
 
     updateUserInfo(userInfo: Partial<UserInfo>): void {
@@ -82,5 +123,7 @@ export const useUserStore = defineStore('user', {
     },
   },
 
-  persist: true
+  persist: {
+    pick: ['refreshToken', 'userInfo']
+  }
 })

@@ -23,6 +23,7 @@ import './utils/naive'
 import router from './router'
 import axios from 'axios'
 import i18n from './i18n'
+import { permissionDirective } from './utils/permission'
  
 // 注册SvgIcon组件
 setupSvgIcon(app)
@@ -32,5 +33,7 @@ app.use(router)
 app.use(i18n)
 // 全局注入axios
 app.config.globalProperties.$axios = axios
+// 全局权限指令：v-permission="'user:edit'" 或 v-permission="['a','b']"
+app.directive('permission', permissionDirective)
 // 挂载应用到DOM
 app.mount('#app')

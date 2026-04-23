@@ -85,8 +85,17 @@ async function handleLogin(loginData: { type: string; data: any }) {
     if (response && response.code === 200 && response.data) {
       userStore.login({
         token: response.data.token,
+        refreshToken: response.data.refreshToken,
         userInfo: response.data.userInfo,
       });
+
+      const infoResponse = await userApi.getInfo();
+      if (infoResponse.code === 200 && infoResponse.data) {
+        userStore.setUserInfo(infoResponse.data);
+      } else {
+        userStore.logout();
+        throw new Error(infoResponse.message || '获取用户信息失败');
+      }
 
       const redirect = (route.query.redirect as string) || '/dashboard/workbench';
       router.push(redirect);

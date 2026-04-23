@@ -7,6 +7,7 @@ import { menuApi } from '@/api/route'
 import { renderIcon } from '@/utils/renderer'
 import { iconMap } from '@/config/route'
 import { DashboardOutlined } from '@vicons/antd'
+import { useUserStore } from './user'
 
 import routes from '@/router/routes'
 
@@ -24,11 +25,24 @@ export interface BreadcrumbItem {
   icon?: () => VNode
 }
 
-const generateMenuFromRoutes = (routes: any[], parentPath: string = ''): MenuOption[] => {
+const hasRoleAccess = (requiredRoles: string[], userRoles: string[], userPermissions: string[]): boolean => {
+  if (!requiredRoles.length) return true
+  if (userPermissions.includes('*')) return true
+  if (userRoles.includes('super_admin')) return true
+  return requiredRoles.some((role) => userRoles.includes(role))
+}
+
+const generateMenuFromRoutes = (
+  routes: any[],
+  parentPath: string = '',
+  accessChecker?: (roles: string[]) => boolean
+): MenuOption[] => {
   const menuOptions: MenuOption[] = []
 
   routes.forEach((route: any) => {
     if (route.redirect || !route.meta) return
+    const routeRoles = (route.meta.roles as string[] | undefined) || []
+    if (accessChecker && !accessChecker(routeRoles)) return
 
     const fullPath = parentPath ? `${parentPath}/${route.path}` : route.path
 
@@ -40,7 +54,7 @@ const generateMenuFromRoutes = (routes: any[], parentPath: string = ''): MenuOpt
     }
 
     if (route.children && route.children.length > 0) {
-      menuOption.children = generateMenuFromRoutes(route.children, fullPath)
+      menuOption.children = generateMenuFromRoutes(route.children, fullPath, accessChecker)
     }
 
     menuOptions.push(menuOption)
@@ -127,19 +141,28 @@ export const useMenuStore = defineStore('menu', {
     async initMenu() {
       this.isLoading = true
       try {
+        const userStore = useUserStore()
+        const accessChecker = (roles: string[]) =>
+          hasRoleAccess(roles, userStore.getRoles, userStore.getPermissions)
         const mockMenu = await getMenuFromMock()
-        const routeMenu = generateMenuFromRoutes(routes)
+        const routeMenu = generateMenuFromRoutes(routes, '', accessChecker)
         this.menuOptions = [...routeMenu, ...mockMenu]
       } catch (error) {
         console.error('获取菜单失败:', error)
-        this.menuOptions = generateMenuFromRoutes(routes)
+        const userStore = useUserStore()
+        const accessChecker = (roles: string[]) =>
+          hasRoleAccess(roles, userStore.getRoles, userStore.getPermissions)
+        this.menuOptions = generateMenuFromRoutes(routes, '', accessChecker)
       } finally {
         this.isLoading = false
       }
     },
 
     generateMenuFromRoutes() {
-      this.menuOptions = generateMenuFromRoutes(routes)
+      const userStore = useUserStore()
+      const accessChecker = (roles: string[]) =>
+        hasRoleAccess(roles, userStore.getRoles, userStore.getPermissions)
+      this.menuOptions = generateMenuFromRoutes(routes, '', accessChecker)
     },
 
     async getMenuFromMock() {

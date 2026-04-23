@@ -33,7 +33,12 @@ export interface UserInfo {
  */
 export interface LoginResponse {
   token: string // 登录令牌
+  refreshToken?: string // 刷新令牌
   userInfo: UserInfo // 用户信息
+}
+
+export interface RefreshTokenParams {
+  refreshToken: string
 }
 
 /**
@@ -73,5 +78,16 @@ export const userApi = {
    */
   logout: (): Promise<ApiResponse> => {
     return service.post('/logout')
+  },
+
+  /**
+   * 刷新Token
+   * @param {RefreshTokenParams} data - 刷新令牌参数
+   * @returns {Promise<ApiResponse<{ token: string; refreshToken?: string }>>}
+   */
+  refreshToken: (
+    data: RefreshTokenParams
+  ): Promise<ApiResponse<{ token: string; refreshToken?: string }>> => {
+    return service.post('/refresh-token', data)
   }
 }

@@ -20,6 +20,7 @@ export default [
           message: '登录成功', // 成功消息
           data: {
             token: 'mock-token-' + Date.now(), // 模拟token
+            refreshToken: 'mock-refresh-token-' + Date.now(),
             userInfo: {
               id: 1,
               username: 'superman',
@@ -37,6 +38,27 @@ export default [
         return {
           code: 401, // 未授权状态码
           message: '用户名或密码错误' // 错误消息
+        }
+      }
+    }
+  },
+  {
+    url: '/api/refresh-token',
+    method: 'post',
+    response: ({ body }: { body: { refreshToken?: string } }) => {
+      if (!body?.refreshToken || !body.refreshToken.startsWith('mock-refresh-token-')) {
+        return {
+          code: 401,
+          message: 'refresh token 无效'
+        }
+      }
+
+      return {
+        code: 200,
+        message: '刷新成功',
+        data: {
+          token: 'mock-token-' + Date.now(),
+          refreshToken: 'mock-refresh-token-' + Date.now()
         }
       }
     }
