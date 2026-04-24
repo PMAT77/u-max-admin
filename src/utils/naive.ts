@@ -42,6 +42,16 @@ function darkenColor(color: string, percent: number): string {
   )
 }
 
+function primaryCommonOverrides(themeStore: ReturnType<typeof useThemeStore>) {
+  return {
+    primaryColor: themeStore.primaryColor,
+    primaryColorHover: lightenColor(themeStore.primaryColor, 10),
+    primaryColorPressed: darkenColor(themeStore.primaryColor, 10),
+    primaryColorSuppl: themeStore.primaryColor,
+    borderRadius: themeStore.borderRadius,
+  }
+}
+
 export const configProviderProps = computed(() => {
   const themeStore = useThemeStore(getPinia())
   const bodyColor = themeStore.isDark ? '#121217' : '#f5f7fa'
@@ -50,14 +60,27 @@ export const configProviderProps = computed(() => {
     theme: themeStore.isDark ? darkTheme : null,
     themeOverrides: {
       common: {
-        primaryColor: themeStore.primaryColor,
-        primaryColorHover: lightenColor(themeStore.primaryColor, 10),
-        primaryColorPressed: darkenColor(themeStore.primaryColor, 10),
-        primaryColorSuppl: themeStore.primaryColor,
-        borderRadius: themeStore.borderRadius,
+        ...primaryCommonOverrides(themeStore),
         bodyColor,
         cardColor,
       },
+    },
+  }
+})
+
+/**
+ * 顶栏与全局 Naive 主题不一致时（如全局亮色 + 顶栏深色），为顶栏子树注入匹配的 Naive 主题，
+ * 避免按钮、面包屑、标签栏等仍使用全局主题的文本色。
+ */
+export const layoutHeaderProviderProps = computed(() => {
+  const themeStore = useThemeStore(getPinia())
+  if (themeStore.isHeaderDark === themeStore.isDark) {
+    return {}
+  }
+  return {
+    theme: themeStore.isHeaderDark ? darkTheme : null,
+    themeOverrides: {
+      common: primaryCommonOverrides(themeStore),
     },
   }
 })

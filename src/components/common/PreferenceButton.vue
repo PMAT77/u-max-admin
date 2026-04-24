@@ -74,15 +74,25 @@
             <section class="preference-section">
               <h3 class="preference-title">布局模式</h3>
               <div class="layout-grid">
-                <button
-                  v-for="item in layoutPatterns"
-                  :key="item.key"
-                  class="layout-card"
-                  :class="{ 'is-active': currentLayoutPattern === item.key }"
-                  @click="handleLayoutPatternChange(item.key)"
-                >
-                  <span class="layout-preview" :class="item.previewClass"></span>
-                </button>
+                <div v-for="item in layoutPatterns" :key="item.key" class="layout-grid__cell">
+                  <n-tooltip trigger="hover" placement="bottom">
+                    <template #trigger>
+                      <button
+                        type="button"
+                        class="layout-card w-full"
+                        :class="{ 'is-active': currentLayoutPattern === item.key }"
+                        @click="handleLayoutPatternChange(item.key)"
+                      >
+                        <span class="layout-preview" :class="item.previewClass">
+                          <span v-if="item.key !== 'horizontal'" class="layout-preview__block layout-preview__sider" />
+                          <span class="layout-preview__block layout-preview__header" />
+                          <span class="layout-preview__block layout-preview__content" />
+                        </span>
+                      </button>
+                    </template>
+                    {{ item.label }}
+                  </n-tooltip>
+                </div>
               </div>
             </section>
 
@@ -295,22 +305,20 @@ const themeOptions = [
   { label: '深色', value: 'dark' },
 ]
 
-const layoutPatterns = [
-  { key: 'vertical', mode: 'vertical', previewClass: 'preview-vertical' },
-  { key: 'sidebar', mode: 'sidebar', previewClass: 'preview-sidebar' },
-  { key: 'top', mode: 'top', previewClass: 'preview-top' },
-  { key: 'vertical-slim', mode: 'vertical', previewClass: 'preview-vertical-slim' },
-  { key: 'top-mix', mode: 'top', previewClass: 'preview-top-mix' },
-  { key: 'sidebar-wide', mode: 'sidebar', previewClass: 'preview-sidebar-wide' },
-] as const
+/** 与 `LayoutMode` / `layouts` 配置一致，仅展示已实现布局 */
+const layoutPatterns: { key: LayoutMode; previewClass: string; label: string }[] = [
+  { key: 'vertical', previewClass: 'preview-vertical', label: '经典' },
+  { key: 'sidebar', previewClass: 'preview-sidebar', label: '侧边' },
+  { key: 'horizontal', previewClass: 'preview-horizontal', label: '水平' },
+]
 
-const currentLayoutPattern = ref<(typeof layoutPatterns)[number]['key']>('vertical')
+const currentLayoutPattern = ref<LayoutMode>('vertical')
 
 const layoutMode = computed<LayoutMode>({
   get: () => layoutStore.getLayoutMode,
   set: (value) => {
     layoutStore.setLayoutMode(value)
-    if (value === 'top') {
+    if (value === 'horizontal') {
       layoutStore.setSidebarShow(false)
       layoutStore.setIsCollapse(false)
     } else {
@@ -376,39 +384,22 @@ watch(siderTransparent, (value) => {
 })
 
 watch(
-  () => [layoutStore.getLayoutMode, layoutStore.getMenuSplit, layoutStore.getIsCollapse] as const,
-  ([mode, menuSplit, isCollapse]) => {
-    let fallback = layoutPatterns.find((item) => item.mode === mode)
-    if (mode === 'top' && menuSplit) {
-      fallback = layoutPatterns.find((item) => item.key === 'top-mix') ?? fallback
-    } else if (mode === 'vertical' && isCollapse) {
-      fallback = layoutPatterns.find((item) => item.key === 'vertical-slim') ?? fallback
-    } else if (mode === 'sidebar' && !isCollapse) {
-      fallback = layoutPatterns.find((item) => item.key === 'sidebar-wide') ?? fallback
+  () => layoutStore.getLayoutMode,
+  (mode) => {
+    if (currentLayoutPattern.value !== mode) {
+      currentLayoutPattern.value = mode
     }
-    const currentPattern = layoutPatterns.find((item) => item.key === currentLayoutPattern.value)
-    if (currentPattern?.key === fallback?.key) return
-    if (fallback) {
-      currentLayoutPattern.value = fallback.key
+    /* 侧边栏布局下侧栏绝对定位，与间隙布局不搭配：进入该模式时关闭间隙 */
+    if (mode === 'sidebar' && layoutStore.getIsGap) {
+      layoutStore.setIsGap(false)
     }
   },
   { immediate: true },
 )
 
-function handleLayoutPatternChange(patternKey: (typeof layoutPatterns)[number]['key']) {
+function handleLayoutPatternChange(patternKey: LayoutMode) {
   currentLayoutPattern.value = patternKey
-  const pattern = layoutPatterns.find((item) => item.key === patternKey)
-  if (!pattern) return
-  layoutMode.value = pattern.mode
-  if (pattern.key === 'top-mix') {
-    isMenuSplit.value = true
-  } else if (pattern.key === 'top') {
-    isMenuSplit.value = false
-  } else if (pattern.key === 'vertical-slim') {
-    layoutStore.setIsCollapse(true)
-  } else {
-    layoutStore.setIsCollapse(false)
-  }
+  layoutMode.value = patternKey
 }
 
 function handlePrimaryColorChange(color: string) {
@@ -552,6 +543,10 @@ onMounted(() => {
   gap: 10px;
 }
 
+.layout-grid__cell {
+  min-width: 0;
+}
+
 .layout-card {
   border: 1px solid var(--u-border-color);
   border-radius: 10px;
@@ -567,100 +562,97 @@ onMounted(() => {
 }
 
 .layout-preview {
-  display: block;
+  display: grid;
   width: 100%;
   height: 46px;
+  box-sizing: border-box;
+  padding: 4px;
+  gap: 5px;
   border-radius: 8px;
-  background-color: color-mix(in srgb, var(--u-primary-color) 10%, var(--u-bg-card));
-  position: relative;
+  background-color: color-mix(in srgb, var(--u-text-primary) 4%, var(--u-bg-card));
   overflow: hidden;
+
+  /* 图二：顶栏浅主色、内容浅灰、侧栏饱和主色 */
+  --preview-chrome: var(--u-primary-color);
+  --preview-topbar: color-mix(in srgb, var(--u-primary-color) 28%, var(--u-bg-elevated));
+  --preview-body: color-mix(in srgb, var(--u-text-primary) 10%, var(--u-bg-elevated));
 }
 
-.preview-vertical::before,
-.preview-sidebar::before,
-.preview-top::before,
-.preview-vertical-slim::before,
-.preview-top-mix::before,
-.preview-sidebar-wide::before {
-  content: '';
-  position: absolute;
-  background-color: color-mix(in srgb, var(--u-primary-color) 62%, white);
-  border-radius: 4px;
+.layout-preview__block {
+  min-width: 0;
+  min-height: 0;
+  border-radius: 3px;
 }
 
-.preview-vertical::before {
-  left: 4px;
-  top: 4px;
-  width: 8px;
-  height: 38px;
+.layout-preview__sider {
+  background-color: var(--preview-chrome);
 }
 
-.preview-sidebar::before {
-  left: 4px;
-  top: 4px;
-  width: 38px;
-  height: 8px;
+.layout-preview__header {
+  background-color: var(--preview-topbar);
 }
 
-.preview-top::before {
-  left: 4px;
-  top: 4px;
-  width: 38px;
-  height: 8px;
+.layout-preview__content {
+  background-color: var(--preview-body);
 }
 
-.preview-top::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 18px;
-  width: 8px;
-  height: 24px;
-  border-radius: 4px;
-  background-color: color-mix(in srgb, var(--u-primary-color) 62%, white);
+/* 经典：侧栏 + 顶栏 + 主区域 */
+.preview-vertical {
+  grid-template-columns: 10px 1fr;
+  grid-template-rows: 9px 1fr;
+  grid-template-areas:
+    'sider header'
+    'sider content';
 }
 
-.preview-vertical-slim::before {
-  left: 4px;
-  top: 4px;
-  width: 8px;
-  height: 38px;
+.preview-vertical .layout-preview__sider {
+  grid-area: sider;
 }
 
-.preview-vertical-slim::after {
-  content: '';
-  position: absolute;
-  left: 16px;
-  top: 4px;
-  width: 20px;
-  height: 8px;
-  border-radius: 4px;
-  background-color: color-mix(in srgb, var(--u-primary-color) 62%, white);
+.preview-vertical .layout-preview__header {
+  grid-area: header;
 }
 
-.preview-top-mix::before {
-  left: 4px;
-  top: 4px;
-  width: 38px;
-  height: 8px;
+.preview-vertical .layout-preview__content {
+  grid-area: content;
 }
 
-.preview-top-mix::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 18px;
-  width: 8px;
-  height: 20px;
-  border-radius: 4px;
-  background-color: color-mix(in srgb, var(--u-primary-color) 62%, white);
+/* 侧边：通栏顶栏 + 侧栏 + 主区域 */
+.preview-sidebar {
+  grid-template-columns: 10px 1fr;
+  grid-template-rows: 9px 1fr;
+  grid-template-areas:
+    'head head'
+    'side body';
 }
 
-.preview-sidebar-wide::before {
-  left: 4px;
-  top: 4px;
-  width: 12px;
-  height: 38px;
+.preview-sidebar .layout-preview__sider {
+  grid-area: side;
+}
+
+.preview-sidebar .layout-preview__header {
+  grid-area: head;
+}
+
+.preview-sidebar .layout-preview__content {
+  grid-area: body;
+}
+
+/* 水平：通栏顶栏 + 主区域 */
+.preview-horizontal {
+  grid-template-columns: 1fr;
+  grid-template-rows: 9px 1fr;
+  grid-template-areas:
+    'head'
+    'body';
+}
+
+.preview-horizontal .layout-preview__header {
+  grid-area: head;
+}
+
+.preview-horizontal .layout-preview__content {
+  grid-area: body;
 }
 
 .preference-footer {

@@ -1,4 +1,4 @@
-export type LayoutMode = 'vertical' | 'sidebar' | 'top'
+export type LayoutMode = 'vertical' | 'sidebar' | 'horizontal'
 
 export interface LayoutConfig {
   mode: LayoutMode

@@ -13,7 +13,7 @@ export const defaultThemeMode: ThemeMode = 'dark'
 
 export const defaultThemeState: ThemeState = {
   mode: defaultThemeMode,
-  primaryColor: '#2f54eb',
+  primaryColor: '#1d55cc',
   borderRadius: '0.5rem',
   siderTheme: 'light',
   headerTheme: 'light',
@@ -21,7 +21,7 @@ export const defaultThemeState: ThemeState = {
 
 export const primaryColorPresets: PrimaryColorPreset[] = [
   { label: '默认蓝', value: '#297acf' },
-  { label: '极客蓝', value: '#1890ff' },
+  { label: '极客蓝', value: '#1d55cc' },
   { label: '薄暮红', value: '#f5222d' },
   { label: '火山橘', value: '#fa541c' },
   { label: '日暮橙', value: '#fa8c16' },
@@ -57,7 +57,7 @@ export const areaThemePalettes: Record<ThemeMode, Record<ThemeTone, AreaThemePal
       itemHoverBg: 'rgba(5, 5, 5, 0.06)',
     },
     dark: {
-      bg: '#1d1f29',
+      bg: '#18181C',
       border: 'rgba(255, 255, 255, 0.12)',
       text: '#eceff5',
       itemHoverBg: 'rgba(255, 255, 255, 0.08)',
@@ -65,13 +65,13 @@ export const areaThemePalettes: Record<ThemeMode, Record<ThemeTone, AreaThemePal
   },
   dark: {
     light: {
-      bg: '#2a2d3a',
+      bg: '#18181C',
       border: 'rgba(255, 255, 255, 0.14)',
       text: '#eef2f8',
       itemHoverBg: 'rgba(255, 255, 255, 0.08)',
     },
     dark: {
-      bg: '#1d1f29',
+      bg: '#18181C',
       border: 'rgba(255, 255, 255, 0.12)',
       text: '#eceff5',
       itemHoverBg: 'rgba(255, 255, 255, 0.08)',

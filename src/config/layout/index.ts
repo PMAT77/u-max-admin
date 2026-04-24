@@ -47,8 +47,8 @@ export const layouts: Record<LayoutMode, LayoutConfig> = {
     siderClass: 'u-max-sider--sidebar',
     logoClass: 'u-max-logo--sidebar',
   },
-  top: {
-    mode: 'top',
+  horizontal: {
+    mode: 'horizontal',
     sidebarWidth: 220,
     collapsedWidth: 64,
     bigLogo: false,
@@ -65,8 +65,8 @@ export const layouts: Record<LayoutMode, LayoutConfig> = {
     isGap: false,
     headerHeight: 56,
     tagHeight: 47,
-    siderClass: 'u-max-sider--top',
-    logoClass: 'u-max-logo--top',
+    siderClass: 'u-max-sider--horizontal',
+    logoClass: 'u-max-logo--horizontal',
   },
 }
 

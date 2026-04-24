@@ -197,7 +197,7 @@ export const useLayoutStore = defineStore('layout', {
 
     setMenuSplit(split: boolean): void {
       this.config.menuSplit = split
-      if (this.mode === 'top') {
+      if (this.mode === 'horizontal') {
         this.config.showSidebar = split
         if (!split) {
           this.sidebar.show = false
@@ -242,5 +242,16 @@ export const useLayoutStore = defineStore('layout', {
     },
   },
 
-  persist: true
+  persist: {
+    /** 旧版持久化字段 `top` → `horizontal` */
+    afterHydrate: (ctx) => {
+      const store = ctx.store as unknown as {
+        mode: LayoutMode | 'top'
+        setLayoutMode: (m: LayoutMode) => void
+      }
+      if (store.mode === 'top') {
+        store.setLayoutMode('horizontal')
+      }
+    },
+  },
 })

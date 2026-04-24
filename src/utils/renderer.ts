@@ -33,8 +33,8 @@ export function renderUserDropdownHeader(): VNode {
       avatar: () => h(NAvatar, { 
         size: 36,
         style: {
-          color: 'var(--u-bg-card)',
-          backgroundColor: 'var(--u-primary-color)'
+          color: '#ffffff',
+          backgroundColor: 'var(--u-primary-color)',
         },
       }, () => h(NIcon, { size: 40 }, { default: () => h(RobotFilled)})),
       header: () => h(

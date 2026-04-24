@@ -23,7 +23,7 @@
 - 📱 **响应式** - 完美支持移动端
 - 🌙 **主题切换** - 支持亮色/暗色主题 + 自定义主色 + 圆角定制 + 侧栏/顶栏独立明暗主题
 - 🌐 **国际化** - 多语言支持（中/英）
-- ⚙️ **配置驱动** - 灵活的布局配置系统
+- ⚙️ **配置驱动** - 灵活的布局配置系统（`vertical` / `sidebar` / **`horizontal`（顶栏横向菜单）**）
 - 🔐 **登录认证** - 多种登录方式（账号/手机/二维码）
 - 🛡️ **RBAC 权限闭环** - 路由 `meta.roles` + 菜单过滤 + 按钮/操作级 `v-permission`
 - 🔄 **Token 自动续期** - accessToken + refreshToken 双令牌与 401 自动刷新重试
@@ -141,6 +141,11 @@ src/
 └── main.ts
 ```
 
+## 文档
+
+- **架构与开发规范**：[`docs/PROJECT_ARCHITECTURE.md`](docs/PROJECT_ARCHITECTURE.md)
+- **开发计划与待办清单**：[`docs/DEVELOPMENT_PLAN.md`](docs/DEVELOPMENT_PLAN.md)（问题分析、优化方向、分阶段 backlog）
+
 ## 开始使用
 
 ### 安装依赖
@@ -180,7 +185,7 @@ npm run preview
 | 主题系统     | 亮色/暗色主题切换 + 自定义主色 + 圆角 + 侧栏/顶栏独立主题 | ✅   |
 | 登录页       | 三种登录方式（账号/手机/二维码）          | ✅   |
 | 布局架构     | 配置驱动布局系统                          | ✅   |
-| 多布局模式   | 支持 vertical/sidebar/top 三种布局        | ✅   |
+| 多布局模式   | 支持 vertical/sidebar/horizontal 三种布局 | ✅   |
 | API 封装     | Axios 请求封装 + 错误处理                 | ✅   |
 | Mock 数据    | 开发环境 Mock 数据支持                    | ✅   |
 | 自动导入     | unplugin-auto-import API 自动导入         | ✅   |
@@ -252,7 +257,7 @@ interface LayoutConfig {
 const layouts = {
   vertical: { ... },
   sidebar: { ... },
-  top: { ... }
+  horizontal: { ... }
 }
 
 // 3. 切换布局
@@ -265,7 +270,7 @@ layoutStore.setLayoutMode('sidebar')
 |------|------|
 | vertical | 垂直布局，侧边栏全屏高度 |
 | sidebar | 侧边栏布局，侧边栏在头部下方 |
-| top | 顶部导航布局，无侧边栏 |
+| horizontal | 水平模式：顶栏横向菜单，无侧边栏 |
 
 ### 侧栏说明
 
@@ -286,7 +291,7 @@ const layouts = {
 };
 
 // 2. 在 type.ts 添加类型
-export type LayoutMode = 'vertical' | 'sidebar' | 'top' | 'mixin';
+export type LayoutMode = 'vertical' | 'sidebar' | 'horizontal' | 'mixin';
 
 // 3. 切换布局
 layoutStore.setLayoutMode('mixin');

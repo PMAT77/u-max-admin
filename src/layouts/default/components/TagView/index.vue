@@ -79,7 +79,10 @@ const cssVars = computed(() => ({
   '--tag-active-shadow-color': `${themeStore.primaryColor}1a`,
   '--tag-border-radius': themeStore.borderRadius,
   '--tag-item-hover-color': 'color-mix(in srgb, var(--u-primary-color) 12%, transparent)',
-  '--tag-item-close-hover-color': 'color-mix(in srgb, var(--u-text-primary) 12%, transparent)',
+  '--tag-item-close-hover-color':
+    'color-mix(in srgb, var(--u-header-text-color, var(--u-text-primary)) 14%, transparent)',
+  '--tag-pill-text': 'color-mix(in srgb, var(--u-header-text-color) 82%, var(--u-header-bg-color))',
+  '--tag-pill-bg': 'color-mix(in srgb, var(--u-header-text-color) 11%, var(--u-header-bg-color))',
 }));
 
 const tagList = computed({
@@ -268,11 +271,12 @@ onMounted(() => {
 .u-max-tagview {
   user-select: none;
   background-color: var(--u-header-bg-color, var(--u-bg-elevated));
-  color: var(--u-header-text-color, var(--u-text-primary));
   border-bottom: 1px solid var(--u-header-border-color, var(--u-border-color));
+  color: var(--u-header-text-color, var(--u-text-primary));
   transition:
     background-color 0.3s var(--n-bezier),
-    border-color 0.3s var(--n-bezier);
+    border-color 0.3s var(--n-bezier),
+    color 0.3s var(--n-bezier);
 
   :deep(.n-scrollbar-content) {
     height: 100%;
@@ -292,35 +296,30 @@ onMounted(() => {
   align-items: center;
   padding: var(--u-tag-item-padding);
   font-size: var(--u-tag-item-font-size);
-  color: var(--n-text-color-2);
-  background-color: var(--n-color-hover);
+  color: var(--tag-pill-text);
+  // background-color: var(--tag-pill-bg);
   border-radius: var(--tag-border-radius);
   cursor: pointer;
   transition:
     background-color var(--u-transition-duration) var(--n-bezier),
-    box-shadow var(--u-transition-duration) var(--n-bezier);
+    box-shadow var(--u-transition-duration) var(--n-bezier),
+    color var(--u-transition-duration) var(--n-bezier);
   white-space: nowrap;
   flex-shrink: 0;
   position: relative;
 
   &:hover {
-    background-color: var(--tag-item-hover-color);
+    background-color: var(--u-header-item-hover-bg, var(--tag-item-hover-color));
   }
 
   &--active {
-    color: var(--n-text-color);
+    color: var(--u-primary-color);
     background-color: var(--tag-active-bg-color);
     box-shadow: 0 0 0 1px var(--tag-active-shadow-color);
 
-    &::before {
-      content: '';
-      position: absolute;
-      left: 8px;
-      width: var(--u-tag-icon-size);
-      height: var(--u-tag-icon-size);
-      border-radius: 50%;
-      background-color: var(--n-primary-color);
-    }
+    &:hover {
+      background-color: var(--tag-active-bg-color);
+    } 
   }
 
   &[draggable='true'] {
@@ -348,12 +347,14 @@ onMounted(() => {
 
 .u-max-tagview__item-icon {
   margin-right: var(--u-space-1);
+  color: inherit;
 }
 
 .u-max-tagview__item-title {
   max-width: var(--u-tag-title-max-width);
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: color var(--u-transition-duration) var(--n-bezier);
 }
 
 .u-max-tagview__item-close {
@@ -361,6 +362,11 @@ onMounted(() => {
   margin-left: var(--u-tag-close-gap);
   border-radius: 50%;
   transition: all var(--u-transition-duration-fast) ease;
+  color: inherit;
+
+  :deep(.n-button__content) {
+    color: inherit;
+  }
 }
 
 .u-max-tagview__item-close:hover {

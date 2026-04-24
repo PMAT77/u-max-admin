@@ -4,6 +4,7 @@
     class="u-max-layout h-screen"
     :class="{ 'u-max-layout--gap': layoutStore.getIsGap }"
     :has-sider="layoutStore.getSidebarShow"
+    :style="layoutStackCssVars"
   >
     <!-- 侧边栏 -->
     <n-layout-sider
@@ -48,20 +49,21 @@
     <n-scrollbar class="u-max-scrollbar" content-style="overflow: hidden;">
       <n-layout-header
         v-if="showHeader"
-        bordered
         class="u-max-header"
         :class="{
           'u-max-header--fixed': layoutStore.getHeaderFixed,
           'u-max-header--no-tag': !layoutStore.getShowTagView,
         }"
       >
-        <Navbar v-if="layoutStore.getShowTopbar" />
-        <TagView v-if="layoutStore.getShowTagView" />
+        <n-config-provider v-bind="layoutHeaderProviderProps">
+          <Navbar v-if="layoutStore.getShowTopbar" />
+          <TagView v-if="layoutStore.getShowTagView" />
+        </n-config-provider>
       </n-layout-header>
 
       <!-- 内容区域 -->
       <n-layout-content class="u-max-content p-4 h-full" :style="contentStyle">
-        <div class="px-2.5 box-border size-full">
+        <div class="px-2.5 pt-2.5 box-border size-full">
           <router-view />
           <PreferenceButton />
         </div>
@@ -72,6 +74,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { NConfigProvider } from 'naive-ui';
+import { layoutHeaderProviderProps } from '@/utils/naive';
 import { useLayoutStore, useThemeStore } from '@/stores';
 import { useMenuStore } from '@/stores';
 import { TextIndentLess, TextIndentMore } from '@vicons/carbon';
@@ -85,6 +89,18 @@ const layoutStore = useLayoutStore();
 const themeStore = useThemeStore();
 const menuStore = useMenuStore();
 const showHeader = computed(() => layoutStore.getShowTopbar || layoutStore.getShowTagView);
+
+/** sidebar 绝对定位侧栏需与整块固定顶栏（顶栏 + 页签）对齐，仅用 header 高度会挡住菜单 */
+const layoutStackCssVars = computed(() => {
+  if (!showHeader.value) {
+    return { '--u-max-layout-header-stack': '0px' } as Record<string, string>
+  }
+  let stack = 0
+  if (layoutStore.getShowTopbar) stack += layoutStore.getHeaderHeight
+  if (layoutStore.getShowTagView) stack += layoutStore.getTagHeight
+  return { '--u-max-layout-header-stack': `${stack}px` } as Record<string, string>
+})
+
 const contentStyle = computed(() => {
   if (!showHeader.value || !layoutStore.getHeaderFixed) {
     return { padding: '0' };
@@ -139,9 +155,10 @@ onMounted(() => {
   &--sidebar {
     position: absolute;
     left: 0;
-    top: var(--u-max-header-height);
+    /* 由 layoutStackCssVars 注入：顶栏 + 页签（按开关）；勿仅用 header 高度，否则会与 TagView 重叠 */
+    top: var(--u-max-layout-header-stack, var(--u-layout-header-height));
     z-index: calc(var(--u-max-z-index) - 1);
-    height: calc(100vh - var(--u-max-header-height));
+    height: calc(100vh - var(--u-max-layout-header-stack, var(--u-layout-header-height)));
   }
 }
 

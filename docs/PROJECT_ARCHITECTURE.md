@@ -21,6 +21,8 @@
 13. [常见开发场景指南](#常见开发场景指南)
 14. [技术债与注意事项](#技术债与注意事项)
 
+迭代待办、问题分析与分阶段计划见 **`docs/DEVELOPMENT_PLAN.md`**。
+
 ---
 
 ## 项目概述
@@ -32,7 +34,7 @@
 - 🔐 完整的登录认证流程（账号/手机/二维码）
 - 🎨 主题切换（亮色/暗色）+ 自定义主色 + 圆角定制 + 侧栏/顶栏独立明暗主题
 - 🌐 国际化支持（中/英）
-- 📐 多种布局模式（vertical/sidebar/top）
+- 📐 多种布局模式（vertical/sidebar/horizontal）
 - 🏷️ 标签页缓存
 - 🔧 Mock 数据支持
 - 🤖 验证码生成与验证
@@ -875,6 +877,19 @@ components/common/
 3. 切换主题时：`themeStore` 状态更新（包括 `mode / primaryColor / borderRadius / siderTheme / headerTheme`）
 4. `ThemeProvider.vue` 负责把侧栏/顶栏主题同步为 CSS 变量（`--u-sider-*`、`--u-header-*`），布局组件自动响应
 
+### 区域主题与 Naive 子主题（顶栏 / 侧栏）
+
+- `config/theme/index.ts` 中 `areaThemePalettes` 描述「全局亮/暗 × 区域亮/暗」的调色板；`ThemeProvider.vue` 根据 `themeStore.mode`、`siderTheme`、`headerTheme` 写入 `--u-sider-*`、`--u-header-*`（含 **`--u-header-item-hover-bg`** 等与侧栏对称的悬停背景变量）。
+- 当**全局 Naive 主题**与**顶栏区域明暗**不一致时（例如全局亮 + 顶栏深），仅改 CSS 变量无法修正 `n-button` / `n-breadcrumb` 等内部的 `--n-*` 令牌。项目在 `src/utils/naive.ts` 中导出 **`layoutHeaderProviderProps`**，并在 `layouts/default/index.vue` 的 **`n-layout-header`** 内用 **`n-config-provider`** 包裹顶栏内容，在 `isHeaderDark !== isDark` 时为顶栏子树注入对应的 `darkTheme` 或浅色主题及主色覆盖。
+
+### 应用布局模式（`LayoutMode`）
+
+- 三种：`vertical`（经典侧栏 + 顶栏）、`sidebar`（通栏顶栏 + 侧栏自顶栏下起）、`horizontal`（水平：默认无侧栏，路由菜单在 **`Navbar`** 内以 **`Menu` 的 `placement='header'`** 横向展示）。
+- 持久化中旧键名 **`top`** 已在 `stores/modules/layout.ts` 的 **`persist.afterHydrate`** 中迁移为 **`horizontal`**。
+- **`sidebar`** 模式下侧栏为 `position: absolute`；`layouts/default/index.vue` 通过 **`--u-max-layout-header-stack`**（顶栏 + 页签总高度，由内联样式绑定在 `n-layout`）设置侧栏的 `top` / `height`，避免菜单被 **`TagView`** 遮挡。
+- 切换到 **`sidebar`** 时，`PreferenceButton.vue` 中的监听会自动关闭**间隙布局**（`setIsGap(false)`），与绝对定位侧栏兼容。
+- **`TagView`** 标签项文字/胶囊底优先使用 `--u-header-*` 与 `color-mix`，减少与 Naive 令牌不一致的问题；详见 `layouts/default/components/TagView/index.vue`。
+
 ### 主题持久化
 
 - 主题设置通过 `pinia-plugin-persistedstate` 自动持久化到 localStorage
@@ -1058,7 +1073,6 @@ themeStore.resetTheme();
 
 | 问题                   | 位置                 | 建议                              |
 | ---------------------- | -------------------- | --------------------------------- |
-| ThemeSwitcher.vue 缺失 | `components/common/` | 需创建或移除相关引用              |
 | API 路径配置不明确     | `.env`               | 确保 `VITE_API_BASE_URL` 配置正确 |
 
 ### 中优先级
@@ -1123,5 +1137,5 @@ npm run preview  # 预览生产版本
 
 ---
 
-_文档版本: 1.3.0_
-_最后更新: 2026-04-23_
+_文档版本: 1.4.0_
+_最后更新: 2026-04-24_

@@ -1,11 +1,16 @@
 /** * 导航栏组件 * 显示顶部导航栏，包含 Logo 和导航菜单 */
 <template>
-  <div class="u-max-navbar flex items-center" :style="{ height: `${layoutStore.getHeaderHeight}px` }">
-    <Logo v-if="layoutStore.getLayoutMode === 'sidebar'" />
+  <div
+    class="u-max-navbar flex items-center min-w-0"
+    :class="{ 'u-max-navbar--horizontal': layoutStore.getLayoutMode === 'horizontal' }"
+    :style="{ height: `${layoutStore.getHeaderHeight}px` }"
+  >
+    <Logo v-if="layoutStore.getLayoutMode === 'sidebar' || showHorizontalTopMenu" />
 
-    <div class="flex items-center">
+    <div class="flex items-center shrink-0">
       <div class="h-full flex items-center gap-1">
         <n-button
+          v-if="layoutStore.getLayoutMode !== 'horizontal' || layoutStore.getSidebarShow"
           quaternary
           class="u-max-navbar__btn w-38px h-38px ml-2"
           :focusable="false"
@@ -36,9 +41,13 @@
       </div>
     </div>
 
-    <div class="flex-grow basis-0 h-full"></div>
+    <div v-if="showHorizontalTopMenu" class="u-max-navbar__topmenu min-h-0 min-w-0 flex-1 px-1">
+      <Menu placement="header" />
+    </div>
 
-    <div class="u-max-navbar__right pr-4">
+    <div v-else class="flex-grow basis-0 h-full min-w-0"></div>
+
+    <div class="u-max-navbar__right shrink-0 pr-4">
       <n-flex align="center" :size="4">
         <!-- 主题切换 -->
         <n-button
@@ -223,7 +232,7 @@
                 round
                 class="mr-2"
                 :style="{
-                  color: 'var(--u-bg-card)',
+                  color: '#ffffff',
                   backgroundColor: 'var(--u-primary-color)',
                 }"
               >
@@ -271,11 +280,17 @@ import { useDocumentFullscreen } from '@/utils/fullscreen';
 
 import Logo from '../Logo/index.vue';
 import Breadcrumb from '../Breadcrumb/index.vue';
+import Menu from '../Menu/index.vue';
 import SvgIcon from '@/components/common/SvgIcon.vue';
 
 const router = useRouter();
 
 const layoutStore = useLayoutStore();
+
+/** 水平模式且无侧栏时，路由菜单渲染在顶栏中部 */
+const showHorizontalTopMenu = computed(
+  () => layoutStore.getLayoutMode === 'horizontal' && !layoutStore.getSidebarShow,
+);
 const themeStore = useThemeStore();
 const localeStore = useLocaleStore();
 const userStore = useUserStore();
@@ -439,6 +454,11 @@ function handleUserMenuSelect(key: string) {
     background-color var(--u-transition-duration) var(--n-bezier),
     border-color var(--u-transition-duration) var(--n-bezier);
 
+  /* 水平模式无侧栏折叠钮，Logo/首控件易贴边；与右侧 pr-4（16px）量级一致 */
+  &.u-max-navbar--horizontal {
+    padding-left: calc(var(--u-space-3) + var(--u-space-1));
+  }
+
   .u-max-navbar__btn,
   .u-max-navbar__btn i {
     transition: all var(--u-transition-duration) var(--n-bezier);
@@ -459,6 +479,12 @@ function handleUserMenuSelect(key: string) {
     .u-max-navbar__btn.anim-rotate:hover {
       transform: rotate(90deg);
     }
+  }
+
+  .u-max-navbar__topmenu {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
   }
 }
 </style>

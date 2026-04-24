@@ -76,6 +76,7 @@ watchEffect(() => {
   root.style.setProperty('--u-header-bg-color', headerTokens.bg)
   root.style.setProperty('--u-header-border-color', headerTokens.border)
   root.style.setProperty('--u-header-text-color', headerTokens.text)
+  root.style.setProperty('--u-header-item-hover-bg', headerTokens.itemHoverBg)
 })
 </script>
 

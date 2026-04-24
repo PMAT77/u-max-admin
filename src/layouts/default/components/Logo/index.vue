@@ -54,13 +54,14 @@ const logoCircle = computed(() => {
   return bigLogo.value;
 });
 
+/** 图标前景固定白色，与主色背景对比稳定；背景仍随主题主色 */
 const logoStyle = computed(() => ({
-  color: 'var(--u-bg-card)',
+  color: '#ffffff',
   backgroundColor: 'var(--u-primary-color)',
 }));
 
 const showText = computed(() => {
-  if (mode.value === 'sidebar') return true;
+  if (mode.value === 'sidebar' || mode.value === 'horizontal') return true;
   if (isCollapse.value) return false;
   return bigLogo.value;
 });
@@ -74,6 +75,12 @@ const showText = computed(() => {
 
   &.u-max-logo--sidebar {
     width: var(--u-layout-sidebar-width);
+  }
+
+  &.u-max-logo--horizontal {
+    flex-shrink: 0;
+    margin-right: 4px;
+    color: var(--u-header-text-color, var(--u-text-primary));
   }
 
   .u-max__logo--item {
