@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useNotification, useMessage } from 'naive-ui';
 import { userApi } from '@/api/user';
 import { useRouter, useRoute } from 'vue-router';
@@ -54,13 +54,12 @@ const loginBgUrl = new URL('@/assets/imgs/login-bg.png', import.meta.url).href;
  * @param {boolean} isLeft - 是否在左侧
  * @returns {string} 排序类名
  */
-const getOrderClass = (isLeft: Boolean) => {
+const getOrderClass = (isLeft: boolean) => {
   return isLeft ? 'order-1' : 'order-2';
 };
 
 async function handleLogin(loginData: { type: string; data: any }) {
   const { type, data } = loginData;
-  console.log('登录类型', type, '数据', data);
 
   const loading = message.loading('登录中...');
 
@@ -76,8 +75,8 @@ async function handleLogin(loginData: { type: string; data: any }) {
         });
         break;
       case 'phone':
-        console.log('手机号登录', data);
-        break;
+        message.warning('手机号登录功能开发中');
+        return;
       default:
         break;
     }

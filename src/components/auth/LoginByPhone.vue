@@ -31,6 +31,7 @@ import type { LoginByPhoneEmits } from '@/types/components';
  * 组件事件
  */
 const emit = defineEmits<LoginByPhoneEmits>();
+const message = useMessage();
 
 /**
  * 表单引用
@@ -85,7 +86,7 @@ async function handleGetCode() {
     const valid = await formRef.value.validate();
     if (valid) {
       // 这里可以添加获取验证码的逻辑
-      console.log('获取验证码:', form.value.phone);
+      message.info('验证码功能开发中');
     }
   }
 }

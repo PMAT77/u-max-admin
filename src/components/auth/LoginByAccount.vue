@@ -71,14 +71,15 @@ interface LoginForm {
 }
 
 const emit = defineEmits<LoginByAccountEmits>();
+const message = useMessage();
 
 /** 表单引用 */
 const formRef = ref<FormInst | null>(null);
 
 /** 表单数据 */
 const form = ref<LoginForm>({
-  username: 'superman',
-  password: '123456',
+  username: '',
+  password: '',
   captcha: '',
   captchaId: '',
 });
@@ -143,7 +144,7 @@ async function refreshCaptcha(): Promise<void> {
       form.value.captchaId = response.data.captchaId;
     }
   } catch (error) {
-    console.error('获取验证码失败:', error);
+    message.error('获取验证码失败，请稍后重试');
   } finally {
     captchaLoading.value = false;
   }
