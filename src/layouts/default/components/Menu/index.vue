@@ -128,7 +128,11 @@ function updateExpandedKeys() {
   expandedKeys.value = findParentKeysInSplitMenu(menuOptions.value, currentPath);
 }
 
-function findParentKeysInSplitMenu(options: any[], targetKey: string, parents: string[] = []): string[] {
+function findParentKeysInSplitMenu(
+  options: any[],
+  targetKey: string,
+  parents: string[] = [],
+): string[] {
   for (const option of options) {
     if (!option || option.type === 'divider') continue;
 
@@ -143,7 +147,10 @@ function findParentKeysInSplitMenu(options: any[], targetKey: string, parents: s
     }
 
     if (option.children?.length) {
-      const result = findParentKeysInSplitMenu(option.children, targetKey, [...parents, option.key]);
+      const result = findParentKeysInSplitMenu(option.children, targetKey, [
+        ...parents,
+        option.key,
+      ]);
       if (result.length) return result;
     }
   }
@@ -227,6 +234,10 @@ watch(
 .u-max-menu--header {
   flex: 1;
   min-width: 0;
+  // --u-header-menu-item-bg: color-mix(in srgb, var(--u-sider-item-active-bg) 40%, transparent);
+  // --n-item-color-hover: var(--u-header-menu-item-bg) !important;
+  // --n-item-color-active: var(--u-header-menu-item-bg) !important;
+  // --n-item-color-active-hover: var(--u-header-menu-item-bg) !important;
 
   :deep(.n-menu-item-content),
   :deep(.n-submenu .n-submenu-children .n-menu-item-content) {
