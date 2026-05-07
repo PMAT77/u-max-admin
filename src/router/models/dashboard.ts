@@ -2,7 +2,7 @@
  * 仪表盘相关路由配置
  * 包含控制台页面路由
  */
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,13 +19,13 @@ const routes: RouteRecordRaw[] = [
         name: 'Workbench',
         component: () => import('@/views/dashboard/Dashboard.vue'),
         meta: {
-          title: '工作台', 
+          title: '工作台',
           icon: 'Workbench',
-          affix: true
-        }
-      }
-    ]
-  }
-]
+          affix: true,
+        },
+      },
+    ],
+  },
+];
 
-export default routes
+export default routes;

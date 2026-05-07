@@ -15,7 +15,7 @@ export interface SystemLogoProps {
  */
 export type SystemLogoEmits = {
   // 可以添加组件的Emits类型
-}
+};
 
 /**
  * LoginPanel组件Props
@@ -28,8 +28,8 @@ export interface LoginPanelProps {
  * LoginPanel组件Emits
  */
 export type LoginPanelEmits = {
-  (e: 'login', loginData: { type: string; data: any }): void
-}
+  (e: 'login', loginData: { type: string; data: any }): void;
+};
 
 /**
  * LoginByAccount组件Props
@@ -42,8 +42,14 @@ export interface LoginByAccountProps {
  * LoginByAccount组件Emits
  */
 export type LoginByAccountEmits = {
-  (e: 'login', loginData: { type: string; data: { username: string; password: string; captcha: string; captchaId: string } }): void
-}
+  (
+    e: 'login',
+    loginData: {
+      type: string;
+      data: { username: string; password: string; captcha: string; captchaId: string };
+    },
+  ): void;
+};
 
 /**
  * LoginByPhone组件Props
@@ -56,5 +62,5 @@ export interface LoginByPhoneProps {
  * LoginByPhone组件Emits
  */
 export type LoginByPhoneEmits = {
-  (e: 'login', loginData: { type: string; data: { phone: string; code: string[] } }): void
-}
+  (e: 'login', loginData: { type: string; data: { phone: string; code: string[] } }): void;
+};

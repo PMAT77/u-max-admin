@@ -2,14 +2,14 @@
  * 通用路由配置
  * 包含关于页面和404页面路由
  */
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/common',
     component: () => import('@/layouts/default/index.vue'),
     meta: {
-      title: '通用', 
+      title: '通用',
       show: false,
     },
     children: [
@@ -18,10 +18,10 @@ const routes: RouteRecordRaw[] = [
         name: 'About',
         component: () => import('@/views/common/About.vue'),
         meta: {
-          title: '关于', 
-        }
-      }
-    ]
+          title: '关于',
+        },
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',
@@ -30,10 +30,10 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'NotFound',
-        component: () => import('@/views/common/NotFound.vue')
-      }
-    ]
-  }
-]
+        component: () => import('@/views/common/NotFound.vue'),
+      },
+    ],
+  },
+];
 
-export default routes
+export default routes;

@@ -15,9 +15,9 @@ export default {
     quickLogin: '快捷登录',
     loginSuccess: '登录成功',
     loginFailed: '登录失败',
-    getCode: '获取验证码'
+    getCode: '获取验证码',
   },
-  
+
   // 菜单相关
   menu: {
     dashboard: '控制台',
@@ -37,17 +37,17 @@ export default {
     settings: '系统设置',
     basic: '基本设置',
     permissions: '权限管理',
-    logs: '日志管理'
+    logs: '日志管理',
   },
-  
+
   // 布局相关
   layout: {
     collapse: '折叠',
     expand: '展开',
     profile: '个人资料',
-    logout: '退出登录'
+    logout: '退出登录',
   },
-  
+
   // 通用
   common: {
     save: '保存',
@@ -65,6 +65,6 @@ export default {
     success: '成功',
     error: '错误',
     warning: '警告',
-    info: '信息'
-  }
-}
+    info: '信息',
+  },
+};

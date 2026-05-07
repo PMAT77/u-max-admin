@@ -319,7 +319,7 @@ onMounted(() => {
 
     &:hover {
       background-color: var(--tag-active-bg-color);
-    } 
+    }
   }
 
   &[draggable='true'] {

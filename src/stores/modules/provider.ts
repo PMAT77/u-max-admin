@@ -1,27 +1,27 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { LoadingBarApi, MessageApi, NotificationApi, DialogApi } from 'naive-ui'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import type { LoadingBarApi, MessageApi, NotificationApi, DialogApi } from 'naive-ui';
 
 export const useProviderStore = defineStore('provider', () => {
-  const loadingBar = ref<LoadingBarApi>()
-  const message = ref<MessageApi>()
-  const notification = ref<NotificationApi>()
-  const dialog = ref<DialogApi>()
+  const loadingBar = ref<LoadingBarApi>();
+  const message = ref<MessageApi>();
+  const notification = ref<NotificationApi>();
+  const dialog = ref<DialogApi>();
 
   function setLoadingBar(api: LoadingBarApi) {
-    loadingBar.value = api
+    loadingBar.value = api;
   }
 
   function setMessage(api: MessageApi) {
-    message.value = api
+    message.value = api;
   }
 
   function setNotification(api: NotificationApi) {
-    notification.value = api
+    notification.value = api;
   }
 
   function setDialog(api: DialogApi) {
-    dialog.value = api
+    dialog.value = api;
   }
 
   return {
@@ -33,5 +33,5 @@ export const useProviderStore = defineStore('provider', () => {
     setMessage,
     setNotification,
     setDialog,
-  }
-})
+  };
+});

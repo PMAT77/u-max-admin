@@ -2,14 +2,14 @@
  * 主题配置
  * 管理系统默认主题、预设颜色和边框圆角配置
  */
-import type { ThemeMode, ThemeState, BorderRadiusPreset, ThemeTone } from './type'
+import type { ThemeMode, ThemeState, BorderRadiusPreset, ThemeTone } from './type';
 
 export interface PrimaryColorPreset {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
 
-export const defaultThemeMode: ThemeMode = 'dark'
+export const defaultThemeMode: ThemeMode = 'dark';
 
 export const defaultThemeState: ThemeState = {
   mode: defaultThemeMode,
@@ -17,7 +17,7 @@ export const defaultThemeState: ThemeState = {
   borderRadius: '0.5rem',
   siderTheme: 'light',
   headerTheme: 'light',
-}
+};
 
 export const primaryColorPresets: PrimaryColorPreset[] = [
   { label: '默认蓝', value: '#297acf' },
@@ -31,7 +31,7 @@ export const primaryColorPresets: PrimaryColorPreset[] = [
   { label: '酱紫', value: '#9c27b0' },
   { label: '暗夜紫', value: '#2f54eb' },
   { label: '魔力粉', value: '#eb2f96' },
-]
+];
 
 export const borderRadiusPresets: BorderRadiusPreset[] = [
   { label: '无圆角', value: '0rem' },
@@ -39,13 +39,13 @@ export const borderRadiusPresets: BorderRadiusPreset[] = [
   { label: '中圆角', value: '0.5rem' },
   { label: '大圆角', value: '0.75rem' },
   { label: '超大圆角', value: '1rem' },
-]
+];
 
 export interface AreaThemePalette {
-  bg: string
-  border: string
-  text: string
-  itemHoverBg: string
+  bg: string;
+  border: string;
+  text: string;
+  itemHoverBg: string;
 }
 
 export const areaThemePalettes: Record<ThemeMode, Record<ThemeTone, AreaThemePalette>> = {
@@ -77,9 +77,9 @@ export const areaThemePalettes: Record<ThemeMode, Record<ThemeTone, AreaThemePal
       itemHoverBg: 'rgba(255, 255, 255, 0.08)',
     },
   },
-}
+};
 
 export const areaThemeActiveAlpha: Record<ThemeTone, number> = {
   light: 0.16,
   dark: 0.32,
-}
+};

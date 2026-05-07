@@ -1,5 +1,14 @@
 <script setup lang="ts">
-import { NLoadingBarProvider, NNotificationProvider, NMessageProvider, NDialogProvider, useLoadingBar, useMessage, useNotification, useDialog } from 'naive-ui';
+import {
+  NLoadingBarProvider,
+  NNotificationProvider,
+  NMessageProvider,
+  NDialogProvider,
+  useLoadingBar,
+  useMessage,
+  useNotification,
+  useDialog,
+} from 'naive-ui';
 import { defineComponent, h } from 'vue';
 import { useProviderStore } from '@/stores/modules/provider';
 

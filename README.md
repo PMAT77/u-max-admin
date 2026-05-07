@@ -1,6 +1,6 @@
 # UMax Admin
 
-基于 Vue 3 + Vite + Naive UI 构建的企业级中后台管理系统。
+基于 Vue 3 + **Vite+**（`vp`）+ Naive UI 构建的企业级中后台管理系统。
 
 ## 项目预览
 
@@ -16,7 +16,7 @@
 
 - 🚀 **Vue 3 Composition API** - 现代化的 Vue 开发方式
 - 🎨 **Naive UI** - 优秀的 Vue 3 组件库
-- 📦 **Vite** - 极速的开发体验
+- 📦 **Vite+** - 统一工具链（`vp dev` / `vp build` / `vp check`，底层 Vite）
 - 🎯 **TypeScript** - 完整的类型支持
 - 🗂️ **Pinia** - 轻量级状态管理 + 持久化
 - 🎨 **UnoCSS** - 原子化 CSS 引擎
@@ -32,18 +32,18 @@
 
 ## 技术栈
 
-| 技术                        | 版本            | 说明       |
-| --------------------------- | --------------- | ---------- |
-| Vue                         | ^3.5.25         | 核心框架   |
-| Vite                        | ^7.3.1          | 构建工具   |
-| Naive UI                    | ^2.44.1         | UI 组件库  |
-| TypeScript                  | ^5.9.3          | 类型支持   |
-| Pinia                       | ^3.0.4          | 状态管理   |
-| pinia-plugin-persistedstate | ^4.7.1          | 状态持久化 |
-| UnoCSS                      | ^66.6.6         | CSS 引擎   |
-| Axios                       | ^1.13.6         | HTTP 请求  |
-| Vue Router                  | ^4.6.4          | 路由管理   |
-| Vue I18n                    | ^12.0.0-alpha.3 | 国际化     |
+| 技术                        | 版本                                                             | 说明         |
+| --------------------------- | ---------------------------------------------------------------- | ------------ |
+| Vue                         | ^3.5.25                                                          | 核心框架     |
+| Vite+ / Vite                | 见 `package.json`（`vite-plus`、`@voidzero-dev/vite-plus-core`） | 构建与工具链 |
+| Naive UI                    | ^2.44.1                                                          | UI 组件库    |
+| TypeScript                  | ^5.9.3                                                           | 类型支持     |
+| Pinia                       | ^3.0.4                                                           | 状态管理     |
+| pinia-plugin-persistedstate | ^4.7.1                                                           | 状态持久化   |
+| UnoCSS                      | ^66.6.6                                                          | CSS 引擎     |
+| Axios                       | ^1.13.6                                                          | HTTP 请求    |
+| Vue Router                  | ^4.6.4                                                           | 路由管理     |
+| Vue I18n                    | ^12.0.0-alpha.3                                                  | 国际化       |
 
 ## 目录结构
 
@@ -126,7 +126,7 @@ src/
 ├── utils/               # 工具函数
 │   ├── captcha.ts      # 验证码生成
 │   ├── errorHandler.ts # 错误处理
-│   ├── menu.ts         # 菜单工具
+│   ├── fullscreen.ts   # 全屏
 │   ├── naive.ts        # Naive UI 全局 API
 │   ├── permission.ts   # 权限判断 + v-permission 指令
 │   ├── renderer.ts     # 渲染工具
@@ -138,12 +138,15 @@ src/
 │   ├── redirect/
 │   └── user/
 ├── App.vue
-└── main.ts
+├── main.ts             # 应用入口
+└── vite-env.d.ts       # 环境变量类型（含 VITE_USE_MOCK 等）
 ```
+
+仓库根目录另有 **`.env.example`**（环境变量模板，建议复制为 `.env` / `.env.local` 再修改）。
 
 ## 文档
 
-- **架构与开发规范**：[`docs/PROJECT_ARCHITECTURE.md`](docs/PROJECT_ARCHITECTURE.md)
+- **架构与开发规范**：[`docs/PROJECT_ARCHITECTURE.md`](docs/PROJECT_ARCHITECTURE.md)（§1–§14 总览；§15–§23 目录展开、规范速查与操作清单）
 - **开发计划与待办清单**：[`docs/DEVELOPMENT_PLAN.md`](docs/DEVELOPMENT_PLAN.md)（问题分析、优化方向、分阶段 backlog）
 
 ## 开始使用
@@ -151,26 +154,36 @@ src/
 ### 安装依赖
 
 ```bash
-npm install
+vp install
+# 或: npm install
 ```
 
 ### 开发模式
 
 ```bash
-npm run dev
+vp dev
+# 或: npm run dev（等价于 vp dev）
 ```
 
 ### 构建生产版本
 
 ```bash
-npm run build
+vp build
+# 或: npm run build
 ```
 
 ### 预览生产版本
 
 ```bash
-npm run preview
+vp preview
+# 或: npm run preview
 ```
+
+### 本地 Mock 与演示账号
+
+- 在 **`.env`** 中设置 **`VITE_USE_MOCK=true`**（且使用默认 `development` 模式）时，`vite-plugin-mock` 会拦截 `/api` 等请求。
+- **Mock 仅作用于 `vp dev`**：`vp build` / `vp preview` **不会**注入 Mock，产物始终请求 **`VITE_API_BASE_URL`** 指向的真实服务（详见 `docs/PROJECT_ARCHITECTURE.md` §10）。
+- 启用 Mock 时，账号密码登录可使用演示账号：**`superman` / `123456`**（定义在 `src/mock/user.ts`）。对接真实后端时请关闭 `VITE_USE_MOCK` 并配置正确 `VITE_API_BASE_URL`。
 
 ## 开发清单
 
@@ -187,7 +200,7 @@ npm run preview
 | 布局架构     | 配置驱动布局系统                                          | ✅   |
 | 多布局模式   | 支持 vertical/sidebar/horizontal 三种布局                 | ✅   |
 | API 封装     | Axios 请求封装 + 错误处理                                 | ✅   |
-| Mock 数据    | 开发环境 Mock 数据支持                                    | ✅   |
+| Mock 数据    | 仅 `vp dev` + `VITE_USE_MOCK=true` 时启用；与生产构建隔离 | ✅   |
 | 自动导入     | unplugin-auto-import API 自动导入                         | ✅   |
 | 组件自动导入 | unplugin-vue-components 组件自动导入                      | ✅   |
 | 图标支持     | ionicons5 / carbon / antd / fluent 图标库                 | ✅   |
@@ -324,10 +337,13 @@ themeStore.toggleTheme();
 
 ## 环境变量
 
-| 变量名            | 说明          | 默认值 |
-| ----------------- | ------------- | ------ |
-| VITE_API_BASE_URL | API 基础路径  | /api   |
-| VITE_MOCK_ENABLE  | 是否启用 Mock | true   |
+| 变量名            | 说明                                                                   | 默认值 |
+| ----------------- | ---------------------------------------------------------------------- | ------ |
+| VITE_API_BASE_URL | API 基础路径                                                           | /api   |
+| VITE_USE_MOCK     | 仅 `vp dev` 且为 `development` 模式：为 `true` 时启用 vite-plugin-mock | true   |
+| VITE_APP_ENV      | 环境标识（可读）                                                       | —      |
+
+生产构建（`vp build` / `vp preview`）下 **Mock 恒关闭**，与 `VITE_USE_MOCK` 无关。详见仓库根目录 `.env.example`。
 
 ## 浏览器支持
 
@@ -335,6 +351,10 @@ themeStore.toggleTheme();
 - Firefox >= 90
 - Safari >= 15
 - Edge >= 90
+
+## 持续集成
+
+仓库包含示例工作流 [`.github/workflows/quality.yml`](.github/workflows/quality.yml)，可结合 `npm run ci`（`vp check && vp test`）在合并前做检查。
 
 ## License
 

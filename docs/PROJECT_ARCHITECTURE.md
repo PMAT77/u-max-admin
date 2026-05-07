@@ -1,10 +1,11 @@
 # UMax Admin 项目架构文档（按当前代码重写）
 
 > 本文档用于描述当前代码已实现的真实架构、关键机制、开发约束与已知边界。  
-> 任务优先级、待办和里程碑见 `docs/DEVELOPMENT_PLAN.md`。
+> 任务优先级、待办和里程碑见 `docs/DEVELOPMENT_PLAN.md`。  
+> **§1–§14** 为架构总览与关键机制；**§15–§23** 为原附录合并后的目录展开、规范速查、操作清单与技术债（与代码同步维护）。
 
-**文档版本**: 2.0.0  
-**最后更新**: 2026-04-30
+**文档版本**: 2.2.0  
+**最后更新**: 2026-05-07
 
 ---
 
@@ -20,13 +21,13 @@
 - 多区域主题（全局、顶栏、侧栏）与 CSS 变量体系
 - 菜单、面包屑、标签页、偏好设置联动
 - i18n 基础接入（中/英）
-- Mock 联调体系与 API 分层封装
+- Mock 联调体系与 API 分层封装（**仅开发服务器**启用，与生产构建隔离，见 §10）
 
 ### 1.2 当前边界（非完全实现）
 
 - 手机号登录、扫码登录仅有 UI/入口，流程尚未闭环。
 - 用户资料、修改密码、仪表盘页面仍为占位或空实现。
-- 工程质量体系（测试、CI 闸门）尚未形成完整闭环。
+- 工程质量：已有 `vp check` / `vp test` 与 `.github/workflows/quality.yml` 示例；**业务单测与覆盖率**仍待加强。
 
 ---
 
@@ -158,10 +159,10 @@ src/
 - 立即调用 `userApi.getInfo()` 以服务端返回覆盖权限信息。
 - 获取用户信息失败时执行登出，避免脏登录态。
 
-### 7.3 当前风险点
+### 7.3 当前风险点与注意项
 
-- 登录页仍有调试输出（`console.log`）。
 - 手机号登录/扫码登录分支尚未接入真实 API 流程。
+- **本地 Mock 演示账号**（`superman` / `123456`）仅定义在 `src/mock/user.ts`；关闭 `VITE_USE_MOCK` 或生产构建后走真实鉴权，勿将 Mock 凭据当作线上账号。
 
 ---
 
@@ -201,14 +202,21 @@ src/
 
 ---
 
-## 10. Mock 策略（必须关注）
+## 10. Mock 策略（生产与本地隔离）
 
-当前配置下 `viteMockServe` 为：
+`vite.config.ts` 通过 `loadEnv` 与 `resolveViteConfigMode()` 读取与 CLI 一致的 mode（`build`/`preview` 默认 `production`，支持 `--mode`），并计算 **`enableViteMock`**：
 
-- `localEnabled: true`
-- `prodEnabled: true`
+| 配置项         | 实际行为                                                                                       |
+| -------------- | ---------------------------------------------------------------------------------------------- |
+| `localEnabled` | 仅当 **`viteMode === 'development'`** 且 **`.env*` 中 `VITE_USE_MOCK === 'true'`** 时为 `true` |
+| `prodEnabled`  | **恒为 `false`**，生产/预览构建**绝不**注入 Mock                                               |
+| `watchFiles`   | 与 `localEnabled` 同步，避免未启用 Mock 时无意义监听                                           |
 
-这意味着生产构建仍可能启用 Mock，存在较高风险。后续应以环境变量为唯一来源并默认禁用生产 Mock。
+**结论**：`vp build` / `vp preview` 产物中**不包含** `vite-plugin-mock` 对接口的拦截；运行时请求仅走 `VITE_API_BASE_URL` 指向的真实服务。`.env` 里写 `VITE_USE_MOCK=true` 只影响本地 `vp dev`，**不能**让生产包走 Mock。
+
+**约定**：环境变量模板见仓库根目录 **`.env.example`**；`import.meta.env` 类型见 **`src/vite-env.d.ts`**。
+
+**本地演示登录（Mock）**：账号 `superman`、密码 `123456`（见 `src/mock/user.ts`），仅在上述 Mock 启用且请求被插件拦截时有效。
 
 ---
 
@@ -238,7 +246,7 @@ src/
 - 新增页面时优先复用现有布局、路由模型和权限约定。
 - 所有主题相关样式优先使用 CSS token，避免硬编码颜色。
 - 新增 API 模块时，保持与 `src/api/index.ts` 返回结构一致。
-- 生产环境默认禁用 Mock，任何例外必须显式评审。
+- 生产构建禁止启用 `vite-plugin-mock`（当前 `prodEnabled` 已写死为 `false`）；若未来引入其他 Mock 手段须单独评审。
 
 ---
 
@@ -260,1144 +268,191 @@ vp test
 - 开发计划与优先级：`docs/DEVELOPMENT_PLAN.md`
 - 项目说明与快速开始：`README.md`
 
-# Naive Admin Max 项目架构文档
+## 15. 目录结构与模块边界（展开）
 
-> 本文档旨在帮助 AI 助手快速理解项目架构和开发规范，以便更高效地协助开发。
+以下在 §3 基础上展开至文件级，便于定位；**以仓库实际文件为准**。
 
----
-
-## 目录
-
-1. [项目概述](#项目概述)
-2. [技术栈概览](#技术栈概览)
-3. [目录结构详解](#目录结构详解)
-4. [核心开发规范](#核心开发规范)
-5. [状态管理规范](#状态管理规范)
-6. [路由系统规范](#路由系统规范)
-7. [API 请求规范](#api-请求规范)
-8. [样式开发规范](#样式开发规范)
-9. [组件开发规范](#组件开发规范)
-10. [国际化规范](#国际化规范)
-11. [Mock 数据规范](#mock-数据规范)
-12. [主题系统](#主题系统)
-13. [常见开发场景指南](#常见开发场景指南)
-14. [技术债与注意事项](#技术债与注意事项)
-
-迭代待办、问题分析与分阶段计划见 **`docs/DEVELOPMENT_PLAN.md`**。
-
----
-
-## 项目概述
-
-**Naive Admin Max** 是一个基于 Vue 3 + TypeScript + Vite 的现代化后台管理系统模板。采用 Naive UI 作为组件库，支持主题切换、国际化、权限控制等企业级特性。
-
-### 核心特性
-
-- 🔐 完整的登录认证流程（账号/手机/二维码）
-- 🎨 主题切换（亮色/暗色）+ 自定义主色 + 圆角定制 + 侧栏/顶栏独立明暗主题
-- 🌐 国际化支持（中/英）
-- 📐 多种布局模式（vertical/sidebar/horizontal）
-- 🏷️ 标签页缓存
-- 🔧 Mock 数据支持
-- 🤖 验证码生成与验证
-
----
-
-## 技术栈概览
-
-### 核心框架
-
-| 技术       | 版本  | 说明                           |
-| ---------- | ----- | ------------------------------ |
-| Vue        | 3.5.x | 核心框架，使用 Composition API |
-| TypeScript | 5.9.x | 类型安全                       |
-| Vite       | 7.x   | 构建工具                       |
-
-### UI 与样式
-
-| 技术       | 版本   | 说明                                   |
-| ---------- | ------ | -------------------------------------- |
-| Naive UI   | 2.44.x | Vue 3 组件库                           |
-| UnoCSS     | 66.x   | 原子化 CSS 引擎                        |
-| Sass       | 1.98.x | CSS 预处理器                           |
-| @vicons/\* | 0.13.x | 图标库（carbon/antd/fluent/ionicons5） |
-
-### 状态与路由
-
-| 技术                        | 版本 | 说明       |
-| --------------------------- | ---- | ---------- |
-| Pinia                       | 3.x  | 状态管理   |
-| pinia-plugin-persistedstate | 4.x  | 状态持久化 |
-| Vue Router                  | 4.x  | 路由管理   |
-
-### 工具链
-
-| 技术                    | 说明             |
-| ----------------------- | ---------------- |
-| unplugin-auto-import    | 自动导入 Vue API |
-| unplugin-vue-components | 组件自动注册     |
-| vite-plugin-mock        | Mock 数据        |
-| vite-plugin-svg-icons   | SVG 图标注册     |
-| vue-i18n                | 国际化           |
-| axios                   | HTTP 请求        |
-| @vueuse/core            | Vue 工具集       |
-
----
-
-## 目录结构详解
-
-```
+```text
 src/
-├── api/                          # API 请求层
-│   ├── index.ts                  # Axios 实例 + 拦截器配置
-│   ├── captcha.ts                # 验证码 API
-│   ├── user.ts                   # 用户相关 API
-│   └── route.ts                  # 路由/菜单相关 API
-│
-├── assets/                       # 静态资源
-│   ├── imgs/                     # 图片资源
-│   └── svgs/                     # SVG 图标（自动注册）
-│
-├── components/                   # 组件库
-│   ├── auth/                     # 认证业务组件
-│   │   ├── LoginPanel.vue        # 登录面板容器
-│   │   ├── LoginByAccount.vue    # 账号登录表单
-│   │   ├── LoginByPhone.vue      # 手机号登录表单
-│   │   └── LoginByQrcode.vue     # 扫码登录
-│   └── common/                   # 通用组件
-│       ├── ThemeProvider.vue     # 主题提供者（全局）
-│       ├── PreferenceButton.vue   # 偏好设置按钮
-│       └── SvgIcon.vue           # SVG 图标组件
-│
-├── config/                       # 配置文件
-│   ├── layout/                   # 布局配置
-│   │   ├── index.ts              # 布局配置项
-│   │   └── type.ts               # 布局类型定义
-│   ├── route/                    # 路由配置
-│   │   └── index.ts              # 路由图标映射
-│   └── theme/                    # 主题配置
-│       ├── index.ts              # 主题配置项
-│       └── type.ts               # 主题类型定义
-│
-├── i18n/                         # 国际化
-│   ├── index.ts                  # i18n 实例配置
-│   └── locales/                  # 语言包
-│       ├── zh-CN.ts              # 简体中文
-│       └── en-US.ts              # 英文
-│
-├── icons/                        # 图标配置
-│   └── index.ts                  # SVG 图标注册逻辑
-│
-├── layouts/                      # 布局组件
-│   ├── blank/                    # 空白布局（登录页等）
-│   │   └── index.vue
-│   └── default/                  # 默认布局（侧边栏+顶栏+内容）
-│       ├── index.vue
-│       └── components/           # 布局子组件
-│           ├── Logo/
-│           ├── Menu/
-│           ├── Navbar/
-│           ├── Breadcrumb/
-│           └── TagView/
-│
-├── mock/                         # Mock 数据
-│   ├── index.ts                  # Mock 配置
-│   ├── captcha.ts                # 验证码 Mock
-│   ├── user.ts                   # 用户 Mock
-│   └── route.ts                  # 路由 Mock
-│
-├── router/                       # 路由系统
-│   ├── index.ts                  # 路由实例 + 守卫
-│   ├── routes.ts                 # 路由配置汇总
-│   └── models/                   # 路由模块
-│       ├── auth.ts               # 认证路由
-│       ├── dashboard.ts           # 仪表盘路由
-│       ├── user.ts               # 用户路由
-│       └── common.ts             # 公共路由
-│
-├── stores/                       # 状态管理
-│   ├── index.ts                  # Store 统一导出
-│   ├── setup.ts                  # Pinia 配置
-│   └── modules/                  # Store 模块
-│       ├── user.ts               # 用户状态
-│       ├── theme.ts               # 主题状态
-│       ├── layout.ts              # 布局状态
-│       ├── menu.ts                # 菜单状态
-│       ├── locale.ts              # 国际化状态
-│       └── tagView.ts            # 标签页状态
-│
-├── styles/                       # 全局样式
-│   ├── normal.scss               # 全局样式重置
-│   └── tokens.scss               # 设计令牌（CSS Variables）
-│
-├── types/                        # TypeScript 类型定义
-│   ├── api.ts                    # API 类型
-│   └── components.ts             # 组件类型
-│
-├── utils/                        # 工具函数
-│   ├── naive.ts                  # Naive UI 全局 API（依赖 providerStore）
-│   ├── provider.ts               # Naive UI API 实例存储（Pinia Store）
-│   ├── permission.ts             # 权限判断工具 + v-permission 指令
-│   ├── renderer.ts               # 渲染工具
-│   ├── errorHandler.ts           # 错误处理
-│   ├── tokenStorage.ts           # access/refresh token 存储
-│   ├── captcha.ts                # 验证码生成
-│   └── menu.ts                   # 菜单工具
-│
-├── views/                        # 页面视图
-│   ├── auth/                     # 认证页面
-│   │   └── Login.vue
-│   ├── dashboard/                # 仪表盘页面
-│   │   └── Dashboard.vue
-│   ├── user/                     # 用户页面
-│   │   └── profile/index.vue
-│   ├── common/                   # 公共页面
-│   │   ├── About.vue
-│   │   └── NotFound.vue
-│   └── redirect/                 # 重定向页面
-│       └── index.vue
-│
-├── App.vue                       # 根组件
-├── main.ts                       # 应用入口
-└── vite-env.d.ts                 # Vite 类型声明
+├── api/
+│   ├── index.ts          # Axios 实例、拦截器、401 续期
+│   ├── captcha.ts
+│   ├── user.ts
+│   └── route.ts
+├── assets/
+├── components/
+│   ├── auth/             # LoginPanel、LoginByAccount/Phone/Qrcode
+│   └── common/           # ThemeProvider、NaiveProvider、PreferenceButton、SvgIcon
+├── config/
+│   ├── layout/
+│   ├── route/index.ts    # iconMap：路由 meta.icon 在此注册
+│   └── theme/
+├── i18n/
+├── icons/
+├── layouts/
+│   ├── blank/index.vue
+│   └── default/          # Logo、Menu、Navbar、Breadcrumb、TagView
+├── mock/                 # vite-plugin-mock 数据源（仅开发，见 §10）
+├── router/
+│   ├── index.ts          # 守卫、白名单
+│   ├── routes.ts
+│   └── models/           # auth、common、dashboard、user
+├── stores/
+│   ├── setup.ts          # getPinia() 等
+│   ├── index.ts          # 聚合导出各业务 store
+│   └── modules/
+│       ├── user.ts / theme.ts / layout.ts / menu.ts / locale.ts / tagView.ts
+│       └── provider.ts   # Naive 全局 API 容器（不持久化；多从本文件直接 import）
+├── styles/               # tokens.scss、normal.scss
+├── types/
+├── utils/
+│   ├── naive.ts          # globalMessage、globalLoadingBar（组件外安全调用）
+│   ├── permission.ts     # v-permission
+│   ├── tokenStorage.ts / errorHandler.ts / renderer.ts / captcha.ts / fullscreen.ts
+├── views/
+│   ├── auth/Login.vue
+│   ├── dashboard/
+│   ├── user/profile/、user/change-password/
+│   ├── common/、redirect/
+├── App.vue
+├── main.ts
+└── vite-env.d.ts
 ```
 
 ---
 
-## 核心开发规范
+## 16. 应用初始化与 Naive 全局 API
 
-### 应用初始化顺序
+### 16.1 `main.ts` 顺序（不可随意调整）
 
-```
-main.ts 初始化流程（顺序不可更改）：
+1. `createApp(App)`
+2. `setupStore(app)` — 必须先注册 Pinia
+3. `import '@/utils/naive'` — 依赖已就绪的 Pinia（供后续路由等使用）
+4. `app.use(router)`、`app.use(i18n)`、全局指令与组件
+5. `app.mount('#app')`
 
-1. createApp(App)
-2. setupStore(app)              ← 使用 setup 函数注册 Pinia
-3. import '@/utils/naive'       ← 依赖 Pinia，延迟初始化 API
-4. import router                 ← 依赖 Pinia + Naive
-5. app.use(router)
-6. app.use(i18n)
-7. app.mount('#app')
-```
+### 16.2 Naive 全局 API 与 `provider` Store
 
-### 关键说明：Naive UI 全局 API 通过 Pinia Store 初始化
+`useMessage` / `useLoadingBar` 等须在 Provider 子树内调用。本项目约定：
 
-Naive UI 的 `useLoadingBar()` 等 hooks 需要在 Provider 组件内部调用。本项目通过 Pinia Store 保存实例：
-
-1. **`NaiveProvider.vue`** - 在 `n-loading-bar-provider` 等内部调用 hooks，将实例存入 `providerStore`
-2. **`stores/modules/provider.ts`** - 保存 loadingBar、message、notification、dialog 实例
-3. **`utils/naive.ts`** - 提供 `globalLoadingBar` 等全局 API，内部通过 store 获取实例
+1. **`components/common/NaiveProvider.vue`** 在 `n-loading-bar-provider` 等内部取实例，写入 **`stores/modules/provider.ts`**。
+2. **`utils/naive.ts`** 导出 `globalMessage`、`globalLoadingBar` 等；内部通过 **`useProviderStore(getPinia())`** 取实例，未就绪时为空操作，可在 **`router/index.ts`** 等组件外安全调用。
 
 ```typescript
-// 安全调用示例（可在路由守卫中使用）
 import { globalMessage, globalLoadingBar } from '@/utils/naive';
 
 router.beforeEach(() => {
-  globalLoadingBar.start(); // 安全：未就绪时为空操作
+  globalLoadingBar?.start();
 });
 ```
 
-### 文件命名规范
+---
+
+## 17. 开发规范速查
+
+### 17.1 文件命名
 
 | 类型       | 规范       | 示例              |
 | ---------- | ---------- | ----------------- |
-| 组件文件   | PascalCase | `LoginPanel.vue`  |
-| 工具文件   | camelCase  | `errorHandler.ts` |
-| 类型文件   | camelCase  | `components.ts`   |
+| 组件       | PascalCase | `LoginPanel.vue`  |
+| 工具/类型  | camelCase  | `errorHandler.ts` |
 | Store 模块 | camelCase  | `user.ts`         |
 | 路由模块   | camelCase  | `dashboard.ts`    |
-| 样式文件   | camelCase  | `normal.scss`     |
 
-### 导入路径别名
+### 17.2 路径别名
 
-```typescript
-// vite.config.ts 配置
-resolve: {
-  alias: {
-    '@': '/src'
-  }
-}
+`@` → `src/`（见 `vite.config.ts` 的 `resolve.alias`）。
 
-// 使用示例
-import { useUserStore } from '@/stores'
-import LoginPanel from '@/components/auth/LoginPanel.vue'
-```
+### 17.3 路由 `meta` 常用字段
 
----
+在 `router/models/*.ts` 中：`title`（菜单标题）、`icon`（须在 `config/route/index.ts` 的 `iconMap` 注册）、`roles`（访问所需角色）、`show`、`hideTag`、`affix`、`noCache` 等与布局/菜单/标签页联动。
 
-## 状态管理规范
+### 17.4 新增路由模块
 
-### Store 模块结构
+1. 在 `src/router/models/` 新建模块并 `export default routes`。
+2. 在 `src/router/routes.ts` 中 `import` 并展开合并到总路由数组。
 
-```typescript
-// stores/modules/xxx.ts
-import { defineStore } from 'pinia';
+### 17.5 守卫与白名单
 
-export const useXxxStore = defineStore('xxx', {
-  state: () => ({
-    // 状态
-  }),
+逻辑见 `src/router/index.ts`：`whiteList` 含 `/auth/login` 等；已登录访问登录页会重定向到工作台；`meta.roles` 与 `userStore` 角色、`permissions`（含 `*`、`super_admin`）共同决定访问。
 
-  getters: {
-    // 获取器（命名以 get 开头）
-    getXxx(): Type {
-      return this.xxx;
-    },
-  },
+### 17.6 操作级权限
 
-  actions: {
-    // 操作方法
-    setXxx(value: Type): void {
-      this.xxx = value;
-    },
-  },
-
-  persist: true, // 是否持久化（可用 true 或配置对象）
-});
-```
-
-### 现有 Store 模块
-
-| 模块     | 文件                         | 职责                                          | 持久化 |
-| -------- | ---------------------------- | --------------------------------------------- | ------ |
-| user     | `stores/modules/user.ts`     | accessToken、refreshToken、用户信息、权限方法 | ✅     |
-| theme    | `stores/modules/theme.ts`    | 主题模式、主色、圆角、侧栏主题、顶栏主题      | ✅     |
-| layout   | `stores/modules/layout.ts`   | 布局配置、侧边栏状态                          | ✅     |
-| menu     | `stores/modules/menu.ts`     | 菜单、面包屑、当前路径                        | ✅     |
-| locale   | `stores/modules/locale.ts`   | 语言设置                                      | ✅     |
-| tagView  | `stores/modules/tagView.ts`  | 标签页缓存                                    | ✅     |
-| provider | `stores/modules/provider.ts` | Naive UI API 实例存储                         | ❌     |
-
-### 主题状态（theme store）
-
-```typescript
-// 状态结构
-interface ThemeState {
-  mode: 'light' | 'dark';
-  primaryColor: string; // 主色，如 '#2f54eb'
-  borderRadius: string; // 圆角，如 '0.5rem'
-  siderTheme: 'light' | 'dark'; // 侧栏主题
-  headerTheme: 'light' | 'dark'; // 顶栏主题
-}
-
-// 核心方法
-themeStore.toggleTheme(); // 切换亮/暗模式
-themeStore.setPrimaryColor(); // 设置主色
-themeStore.setBorderRadius(); // 设置圆角
-themeStore.setSiderTheme(); // 设置侧栏主题
-themeStore.setHeaderTheme(); // 设置顶栏主题
-themeStore.resetTheme(); // 重置为默认
-themeStore.isDark; // getter: 是否暗色模式
-```
-
-### 在组件中使用
-
-```typescript
-import { useUserStore, useThemeStore } from '@/stores';
-
-const userStore = useUserStore();
-const themeStore = useThemeStore();
-
-// 读取状态
-const isLoggedIn = userStore.isLoggedIn;
-const isDark = themeStore.isDark;
-
-// 调用方法
-userStore.setToken('xxx');
-themeStore.toggleTheme();
-```
-
-### 在组件外部使用（如路由守卫）
-
-```typescript
-import { useUserStore } from '@/stores/modules/user';
-import { getPinia } from '@/stores/setup';
-
-const userStore = useUserStore(getPinia());
-console.log(userStore.isLoggedIn);
-```
-
-### 主题配置
-
-主题相关配置在 `config/theme/` 目录下：
-
-```typescript
-// config/theme/index.ts
-export const defaultThemeMode: ThemeMode = 'dark'
-export const defaultThemeState: ThemeState = {
-  mode: 'dark',
-  primaryColor: '#2f54eb',
-  borderRadius: '0.5rem',
-  siderTheme: 'light',
-  headerTheme: 'light',
-}
-
-// 预设主色（11种）
-export const primaryColorPresets: PrimaryColorPreset[] = [...]
-
-// 预设圆角（5种）
-export const borderRadiusPresets: BorderRadiusPreset[] = [...]
-```
+- 模板：`v-permission="'code'"` 或 `v-permission="['a','b']"`（`utils/permission.ts`）。
+- 脚本：`userStore` 内权限判断方法（与登录后 `/user/info` 回填一致）。
 
 ---
 
-## 路由系统规范
+## 18. API 模块约定
 
-### 路由配置结构
-
-```typescript
-// router/models/xxx.ts
-import type { RouteRecordRaw } from 'vue-router';
-
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/module',
-    name: 'ModuleName',
-    component: () => import('@/layouts/default/index.vue'),
-    meta: {
-      title: '模块名称', // 必填：菜单标题
-      icon: 'IconName', // 可选：菜单图标（需在 iconMap 中注册）
-      hideTag: false, // 可选：是否隐藏标签
-      show: true, // 可选：是否显示在菜单
-      affix: false, // 可选：是否固定标签
-      noCache: false, // 可选：是否缓存
-    },
-    children: [
-      {
-        path: 'page',
-        name: 'PageName',
-        component: () => import('@/views/module/Page.vue'),
-        meta: { title: '页面名称' },
-      },
-    ],
-  },
-];
-
-export default routes;
-```
-
-### 图标映射
-
-图标需要在 `config/route/index.ts` 中注册：
-
-```typescript
-// config/route/index.ts
-import { Screen, Settings, Document } from '@vicons/carbon';
-import { DashboardOutlined } from '@vicons/antd';
-
-export const iconMap: Record<string, Component> = {
-  Dashboard: DashboardOutlined,
-  Workbench: Screen,
-  User: User,
-};
-```
-
-### 添加新路由模块
-
-1. 在 `router/models/` 下创建路由文件
-2. 在 `router/routes.ts` 中导入并合并
-
-```typescript
-// router/routes.ts
-import NewModuleRoutes from './models/newModule';
-
-const routes: RouteRecordRaw[] = [
-  ...redirectRoutes,
-  ...AuthRoutes,
-  ...DashboardRoutes,
-  ...CommonRoutes,
-  ...UserRoutes,
-  ...NewModuleRoutes, // 添加新模块
-];
-```
-
-### 路由守卫逻辑
-
-```
-beforeEach
-    │
-    ├── providerStore.loadingBar.start()
-    │
-    ├── 检查登录状态
-    │   ├── 已登录 + 访问登录页 → 重定向到工作台
-    │   ├── 已登录 + 其他页面
-    │   │   ├── 校验 to.meta.roles（支持 super_admin / *）
-    │   │   └── 无权限 → 提示并重定向到工作台
-    │   └── 未登录
-    │       ├── 白名单页面 → 放行
-    │       └── 需认证页面 → 重定向登录页
-    │
-    ↓
-afterEach → providerStore.loadingBar.finish()
-```
-
-### 白名单配置
-
-```typescript
-// router/index.ts
-const whiteList = ['/auth/login', '/auth/register', '/auth/forgot-password'];
-```
-
-### 操作级权限控制（permissions）
-
-项目提供两层 permissions 能力：
-
-1. **模板层**：全局 `v-permission` 指令（`utils/permission.ts`）
-2. **脚本层**：`userStore.hasPermission()` / `userStore.hasAnyPermission()`
-
-```vue
-<n-button v-permission="'user:password:update'">修改密码</n-button>
-<n-button v-permission="['user:create', 'user:update']">保存</n-button>
-```
-
-约定：后端返回 `permissions: ['*']` 时视为超级权限，前端直接放行。
-
-### 布局选择
-
-| 布局    | 使用场景               | 路径                          |
-| ------- | ---------------------- | ----------------------------- |
-| default | 需要侧边栏和导航的页面 | `@/layouts/default/index.vue` |
-| blank   | 登录页等纯净页面       | `@/layouts/blank/index.vue`   |
+- 统一通过 **`import service from './index'`** 使用已配置拦截器的实例；`baseURL` 为 `import.meta.env.VITE_API_BASE_URL`。
+- 业务文件导出 `xxxApi` 对象，方法返回 `Promise`，与后端约定的 `code` / `message` / `data` 结构保持一致（类型可放在 `src/types/api.ts` 等）。
+- **登录后**须以 **`userApi.getInfo()`**（或等价接口）覆盖权限；失败应登出，避免脏会话（见 §7.2）。
 
 ---
 
-## API 请求规范
+## 19. 样式与组件分层
 
-### Axios 实例配置
+| 场景           | 推荐                                                     |
+| -------------- | -------------------------------------------------------- |
+| 布局、间距     | UnoCSS 原子类                                            |
+| 复杂与主题相关 | `scoped` + Sass，语义色走 token                          |
+| 全局主题变量   | `src/styles/tokens.scss` + `ThemeProvider` 注入（见 §8） |
 
-```typescript
-// api/index.ts
-const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: 10000,
-});
-```
-
-### 请求拦截器
-
-```typescript
-service.interceptors.request.use((config) => {
-  const token = userStore.getToken || getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-```
-
-### 响应拦截器
-
-统一处理以下错误与续期逻辑：
-
-- 401: 触发 refresh token 流程，刷新成功后重放原请求
-- refresh 失败: 清理登录态并跳转登录页
-- 403: 权限不足
-- 404: 资源不存在
-- 500: 服务器错误
-- 网络错误
-
-### API 模块定义
-
-```typescript
-// api/xxx.ts
-import service from './index';
-
-export interface ApiResponse<T = any> {
-  code: number;
-  message: string;
-  data?: T;
-}
-
-export const xxxApi = {
-  getList: (): Promise<ApiResponse<ListData[]>> => {
-    return service.get('/xxx/list');
-  },
-
-  getItem: (id: string): Promise<ApiResponse<ItemData>> => {
-    return service.get(`/xxx/${id}`);
-  },
-
-  create: (data: CreateParams): Promise<ApiResponse> => {
-    return service.post('/xxx', data);
-  },
-
-  update: (id: string, data: UpdateParams): Promise<ApiResponse> => {
-    return service.put(`/xxx/${id}`, data);
-  },
-
-  delete: (id: string): Promise<ApiResponse> => {
-    return service.delete(`/xxx/${id}`);
-  },
-};
-```
-
-### 登录与权限热更新流程
-
-当前登录流程以服务端权限为准，避免仅依赖登录接口返回：
-
-1. 调用 `/login` 获取 `accessToken` 与 `refreshToken`
-2. 写入 `userStore` 与 token 存储（access: sessionStorage，refresh: localStorage）
-3. 立即调用 `/user/info` 拉取最新角色与权限
-4. 使用 `/user/info` 返回值覆盖 `userStore.userInfo`
-5. 若 `/user/info` 失败，立即登出并回到登录页
-
-### 全局消息提示
-
-```typescript
-import { globalMessage } from '@/utils/naive';
-
-// 使用示例
-globalMessage.info('消息内容');
-globalMessage.success('操作成功');
-globalMessage.warning('警告信息');
-globalMessage.error('错误信息');
-```
+**组件分层**：`components/auth` 承载登录业务；`components/common` 放与页面无关的通用块；**页面级**组件放在 `views/`；**壳层**在 `layouts/`。新增业务优先贴近现有目录命名。
 
 ---
 
-## 样式开发规范
+## 20. i18n 与 Mock 文件
 
-### 样式方案选择
-
-| 场景                 | 推荐方案      | 示例                             |
-| -------------------- | ------------- | -------------------------------- |
-| 布局、间距、简单样式 | UnoCSS 原子类 | `class="flex items-center mt-4"` |
-| 复杂样式、主题相关   | SCSS          | `<style scoped lang="scss">`     |
-| 设计令牌             | CSS Variables | `var(--u-bg-card)`               |
-
-### 设计令牌规范（Theme Tokens）
-
-统一在 `src/styles/tokens.scss` 维护语义化变量：
-
-- 颜色：`--u-bg-page` / `--u-bg-card` / `--u-text-primary` / `--u-border-color`
-- 主题能力：`--u-primary-color`
-- 尺寸能力：`--u-radius-base` / `--u-layout-header-height`
-- 阴影：`--u-shadow-card` / `--u-shadow-elevated`
-
-明暗主题通过 `html[data-theme='light|dark']` 切换，不直接在业务组件写死颜色值。
-
-### UnoCSS 常用类
-
-```html
-<!-- 布局 -->
-<div class="flex items-center justify-center">
-  <div class="flex flex-col h-full">
-    <!-- 间距 -->
-    <div class="mt-4 mb-2 px-4 py-2">
-      <div class="m-6 p-4">
-        <!-- 尺寸 -->
-        <div class="w-full h-screen">
-          <div class="w-65 max-w-md">
-            <!-- 显示 -->
-            <div class="hidden lg:block">
-              <div class="overflow-y-auto"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-```
-
-### SCSS 作用域样式
-
-```vue
-<style scoped lang="scss">
-.component-name {
-  // 样式
-
-  &--modifier {
-    // 修饰符样式
-  }
-
-  &__element {
-    // 元素样式
-  }
-}
-</style>
-```
+- 语言包：`src/i18n/locales/*.ts`，切换语言可用 `setI18nLocale`（见 `src/i18n/index.ts`）。
+- **Mock**：每个文件 `export default [ ... ] as MockMethod[]`，`url` 建议带 **`/api`** 前缀与 `VITE_API_BASE_URL` 对齐；在 `src/mock/index.ts` 聚合导出。**启用条件与生产隔离见 §10**，勿在业务代码中 `import` mock 数据文件。
 
 ---
 
-## 组件开发规范
+## 21. 常见操作清单
 
-### 组件分类
-
-| 目录                 | 用途         | 特点               |
-| -------------------- | ------------ | ------------------ |
-| `components/auth/`   | 认证业务组件 | 与登录流程相关     |
-| `components/common/` | 通用组件     | 可复用、无业务逻辑 |
-| `views/`             | 页面组件     | 路由级别           |
-| `layouts/`           | 布局组件     | 页面框架           |
-
-### 主题提供者组件
-
-`ThemeProvider.vue` 是全局主题配置的关键组件，配合 `NaiveProvider.vue` 提供 Naive UI 全局 API：
-
-```vue
-<!-- ThemeProvider.vue -->
-<n-config-provider
-  :theme="configProviderProps.theme"
-  :theme-overrides="configProviderProps.themeOverrides"
->
-  <n-global-style />
-  <NaiveProvider>
-    <slot />
-  </NaiveProvider>
-</n-config-provider>
-```
-
-```vue
-<!-- NaiveProvider.vue -->
-<n-loading-bar-provider>
-  <n-notification-provider>
-    <n-message-provider>
-      <n-dialog-provider>
-        <NaiveProvider /> <!-- 保存 API 实例到 store -->
-        <slot />
-      </n-dialog-provider>
-    </n-message-provider>
-  </n-notification-provider>
-</n-loading-bar-provider>
-```
-
-### 组件模板
-
-```vue
-<template>
-  <div class="component-name">
-    <!-- 内容 -->
-  </div>
-</template>
-
-<script setup lang="ts">
-// 1. 导入
-import { ref, computed } from 'vue';
-import type { PropType } from 'vue';
-
-// 2. Props 定义
-interface Props {
-  title: string;
-  count?: number;
-}
-const props = withDefaults(defineProps<Props>(), {
-  count: 0,
-});
-
-// 3. Emits 定义
-interface Emits {
-  (e: 'update', value: string): void;
-  (e: 'close'): void;
-}
-const emit = defineEmits<Emits>();
-
-// 4. 响应式状态
-const loading = ref(false);
-
-// 5. 计算属性
-const displayTitle = computed(() => props.title.toUpperCase());
-
-// 6. 方法
-function handleClick() {
-  emit('update', 'value');
-}
-</script>
-
-<style scoped lang="scss">
-.component-name {
-  // 样式
-}
-</style>
-```
+1. **新页面**：`views/...` 建页 → `router/models` 注册路由与 `meta` → 如需菜单图标则在 `iconMap` 注册。
+2. **新 API**：`src/api/<domain>.ts` 使用 `service` 导出 `xxxApi` → 视需要增加 **`src/types`** 与 Mock 条目（仅开发）。
+3. **新 Store**：`stores/modules/<name>.ts` + 在 `stores/index.ts` 导出（若需全局快捷导入）。
+4. **新菜单图标**：安装对应 `@vicons/*` → `config/route/index.ts` 的 `iconMap` → 路由 `meta.icon` 使用同一键名。
 
 ---
 
-## 国际化规范
+## 22. 已知技术债与后续方向
 
-### 语言包结构
+与 `docs/DEVELOPMENT_PLAN.md` P2 呼应，包括但不限于：
 
-```typescript
-// i18n/locales/zh-CN.ts
-export default {
-  common: {
-    confirm: '确认',
-    cancel: '取消',
-    submit: '提交',
-  },
-  auth: {
-    login: '登录',
-    logout: '退出登录',
-    username: '用户名',
-    password: '密码',
-  },
-  // ...
-};
-```
-
-### 使用国际化
-
-```vue
-<script setup>
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
-</script>
-
-<template>
-  <button>{{ t('common.confirm') }}</button>
-</template>
-```
-
-### 切换语言
-
-```typescript
-import { setI18nLocale } from '@/i18n';
-
-setI18nLocale('en-US');
-```
+| 方向         | 说明                                              |
+| ------------ | ------------------------------------------------- |
+| 类型收敛     | API 与 Store 模型统一到 `src/types`，减少重复定义 |
+| 登录方式扩展 | 手机号 / 扫码登录接口与状态机闭环                 |
+| 验证码       | `utils/captcha.ts` 与接口、登录表单进一步打通     |
+| 请求弹性     | 取消（AbortController）、可选重试与缓存策略       |
+| 测试覆盖     | 在 `vp test` 上增加关键链路与模块单测             |
 
 ---
 
-## Mock 数据规范
-
-### Mock 文件结构
-
-```typescript
-// mock/xxx.ts
-import type { MockMethod } from 'vite-plugin-mock';
-
-export default [
-  {
-    url: '/api/xxx/list',
-    method: 'get',
-    response: () => {
-      return {
-        code: 200,
-        message: '成功',
-        data: [
-          { id: 1, name: 'Item 1' },
-          { id: 2, name: 'Item 2' },
-        ],
-      };
-    },
-  },
-  {
-    url: '/api/xxx/create',
-    method: 'post',
-    response: ({ body }) => {
-      return {
-        code: 200,
-        message: '创建成功',
-        data: { id: Date.now(), ...body },
-      };
-    },
-  },
-] as MockMethod[];
-```
-
-### Mock 配置
-
-```typescript
-// vite.config.ts
-viteMockServe({
-  mockPath: 'src/mock',
-  localEnabled: true, // 开发环境启用
-  prodEnabled: true, // 生产环境启用（可根据需要调整）
-  watchFiles: true,
-});
-```
-
-### 注意事项
-
-- Mock 接口路径需要带 `/api` 前缀
-- 确保 `.env` 中配置了 `VITE_API_BASE_URL=/api`
-
----
-
-## 主题系统
-
-### 主题配置
-
-主题系统由以下部分组成：
-
-```
-config/theme/           # 主题配置
-├── index.ts           # 默认配置、预设颜色/圆角
-└── type.ts            # 类型定义
-
-stores/modules/theme.ts # 主题状态管理
-
-components/common/
-└── ThemeProvider.vue  # 主题提供者（全局）
-```
-
-### 主题切换机制
-
-1. `ThemeProvider.vue` 使用 `configProviderProps` 响应式获取主题状态
-2. `configProviderProps` 是 computed 属性，依赖 `themeStore`
-3. 切换主题时：`themeStore` 状态更新（包括 `mode / primaryColor / borderRadius / siderTheme / headerTheme`）
-4. `ThemeProvider.vue` 负责把侧栏/顶栏主题同步为 CSS 变量（`--u-sider-*`、`--u-header-*`），布局组件自动响应
-
-### 区域主题与 Naive 子主题（顶栏 / 侧栏）
-
-- `config/theme/index.ts` 中 `areaThemePalettes` 描述「全局亮/暗 × 区域亮/暗」的调色板；`ThemeProvider.vue` 根据 `themeStore.mode`、`siderTheme`、`headerTheme` 写入 `--u-sider-*`、`--u-header-*`（含 **`--u-header-item-hover-bg`** 等与侧栏对称的悬停背景变量）。
-- 当**全局 Naive 主题**与**顶栏区域明暗**不一致时（例如全局亮 + 顶栏深），仅改 CSS 变量无法修正 `n-button` / `n-breadcrumb` 等内部的 `--n-*` 令牌。项目在 `src/utils/naive.ts` 中导出 **`layoutHeaderProviderProps`**，并在 `layouts/default/index.vue` 的 **`n-layout-header`** 内用 **`n-config-provider`** 包裹顶栏内容，在 `isHeaderDark !== isDark` 时为顶栏子树注入对应的 `darkTheme` 或浅色主题及主色覆盖。
-
-### 应用布局模式（`LayoutMode`）
-
-- 三种：`vertical`（经典侧栏 + 顶栏）、`sidebar`（通栏顶栏 + 侧栏自顶栏下起）、`horizontal`（水平：默认无侧栏，路由菜单在 **`Navbar`** 内以 **`Menu` 的 `placement='header'`** 横向展示）。
-- 持久化中旧键名 **`top`** 已在 `stores/modules/layout.ts` 的 **`persist.afterHydrate`** 中迁移为 **`horizontal`**。
-- **`sidebar`** 模式下侧栏为 `position: absolute`；`layouts/default/index.vue` 通过 **`--u-max-layout-header-stack`**（顶栏 + 页签总高度，由内联样式绑定在 `n-layout`）设置侧栏的 `top` / `height`，避免菜单被 **`TagView`** 遮挡。
-- 切换到 **`sidebar`** 时，`PreferenceButton.vue` 中的监听会自动关闭**间隙布局**（`setIsGap(false)`），与绝对定位侧栏兼容。
-- **`TagView`** 标签项文字/胶囊底优先使用 `--u-header-*` 与 `color-mix`，减少与 Naive 令牌不一致的问题；详见 `layouts/default/components/TagView/index.vue`。
-
-### 主题持久化
-
-- 主题设置通过 `pinia-plugin-persistedstate` 自动持久化到 localStorage
-- 刷新页面后主题设置会自动恢复
-
-### 自定义主题色
-
-```typescript
-// 设置主色
-themeStore.setPrimaryColor('#1890ff');
-
-// 设置圆角
-themeStore.setBorderRadius('0.75rem');
-
-// 设置侧栏/顶栏主题
-themeStore.setSiderTheme('dark');
-themeStore.setHeaderTheme('light');
-
-// 重置为默认
-themeStore.resetTheme();
-```
-
-### 侧栏背景过渡与结构（`layouts/default/index.vue`）
-
-**背景色过渡**
-
-- 侧栏背景由 CSS 变量 `--u-sider-bg-color` 驱动（`ThemeProvider.vue` 写入）。
-- `n-layout-sider` 实际铺色往往在内部节点（如 `.n-layout-sider-scroll-container`），与外层 `.u-max-sider` 是**不同元素**。
-- **父元素上的 `transition` 不会让子元素上的 `background-color` 随变量变化产生过渡**；必须在每个使用 `--u-sider-bg-color` 绘制背景的节点上声明 `transition: background-color …`（必要时同时过渡 `color` / `border-color`）。
-- 过渡时长与曲线使用 `src/styles/tokens.scss` 中的 `--u-transition-duration` 与 Naive 的 `--n-bezier`。
-
-**收拢按钮与滚动**
-
-- 侧栏内容区采用 **纵向 flex + `min-h-0`**：Logo `shrink-0`、菜单外包一层 **`flex-1 min-h-0 overflow-y-auto`**（仅菜单区域滚动）、收拢按钮容器 **`shrink-0`** 固定在侧栏最底部。
-- 避免整块侧栏随 Naive 滚动容器一起滚动，否则收拢按钮会随菜单滚到可视区上方。
-
----
-
-## 常见开发场景指南
-
-### 场景一：添加新页面
-
-1. **创建页面组件**
-
-   ```typescript
-   // src/views/module/Page.vue
-   <template>
-     <div class="page-container">
-       <!-- 页面内容 -->
-     </div>
-   </template>
-
-   <script setup lang="ts">
-   // 页面逻辑
-   </script>
-   ```
-
-2. **添加路由配置**
-
-   ```typescript
-   // src/router/models/module.ts
-   const routes: RouteRecordRaw[] = [
-     {
-       path: '/module',
-       name: 'Module',
-       component: () => import('@/layouts/default/index.vue'),
-       meta: { title: '模块', icon: 'Dashboard' },
-       children: [
-         {
-           path: 'page',
-           name: 'Page',
-           component: () => import('@/views/module/Page.vue'),
-           meta: { title: '页面' },
-         },
-       ],
-     },
-   ];
-   ```
-
-3. **注册路由模块**
-
-   ```typescript
-   // src/router/routes.ts
-   import ModuleRoutes from './models/module';
-
-   const routes = [
-     // ...
-     ...ModuleRoutes,
-   ];
-   ```
-
-### 场景二：添加新 API
-
-1. **定义 API 模块**
-
-   ```typescript
-   // src/api/module.ts
-   import service from './index';
-
-   export const moduleApi = {
-     getList: () => service.get('/module/list'),
-     getItem: (id: string) => service.get(`/module/${id}`),
-     create: (data: any) => service.post('/module', data),
-   };
-   ```
-
-2. **添加 Mock 数据**（可选）
-   ```typescript
-   // src/mock/module.ts
-   export default [
-     {
-       url: '/api/module/list',
-       method: 'get',
-       response: () => ({ code: 200, data: [] }),
-     },
-   ] as MockMethod[];
-   ```
-
-### 场景三：添加新的全局状态
-
-1. **创建 Store 模块**
-
-   ```typescript
-   // src/stores/modules/newStore.ts
-   import { defineStore } from 'pinia';
-
-   export const useNewStore = defineStore('new', {
-     state: () => ({
-       data: null,
-     }),
-     getters: {
-       getData() {
-         return this.data;
-       },
-     },
-     actions: {
-       setData(data: any) {
-         this.data = data;
-       },
-     },
-     persist: true,
-   });
-   ```
-
-2. **导出 Store**
-   ```typescript
-   // src/stores/index.ts
-   export { useNewStore } from './modules/newStore';
-   ```
-
-### 场景四：添加新的菜单图标
-
-1. **安装图标包**
-
-   ```bash
-   npm install @vicons/xxx
-   ```
-
-2. **在 iconMap 中注册**
-
-   ```typescript
-   // src/config/route/index.ts
-   import { NewIcon } from '@vicons/xxx';
-
-   export const iconMap: Record<string, Component> = {
-     // ...existing icons
-     NewIcon: NewIcon,
-   };
-   ```
-
-3. **在路由 meta 中使用**
-   ```typescript
-   meta: { title: '页面', icon: 'NewIcon' }
-   ```
-
----
-
-## 技术债与注意事项
-
-### 高优先级
-
-| 问题               | 位置   | 建议                              |
-| ------------------ | ------ | --------------------------------- |
-| API 路径配置不明确 | `.env` | 确保 `VITE_API_BASE_URL` 配置正确 |
-
-### 中优先级
-
-| 问题            | 建议                                                               |
-| --------------- | ------------------------------------------------------------------ |
-| 类型定义分散    | 统一到 `types/` 目录                                               |
-| 手机号/扫码登录 | 需要补充完整逻辑                                                   |
-| 验证码功能      | 已有基础实现（utils/captcha.ts + mock/captcha.ts），需完善前端集成 |
-
-### 低优先级
-
-| 问题             | 建议                      |
-| ---------------- | ------------------------- |
-| 缺少请求取消机制 | 添加 AbortController 支持 |
-| 缺少请求重试机制 | 网络异常时自动重试        |
-| 缺少 API 缓存    | 对不常变化的数据添加缓存  |
-
----
-
-## 快速参考
+## 23. 快速参考
 
 ### 常用导入
 
 ```typescript
-// Store
 import { useUserStore, useThemeStore, useLayoutStore, useMenuStore } from '@/stores';
-
-// Router
+import { useProviderStore } from '@/stores/modules/provider';
 import { useRouter, useRoute } from 'vue-router';
-
-// API
 import { userApi } from '@/api/user';
-import { captchaApi } from '@/api/captcha';
-
-// Naive UI（组件内）
-import { useMessage, useNotification, useDialog } from 'naive-ui';
-
-// 全局 API（组件外使用，如路由守卫）
+import { useMessage } from 'naive-ui'; // 仅组件 setup 内
 import { globalMessage, globalLoadingBar } from '@/utils/naive';
-
-// 国际化
 import { useI18n } from 'vue-i18n';
 import { setI18nLocale } from '@/i18n';
 ```
 
-### 环境变量
+### 环境变量（模板见 `.env.example`）
 
 ```bash
-# .env
 VITE_API_BASE_URL=/api
-VITE_MOCK_ENABLE=true
+VITE_USE_MOCK=true   # 仅 vp dev + development，见 §10
 ```
 
-### 常用命令
-
-```bash
-npm run dev      # 启动开发服务器
-npm run build    # 构建生产版本
-npm run preview  # 预览生产版本
-```
-
----
-
-_文档版本: 1.4.0_
-_最后更新: 2026-04-24_
+常用 CLI 见 **§13**。

@@ -2,15 +2,20 @@
  * 主题状态管理Store
  * 用于管理应用的主题配置，包括主题模式、主色、边框圆角
  */
-import { defineStore } from 'pinia'
-import { 
-  defaultThemeMode, 
-  defaultThemeState, 
+import { defineStore } from 'pinia';
+import {
+  defaultThemeMode,
+  defaultThemeState,
   primaryColorPresets,
-  borderRadiusPresets 
-} from '@/config/theme'
-import type { ThemeState, ThemeMode, BorderRadiusSize, PrimaryColorPreset, BorderRadiusPreset } from '@/config/theme/type' 
-
+  borderRadiusPresets,
+} from '@/config/theme';
+import type {
+  ThemeState,
+  ThemeMode,
+  BorderRadiusSize,
+  PrimaryColorPreset,
+  BorderRadiusPreset,
+} from '@/config/theme/type';
 
 export const useThemeStore = defineStore('theme', {
   state: (): ThemeState => ({
@@ -33,38 +38,37 @@ export const useThemeStore = defineStore('theme', {
 
   actions: {
     setTheme(mode: ThemeMode): void {
-      this.mode = mode
+      this.mode = mode;
     },
 
     setPrimaryColor(color: string): void {
-      this.primaryColor = color
+      this.primaryColor = color;
     },
 
     setBorderRadius(radius: BorderRadiusSize): void {
-      this.borderRadius = radius
+      this.borderRadius = radius;
     },
 
     setSiderTheme(theme: 'light' | 'dark'): void {
-      this.siderTheme = theme
+      this.siderTheme = theme;
     },
 
     setHeaderTheme(theme: 'light' | 'dark'): void {
-      this.headerTheme = theme
+      this.headerTheme = theme;
     },
 
     toggleTheme(): void {
-      this.mode = this.mode === 'light' ? 'dark' : 'light'
+      this.mode = this.mode === 'light' ? 'dark' : 'light';
     },
 
     resetTheme(): void {
-      this.mode = defaultThemeMode
-      this.primaryColor = defaultThemeState.primaryColor
-      this.borderRadius = defaultThemeState.borderRadius
-      this.siderTheme = defaultThemeState.siderTheme
-      this.headerTheme = defaultThemeState.headerTheme
+      this.mode = defaultThemeMode;
+      this.primaryColor = defaultThemeState.primaryColor;
+      this.borderRadius = defaultThemeState.borderRadius;
+      this.siderTheme = defaultThemeState.siderTheme;
+      this.headerTheme = defaultThemeState.headerTheme;
     },
   },
 
-  persist: true
-,
-})
+  persist: true,
+});

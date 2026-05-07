@@ -2,7 +2,7 @@
  * 路由相关Mock数据
  * 用于模拟菜单接口
  */
-import type { MockMethod } from 'vite-plugin-mock'
+import type { MockMethod } from 'vite-plugin-mock';
 
 export default [
   {
@@ -12,31 +12,31 @@ export default [
       return {
         code: 200,
         message: '获取菜单成功',
-        data: [ 
+        data: [
           {
             name: 'Content',
             path: '/content',
             meta: {
               title: '内容管理',
-              icon: 'Document'
+              icon: 'Document',
             },
             children: [
               {
                 name: 'Articles',
                 path: '/content/articles',
                 meta: {
-                  title: '文章管理', 
-                }
+                  title: '文章管理',
+                },
               },
               {
-                name: 'Categories', 
+                name: 'Categories',
                 path: '/content/categories',
                 meta: {
                   title: '分类管理',
-                }
-              }
-            ]
-          }, 
+                },
+              },
+            ],
+          },
           {
             name: 'Settings',
             path: '/settings',
@@ -46,30 +46,30 @@ export default [
             },
             children: [
               {
-                name: 'Basic', 
+                name: 'Basic',
                 path: '/settings/basic',
                 meta: {
                   title: '基本设置',
-                }
+                },
               },
               {
-                name: 'Permissions', 
+                name: 'Permissions',
                 path: '/settings/permissions',
                 meta: {
                   title: '权限管理',
-                }
+                },
               },
               {
-                name: 'Logs', 
+                name: 'Logs',
                 path: '/settings/logs',
                 meta: {
                   title: '日志管理',
-                }
-              }
-            ]
-          }
-        ]
-      }
-    }
-  }
-] as MockMethod[]
+                },
+              },
+            ],
+          },
+        ],
+      };
+    },
+  },
+] as MockMethod[];

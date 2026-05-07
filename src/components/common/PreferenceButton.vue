@@ -26,10 +26,15 @@
         </n-tabs>
 
         <n-scrollbar class="preference-scroll">
-          <div v-if="activeTab === 'theme'" class="preference-content">  
+          <div v-if="activeTab === 'theme'" class="preference-content">
             <section class="preference-section">
               <h3 class="preference-title">布局主题</h3>
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="侧边栏主题" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-select v-model:value="siderTheme" class="w-150px" :options="themeOptions" />
@@ -57,10 +62,21 @@
 
             <section class="preference-section">
               <h3 class="preference-title">圆角</h3>
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="圆角值" class="mb-0">
                   <div class="flex w-full items-center gap-3">
-                    <n-slider v-model:value="radiusValue" :min="0" :max="1" :step="0.05" class="flex-1" />
+                    <n-slider
+                      v-model:value="radiusValue"
+                      :min="0"
+                      :max="1"
+                      :step="0.05"
+                      class="flex-1"
+                    />
                     <span class="min-w-44px text-right text-xs text-[var(--u-text-secondary)]">
                       {{ radiusValue.toFixed(2) }}
                     </span>
@@ -84,7 +100,10 @@
                         @click="handleLayoutPatternChange(item.key)"
                       >
                         <span class="layout-preview" :class="item.previewClass">
-                          <span v-if="item.key !== 'horizontal'" class="layout-preview__block layout-preview__sider" />
+                          <span
+                            v-if="item.key !== 'horizontal'"
+                            class="layout-preview__block layout-preview__sider"
+                          />
                           <span class="layout-preview__block layout-preview__header" />
                           <span class="layout-preview__block layout-preview__content" />
                         </span>
@@ -99,7 +118,12 @@
             <n-divider class="!my-10px" />
 
             <section class="preference-section">
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="间隙布局" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-switch v-model:value="isGapLayoutEnabled" />
@@ -122,7 +146,12 @@
 
             <section class="preference-section">
               <h3 class="preference-title">顶栏</h3>
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="显示顶栏" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-switch v-model:value="showTopbar" />
@@ -135,7 +164,12 @@
                 </n-form-item>
                 <n-form-item label="顶栏高度" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
-                    <n-input-number v-model:value="headerHeight" :min="40" :max="90" class="w-150px" />
+                    <n-input-number
+                      v-model:value="headerHeight"
+                      :min="40"
+                      :max="90"
+                      class="w-150px"
+                    />
                   </div>
                 </n-form-item>
               </n-form>
@@ -145,7 +179,12 @@
 
             <section class="preference-section">
               <h3 class="preference-title">面包屑</h3>
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="显示面包屑" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-switch v-model:value="showBreadcrumb" />
@@ -163,7 +202,12 @@
 
             <section class="preference-section">
               <h3 class="preference-title">页签</h3>
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="显示页签" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-switch v-model:value="showTagView" />
@@ -185,9 +229,9 @@
 
           <div v-else class="preference-content">
             <section class="preference-section">
-              <n-radio-group v-model:value="styleType" class="flex justify-center mt-10px mb-15px"> 
-                <n-radio-button value="pure" >纯色主题</n-radio-button>
-                <n-radio-button value="skin" >主题皮肤</n-radio-button>
+              <n-radio-group v-model:value="styleType" class="flex justify-center mt-10px mb-15px">
+                <n-radio-button value="pure">纯色主题</n-radio-button>
+                <n-radio-button value="skin">主题皮肤</n-radio-button>
               </n-radio-group>
               <n-color-picker
                 v-model:value="primaryColorInput"
@@ -197,7 +241,12 @@
               />
             </section>
             <section class="preference-section">
-              <n-form label-placement="left" label-width="auto" label-align="left" :show-feedback="false">
+              <n-form
+                label-placement="left"
+                label-width="auto"
+                label-align="left"
+                :show-feedback="false"
+              >
                 <n-form-item label="顶部透明" class="mb-2 last:mb-0">
                   <div class="flex w-full justify-end">
                     <n-switch v-model:value="headerTransparent" />
@@ -214,7 +263,9 @@
         </n-scrollbar>
 
         <div class="preference-footer">
-          <n-button class="w-1/2" strong type="primary" @click="handleCopyConfig">复制配置</n-button>
+          <n-button class="w-1/2" strong type="primary" @click="handleCopyConfig"
+            >复制配置</n-button
+          >
           <n-button class="w-1/2" strong @click="handleReset">重置配置</n-button>
         </div>
       </div>
@@ -223,187 +274,187 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue';
 import { Moon, Screen, Sun, Template } from '@vicons/carbon';
-import { useLayoutStore, useThemeStore } from '@/stores'
-import type { LayoutMode } from '@/config/layout/type'
+import { useLayoutStore, useThemeStore } from '@/stores';
+import type { LayoutMode } from '@/config/layout/type';
 
-const showDrawer = ref(false)
-const activeTab = ref<'theme' | 'layout' | 'style'>('theme')
-const themeStore = useThemeStore()
-const layoutStore = useLayoutStore()
-const message = useMessage()
+const showDrawer = ref(false);
+const activeTab = ref<'theme' | 'layout' | 'style'>('theme');
+const themeStore = useThemeStore();
+const layoutStore = useLayoutStore();
+const message = useMessage();
 
-const themeModeType = ref<'light' | 'dark' | 'system'>('dark')
+const themeModeType = ref<'light' | 'dark' | 'system'>('dark');
 const siderTheme = computed({
   get: () => themeStore.siderTheme,
   set: (value: 'light' | 'dark') => themeStore.setSiderTheme(value),
-})
+});
 const headerTheme = computed({
   get: () => themeStore.headerTheme,
   set: (value: 'light' | 'dark') => themeStore.setHeaderTheme(value),
-})
-const isColorWeak = ref(false)
-const isGrayMode = ref(false)
+});
+const isColorWeak = ref(false);
+const isGrayMode = ref(false);
 const showTopbar = computed({
   get: () => layoutStore.getShowTopbar,
   set: (value: boolean) => layoutStore.setShowTopbar(value),
-})
+});
 const fixedTopbar = computed({
   get: () => layoutStore.getHeaderFixed,
   set: (value: boolean) => layoutStore.setHeaderFixed(value),
-})
+});
 const showBreadcrumb = computed({
   get: () => layoutStore.getShowBreadcrumb,
   set: (value: boolean) => layoutStore.setShowBreadcrumb(value),
-})
+});
 const showBreadcrumbIcon = computed({
   get: () => layoutStore.getShowBreadcrumbIcon,
   set: (value: boolean) => layoutStore.setShowBreadcrumbIcon(value),
-})
+});
 const showTagView = computed({
   get: () => layoutStore.getShowTagView,
   set: (value: boolean) => layoutStore.setShowTagView(value),
-})
+});
 const showTagIcon = computed({
   get: () => layoutStore.getShowTagIcon,
   set: (value: boolean) => layoutStore.setShowTagIcon(value),
-})
+});
 const isMenuSplit = computed({
   get: () => layoutStore.getMenuSplit,
   set: (value: boolean) => layoutStore.setMenuSplit(value),
-})
+});
 const showMenuBorder = computed({
   get: () => layoutStore.getShowMenuBorder,
   set: (value: boolean) => layoutStore.setShowMenuBorder(value),
-})
-const styleType = ref<'pure' | 'skin'>('pure')
-const headerTransparent = ref(false)
-const siderTransparent = ref(false)
+});
+const styleType = ref<'pure' | 'skin'>('pure');
+const headerTransparent = ref(false);
+const siderTransparent = ref(false);
 const headerHeight = computed({
   get: () => layoutStore.getHeaderHeight,
   set: (value: number | null) => {
-    if (value === null) return
-    layoutStore.setHeaderHeight(value)
+    if (value === null) return;
+    layoutStore.setHeaderHeight(value);
   },
-})
+});
 const tagHeight = computed({
   get: () => layoutStore.getTagHeight,
   set: (value: number | null) => {
-    if (value === null) return
-    layoutStore.setTagHeight(value)
+    if (value === null) return;
+    layoutStore.setTagHeight(value);
   },
-})
-const primaryColorInput = ref(themeStore.primaryColor)
+});
+const primaryColorInput = ref(themeStore.primaryColor);
 const isGapLayoutEnabled = computed({
   get: () => layoutStore.getIsGap,
   set: (value: boolean) => layoutStore.setIsGap(value),
-})
+});
 
 const themeOptions = [
   { label: '浅色', value: 'light' },
   { label: '深色', value: 'dark' },
-]
+];
 
 /** 与 `LayoutMode` / `layouts` 配置一致，仅展示已实现布局 */
 const layoutPatterns: { key: LayoutMode; previewClass: string; label: string }[] = [
   { key: 'vertical', previewClass: 'preview-vertical', label: '经典' },
   { key: 'sidebar', previewClass: 'preview-sidebar', label: '侧边' },
   { key: 'horizontal', previewClass: 'preview-horizontal', label: '水平' },
-]
+];
 
-const currentLayoutPattern = ref<LayoutMode>('vertical')
+const currentLayoutPattern = ref<LayoutMode>('vertical');
 
 const layoutMode = computed<LayoutMode>({
   get: () => layoutStore.getLayoutMode,
   set: (value) => {
-    layoutStore.setLayoutMode(value)
+    layoutStore.setLayoutMode(value);
     if (value === 'horizontal') {
-      layoutStore.setSidebarShow(false)
-      layoutStore.setIsCollapse(false)
+      layoutStore.setSidebarShow(false);
+      layoutStore.setIsCollapse(false);
     } else {
-      layoutStore.setSidebarShow(true)
+      layoutStore.setSidebarShow(true);
     }
   },
-})
+});
 
 const radiusValue = computed<number>({
   get: () => {
-    const parsed = Number.parseFloat(themeStore.borderRadius)
-    if (Number.isNaN(parsed)) return 0
-    return Math.min(1, Math.max(0, parsed))
+    const parsed = Number.parseFloat(themeStore.borderRadius);
+    if (Number.isNaN(parsed)) return 0;
+    return Math.min(1, Math.max(0, parsed));
   },
   set: (value: number) => {
-    const normalized = Math.min(1, Math.max(0, value))
-    themeStore.setBorderRadius(`${normalized}rem` as any)
+    const normalized = Math.min(1, Math.max(0, value));
+    themeStore.setBorderRadius(`${normalized}rem` as any);
   },
-})
+});
 
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 watch(themeModeType, (value) => {
   if (value === 'system') {
-    themeStore.setTheme(prefersDark.matches ? 'dark' : 'light')
-    return
+    themeStore.setTheme(prefersDark.matches ? 'dark' : 'light');
+    return;
   }
-  themeStore.setTheme(value)
-})
+  themeStore.setTheme(value);
+});
 
 watch(
   () => themeStore.mode,
   (value) => {
     if (themeModeType.value !== 'system') {
-      themeModeType.value = value
+      themeModeType.value = value;
     }
   },
   { immediate: true },
-)
+);
 
 watch(
   () => themeStore.primaryColor,
   (value) => {
-    primaryColorInput.value = value
+    primaryColorInput.value = value;
   },
   { immediate: true },
-)
+);
 
 watch(isGrayMode, (value) => {
-  applyVisualFilter()
-})
+  applyVisualFilter();
+});
 
 watch(isColorWeak, (value) => {
-  applyVisualFilter()
-})
+  applyVisualFilter();
+});
 
 watch(headerTransparent, (value) => {
-  document.documentElement.style.setProperty('--u-header-opacity', value ? '0.82' : '1')
-})
+  document.documentElement.style.setProperty('--u-header-opacity', value ? '0.82' : '1');
+});
 
 watch(siderTransparent, (value) => {
-  document.documentElement.style.setProperty('--u-sider-opacity', value ? '0.82' : '1')
-})
+  document.documentElement.style.setProperty('--u-sider-opacity', value ? '0.82' : '1');
+});
 
 watch(
   () => layoutStore.getLayoutMode,
   (mode) => {
     if (currentLayoutPattern.value !== mode) {
-      currentLayoutPattern.value = mode
+      currentLayoutPattern.value = mode;
     }
     /* 侧边栏布局下侧栏绝对定位，与间隙布局不搭配：进入该模式时关闭间隙 */
     if (mode === 'sidebar' && layoutStore.getIsGap) {
-      layoutStore.setIsGap(false)
+      layoutStore.setIsGap(false);
     }
   },
   { immediate: true },
-)
+);
 
 function handleLayoutPatternChange(patternKey: LayoutMode) {
-  currentLayoutPattern.value = patternKey
-  layoutMode.value = patternKey
+  currentLayoutPattern.value = patternKey;
+  layoutMode.value = patternKey;
 }
 
 function handlePrimaryColorChange(color: string) {
-  themeStore.setPrimaryColor(color)
+  themeStore.setPrimaryColor(color);
 }
 
 async function handleCopyConfig() {
@@ -427,42 +478,42 @@ async function handleCopyConfig() {
     headerHeight: layoutStore.getHeaderHeight,
     tagHeight: layoutStore.getTagHeight,
     styleType: styleType.value,
-  }
+  };
   try {
-    await navigator.clipboard.writeText(JSON.stringify(data, null, 2))
-    message.success('配置已复制到剪贴板')
+    await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    message.success('配置已复制到剪贴板');
   } catch {
-    message.error('复制失败，请检查浏览器剪贴板权限')
+    message.error('复制失败，请检查浏览器剪贴板权限');
   }
 }
 
 function handleReset() {
-  activeTab.value = 'theme'
-  themeModeType.value = 'dark'
-  isColorWeak.value = false
-  isGrayMode.value = false
-  styleType.value = 'pure'
-  headerTransparent.value = false
-  siderTransparent.value = false
-  currentLayoutPattern.value = 'vertical'
-  themeStore.resetTheme()
-  layoutStore.resetLayout()
-  primaryColorInput.value = themeStore.primaryColor
-  message.success('已恢复默认配置')
+  activeTab.value = 'theme';
+  themeModeType.value = 'dark';
+  isColorWeak.value = false;
+  isGrayMode.value = false;
+  styleType.value = 'pure';
+  headerTransparent.value = false;
+  siderTransparent.value = false;
+  currentLayoutPattern.value = 'vertical';
+  themeStore.resetTheme();
+  layoutStore.resetLayout();
+  primaryColorInput.value = themeStore.primaryColor;
+  message.success('已恢复默认配置');
 }
 
 function applyVisualFilter() {
-  const filters: string[] = []
-  if (isGrayMode.value) filters.push('grayscale(1)')
-  if (isColorWeak.value) filters.push('invert(80%)')
-  document.documentElement.style.filter = filters.join(' ')
+  const filters: string[] = [];
+  if (isGrayMode.value) filters.push('grayscale(1)');
+  if (isColorWeak.value) filters.push('invert(80%)');
+  document.documentElement.style.filter = filters.join(' ');
 }
 
 onMounted(() => {
   if (prefersDark.matches) {
-    themeModeType.value = themeStore.mode
+    themeModeType.value = themeStore.mode;
   }
-})
+});
 </script>
 
 <style scoped lang="scss">
@@ -498,7 +549,7 @@ onMounted(() => {
   gap: 10px;
 }
 
-.preference-title {  
+.preference-title {
   color: var(--u-text-secondary);
 }
 

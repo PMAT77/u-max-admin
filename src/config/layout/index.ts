@@ -2,7 +2,7 @@
  * 布局配置
  * 使用配置驱动的方式管理不同布局模式的样式和行为
  */
-import type { LayoutMode, LayoutConfig } from './type'
+import type { LayoutMode, LayoutConfig } from './type';
 
 export const layouts: Record<LayoutMode, LayoutConfig> = {
   vertical: {
@@ -68,7 +68,7 @@ export const layouts: Record<LayoutMode, LayoutConfig> = {
     siderClass: 'u-max-sider--horizontal',
     logoClass: 'u-max-logo--horizontal',
   },
-}
+};
 
-export const defaultMode: LayoutMode = 'vertical'
-export const defaultLayoutConfig: LayoutConfig = layouts[defaultMode]
+export const defaultMode: LayoutMode = 'vertical';
+export const defaultLayoutConfig: LayoutConfig = layouts[defaultMode];

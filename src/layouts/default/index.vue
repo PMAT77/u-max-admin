@@ -93,13 +93,13 @@ const showHeader = computed(() => layoutStore.getShowTopbar || layoutStore.getSh
 /** sidebar 绝对定位侧栏需与整块固定顶栏（顶栏 + 页签）对齐，仅用 header 高度会挡住菜单 */
 const layoutStackCssVars = computed(() => {
   if (!showHeader.value) {
-    return { '--u-max-layout-header-stack': '0px' } as Record<string, string>
+    return { '--u-max-layout-header-stack': '0px' } as Record<string, string>;
   }
-  let stack = 0
-  if (layoutStore.getShowTopbar) stack += layoutStore.getHeaderHeight
-  if (layoutStore.getShowTagView) stack += layoutStore.getTagHeight
-  return { '--u-max-layout-header-stack': `${stack}px` } as Record<string, string>
-})
+  let stack = 0;
+  if (layoutStore.getShowTopbar) stack += layoutStore.getHeaderHeight;
+  if (layoutStore.getShowTagView) stack += layoutStore.getTagHeight;
+  return { '--u-max-layout-header-stack': `${stack}px` } as Record<string, string>;
+});
 
 const contentStyle = computed(() => {
   if (!showHeader.value || !layoutStore.getHeaderFixed) {

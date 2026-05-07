@@ -15,9 +15,9 @@ export default {
     quickLogin: 'Quick Login',
     loginSuccess: 'Login Success',
     loginFailed: 'Login Failed',
-    getCode: 'Get Code'
+    getCode: 'Get Code',
   },
-  
+
   // 菜单相关
   menu: {
     dashboard: 'Dashboard',
@@ -37,17 +37,17 @@ export default {
     settings: 'Settings',
     basic: 'Basic Settings',
     permissions: 'Permissions',
-    logs: 'Logs'
+    logs: 'Logs',
   },
-  
+
   // 布局相关
   layout: {
     collapse: 'Collapse',
     expand: 'Expand',
     profile: 'Profile',
-    logout: 'Logout'
+    logout: 'Logout',
   },
-  
+
   // 通用
   common: {
     save: 'Save',
@@ -65,6 +65,6 @@ export default {
     success: 'Success',
     error: 'Error',
     warning: 'Warning',
-    info: 'Info'
-  }
-}
+    info: 'Info',
+  },
+};
